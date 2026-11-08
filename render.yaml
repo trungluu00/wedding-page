@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: mywedding-website
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/wedding
+    autoDeploy: true
