@@ -5286,3 +5286,251 @@ body.orn-none .ambient-xi,
 body.orn-none .intro-seal-badge {
   display: none;
 }
+
+/* ==========================================================================
+   GIAO DIỆN XANH · TRẮNG · KEM (theo trang chọn theme đã duyệt)
+   - Bìa thư và hero: nền --c-primary, chữ --c-on-primary, hoa văn --c-accent
+   - Tên cặp đôi: font viết tay (--font-script)
+   - Tiêu đề phần: --c-strong; nền trang kem (--c-bg); thẻ trắng (--c-surface)
+   - Nút chính xanh; khối đếm ngược / timeline dùng --c-soft
+   Chỉ dùng biến theme nên đổi preset là đổi theo.
+   ========================================================================== */
+
+/* --- Bìa thư --- */
+.wedding-intro-overlay {
+  background-color: var(--c-strong);
+  background-image:
+    radial-gradient(circle at 50% 38%, rgb(var(--c-primary-rgb) / 1) 0%, rgb(var(--c-strong-rgb) / 1) 72%);
+}
+.ambient-xi {
+  color: rgb(var(--c-accent-rgb) / 0.5);
+  text-shadow: none;
+}
+.ambient-radial-glow.glow-1 {
+  background: radial-gradient(circle, rgb(var(--c-on-primary-rgb) / 0.10) 0%, transparent 70%);
+}
+.intro-envelope-card {
+  background-color: var(--c-primary);
+  background-image:
+    linear-gradient(165deg, rgb(var(--c-on-primary-rgb) / 0.06) 0%, rgb(var(--c-strong-rgb) / 0.35) 100%),
+    radial-gradient(circle at 50% 0%, rgb(var(--c-accent-rgb) / 0.18) 0%, transparent 55%);
+  background-size: cover;
+  background-repeat: no-repeat;
+  color: var(--c-on-primary);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.32),
+    0 0 0 1px rgb(var(--c-accent-rgb) / 0.55),
+    inset 0 0 0 6px rgb(var(--c-primary-rgb) / 1),
+    inset 0 0 0 7px rgb(var(--c-accent-rgb) / 0.35);
+}
+.seal-ring {
+  background: rgb(var(--c-strong-rgb) / 0.55);
+  border-color: var(--c-accent);
+}
+.intro-name {
+  font-family: var(--font-script);
+  font-size: 50px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.05;
+  color: var(--c-on-primary);
+}
+.intro-amp {
+  color: var(--c-accent);
+  font-size: 22px;
+}
+.intro-date {
+  color: rgb(var(--c-on-primary-rgb) / 0.9);
+  letter-spacing: 1.5px;
+}
+.intro-sub-greeting {
+  color: rgb(var(--c-on-primary-rgb) / 0.82);
+}
+.intro-guest-name {
+  color: var(--c-on-primary);
+  font-style: normal;
+}
+.intro-open-btn {
+  background: var(--c-accent);
+  border-color: var(--c-accent);
+  color: var(--c-text);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
+}
+.intro-open-btn:hover {
+  background: var(--c-surface);
+  border-color: var(--c-surface);
+  color: var(--c-strong);
+}
+.btn-glow-pulse {
+  border-color: rgb(var(--c-accent-rgb) / 0.7);
+}
+.envelope-corner {
+  border-color: rgb(var(--c-accent-rgb) / 0.75);
+}
+
+/* --- Hero --- */
+.stt-hero-section {
+  position: relative;
+  background-color: var(--c-primary);
+  background-image: radial-gradient(circle at 50% 0%, rgb(var(--c-on-primary-rgb) / 0.10) 0%, transparent 60%);
+  color: var(--c-on-primary);
+  padding-bottom: 46px;
+}
+.stt-hero-section::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 26px;
+  background: var(--c-bg);
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+}
+.stt-hero-invite {
+  color: var(--c-accent);
+  font-weight: 600;
+}
+.stt-hero-image-wrap {
+  border: 1px solid rgb(var(--c-accent-rgb) / 0.6);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  background-color: var(--c-strong);
+}
+.stt-hero-names {
+  font-family: var(--font-script);
+  font-size: 2.6rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--c-on-primary);
+  line-height: 1.15;
+}
+.stt-hero-names .stt-heart {
+  font-size: 1rem;
+}
+.stt-hero-date {
+  color: rgb(var(--c-on-primary-rgb) / 0.85);
+  letter-spacing: 4px;
+}
+
+/* --- Tiêu đề, chữ nhấn --- */
+.stt-section-tag {
+  color: var(--c-accent-strong);
+}
+.stt-section-title,
+.stt-loc-name,
+.stt-big-day,
+.stt-cal-header-date,
+.stt-cd-num,
+.alb-chapter-badge,
+.stt-acc-toggle,
+.stt-announce-name,
+.stt-parent-name,
+.stt-profile-name {
+  color: var(--c-strong);
+}
+.stt-couple-quote,
+.stt-ending-names,
+.stt-announce-name,
+.stt-profile-name {
+  font-family: var(--font-script);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.stt-announce-name {
+  font-size: 1.75rem;
+}
+.stt-profile-name {
+  font-size: 1.6rem;
+}
+.stt-ending-names {
+  font-size: 2.4rem;
+  color: #fff;
+}
+.stt-couple-quote {
+  color: var(--c-strong);
+}
+
+/* --- Thẻ trắng viền mảnh --- */
+.stt-loc-card,
+.stt-calendar-wrap,
+.stt-acc-group {
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+}
+.stt-loc-btn,
+.stt-copy-btn {
+  border-color: var(--c-primary);
+  color: var(--c-strong);
+  background: transparent;
+}
+.stt-loc-btn:hover,
+.stt-copy-btn:hover {
+  background: var(--c-primary);
+  color: var(--c-on-primary);
+}
+
+/* --- Lịch trình & đếm ngược --- */
+.stt-step-icon {
+  background: var(--c-soft);
+  border: 1px solid rgb(var(--c-primary-rgb) / 0.25);
+  color: var(--c-strong);
+}
+.stt-countdown-wrap {
+  gap: 8px;
+}
+.stt-countdown-wrap .stt-cd-dot {
+  display: none;
+}
+.stt-cd-unit {
+  background: var(--c-soft);
+  border-radius: 10px;
+  padding: 10px 4px;
+  min-width: 64px;
+}
+.stt-personalized-box {
+  background: var(--c-soft);
+  border-color: rgb(var(--c-primary-rgb) / 0.2);
+}
+
+/* --- Bottom sheet & thanh công cụ --- */
+.cl-sheet-head h3 {
+  color: var(--c-strong);
+}
+.btn-sheet-submit {
+  background: var(--c-primary);
+  color: var(--c-on-primary);
+  box-shadow: 0 4px 14px rgb(var(--c-primary-rgb) / 0.3);
+}
+.side-btn input:checked + span {
+  background: var(--c-primary);
+  color: var(--c-on-primary);
+}
+.attend-choice.active {
+  color: var(--c-strong);
+  border-color: rgb(var(--c-primary-rgb) / 0.35);
+}
+.lyric-line.active {
+  color: var(--c-strong);
+}
+.audio-toggle {
+  background: rgb(var(--c-primary-rgb) / 0.9);
+  border-color: rgb(var(--c-accent-rgb) / 0.6);
+}
+.auto-scroll-btn-pill,
+.cover-reopen-btn-pill {
+  color: var(--c-strong);
+  border-color: rgb(var(--c-primary-rgb) / 0.25);
+}
+.auto-scroll-btn-pill.scrolling {
+  background: var(--c-primary);
+  color: var(--c-on-primary);
+}
+.heart-shoot-btn {
+  background: var(--c-primary);
+  color: var(--c-on-primary);
+  box-shadow: 0 3px 10px rgb(var(--c-primary-rgb) / 0.3);
+}
+.message-box-button {
+  background: var(--c-bg);
+  border-color: var(--c-line);
+}
