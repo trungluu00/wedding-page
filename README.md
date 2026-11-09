@@ -173,11 +173,11 @@ Tất cả nằm trong `wedding.config.js` (tìm chữ `TODO`), trừ các mục
 **Trang & chia sẻ**
 - [ ] `site.domain` — tên miền thật (và ô `CauHinh!B1` trong Sheet)
 - [ ] `site.description` — câu mô tả khi chia sẻ link (tùy chọn chỉnh)
-- [ ] `site.ogImage` — tạo ảnh 1200x630 đặt tại `public/photos/share-1200x630.jpg` (hiện chưa có file; build sẽ cảnh báo)
+- [x] `site.ogImage` — đã tạo từ ảnh `p38` bởi `npm run photos` (đổi `photos.share` nếu muốn ảnh khác)
 
 **Cô dâu chú rể** (`couple.groom` và `couple.bride`)
 - [ ] `role` — Trưởng nam/Thứ nam…, Trưởng nữ/Út nữ…
-- [ ] `portrait` — ảnh chân dung vuông
+- [x] `portrait` — đã cắt từ ảnh dạm ngõ (`groom` ← p38, `bride` ← p53; chỉnh vùng cắt ở `photos.crops`)
 - [ ] `bio` — giới thiệu ngắn
 - [ ] `phone` — số điện thoại
 - [ ] `father`, `mother` — họ tên bố mẹ (đang là "Ông Lưu Viết TODO"…)
@@ -196,9 +196,10 @@ Tất cả nằm trong `wedding.config.js` (tìm chữ `TODO`), trừ các mục
 **Mừng cưới** (`gifts.accounts`, cả 2 tài khoản)
 - [ ] `bankBin`, `bankName`, `accountNo`, `accountName` (hoặc `qrImage` nếu có ảnh QR sẵn)
 
-**Ảnh** (`photos`, `album.leaves`)
-- [ ] `photos.hero`, `photos.statement`, `photos.middle[0..1]`, `photos.ending`
-- [ ] 12 ảnh trang album (6 tờ: bìa trước, 10 trang trong, bìa sau) + chú thích `frontAlt`/`backAlt`
+**Ảnh** (`photos`, `album.leaves`) — đã gán ảnh lễ dạm ngõ; xem lại và đổi tùy ý
+- [ ] Kiểm tra lựa chọn ảnh hero (p24), lời mời (p27), giữa trang (p14, p41), kết (p29) và 13 tờ album
+- [ ] Chú thích trang album (`frontAlt`/`backAlt`) — đang là chú thích tạm
+- [ ] Khi có ảnh cưới chính thức: chép vào thư mục nguồn, chạy `npm run photos`, đổi id trong config
 
 **Nhạc** (`music`)
 - [ ] **Thay bài hát**: `music/le-duong.mp3` ("Lễ Đường" — Kai Đinh) là bài có bản quyền, chỉ dùng tạm để thử.
