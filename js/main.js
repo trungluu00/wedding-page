@@ -542,10 +542,13 @@ class AutoScrollEngine {
 
 
 // =============================================================================
-// 3. LỜI CHÚC BAY (DANMAKU) — dạng feed chat: tối đa 3 bong bóng, bong bóng mới
+// 3. LỜI CHÚC BAY (DANMAKU) — dạng feed chat: tối đa 2 thẻ, bong bóng mới
 //    hiện ở dưới, các bong bóng cũ trượt lên đúng chiều cao của nó (chỉ animate
 //    transform/opacity, không reflow), cái trên cùng mờ dần rồi mới gỡ.
 // =============================================================================
+/** Bỏ thẻ HTML và khoảng trắng thừa — lời chúc chỉ là chữ thường. */
+const plainText = (s) => String(s ?? '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+
 const SAMPLE_WISHES = [
   { author: '', text: 'Trăm năm hạnh phúc, mãi ngọt ngào! 🌸' },
   { author: '', text: 'Chúc hai bạn xứng đôi vừa lứa, bạc đầu răng long ❤️' },
@@ -561,7 +564,7 @@ class DanmakuEngine {
     this.pool = [];
     this.poolIndex = 0;
     this.items = []; // bong bóng đang hiện, cũ → mới
-    this.maxVisible = 3;
+    this.maxVisible = 2; // thẻ lời chúc cao ~50–66px: 2 thẻ vừa khung, ít che nội dung
     this.gap = 6;
     this.lifetime = 9000; // ms mỗi bong bóng
     this.interval = 3600; // ms giữa hai bong bóng
@@ -587,7 +590,9 @@ class DanmakuEngine {
 
   async loadWishes() {
     const list = await api.fetchWishes();
-    const real = list.filter((w) => w && w.author && w.text).map((w) => ({ author: String(w.author), text: String(w.text) }));
+    const real = list
+      .map((w) => ({ author: plainText(w && w.author), relation: plainText(w && w.relation), text: plainText(w && w.text) }))
+      .filter((w) => w.author && w.text);
     // Chưa có lời chúc thật thì hiện vài câu chúc chung (không gắn tên người)
     this.pool = real.length ? real : SAMPLE_WISHES.slice();
     this.poolIndex = Math.floor(Math.random() * this.pool.length);
@@ -632,15 +637,30 @@ class DanmakuEngine {
 
   spawnBubble(wish, isUser = false) {
     if (!this.enabled || !wish) return;
+    const author = plainText(wish.author);
+    const relation = plainText(wish.relation);
+    const text = plainText(wish.text);
+    if (!text) return;
+
+    // Thẻ lời chúc: ảnh đại diện chữ cái đầu + tên (quan hệ) + lời chúc
     const bubble = document.createElement('div');
     bubble.className = isUser ? 'danmaku-item is-user' : 'danmaku-item';
-    if (wish.author) {
-      const b = document.createElement('b');
-      b.textContent = wish.author;
-      bubble.append(b, document.createTextNode(` · ${wish.text}`));
-    } else {
-      bubble.textContent = wish.text;
-    }
+    const avatar = document.createElement('span');
+    avatar.className = 'danmaku-avatar';
+    avatar.setAttribute('aria-hidden', 'true');
+    // Chữ cái đầu của tên gọi (từ cuối: "Bác Hùng" → "H"); lời chúc chung → ♥
+    const lastWord = author.split(' ').filter(Boolean).pop() || '';
+    avatar.textContent = lastWord ? lastWord.charAt(0).toUpperCase() : '♥';
+    const body = document.createElement('span');
+    body.className = 'danmaku-body';
+    const name = document.createElement('span');
+    name.className = 'danmaku-name';
+    name.textContent = author ? (relation ? `${author} · ${relation}` : author) : 'Lời chúc phúc';
+    const msg = document.createElement('span');
+    msg.className = 'danmaku-text';
+    msg.textContent = text;
+    body.append(name, msg);
+    bubble.append(avatar, body);
     this.container.appendChild(bubble);
 
     const entry = { el: bubble, height: bubble.offsetHeight, timer: null };
@@ -675,10 +695,12 @@ class DanmakuEngine {
     this.layout();
   }
 
-  addWish(author, text) {
-    const wish = { author, text };
+  addWish(author, text, relation = '') {
+    const wish = { author: plainText(author), relation: plainText(relation), text: plainText(text) };
     if (this.pool.every((w) => !w.author)) this.pool = [];
     this.pool.push(wish);
+    // Lần hiện kế tiếp chuyển sang lời chúc khác, không lặp lại lời vừa gửi
+    this.poolIndex = this.pool.length - 1;
     this.spawnBubble(wish, true);
   }
 }
@@ -1812,9 +1834,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (wishForm) {
     wishForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const author = wishSender.value.trim().slice(0, 80);
-      const relation = wishRelation.value.trim().slice(0, 80);
-      const text = wishMessage.value.trim().slice(0, 500);
+      const author = plainText(wishSender.value).slice(0, 80);
+      const relation = plainText(wishRelation.value).slice(0, 80);
+      const text = plainText(wishMessage.value).slice(0, 500);
       const hp = document.getElementById('wishHp')?.value || '';
 
       if (!author || !text) {
@@ -1830,7 +1852,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      danmaku.addWish(author, text);
+      danmaku.addWish(author, text, relation);
       launchConfetti();
       shootHearts(6);
       wishForm.reset();

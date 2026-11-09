@@ -119,7 +119,7 @@ export default {
       id: "tiec-cuoi",
       name: "Tiệc cưới",
       main: true,
-      date: "2026-12-12", // TODO: xác nhận — đang đặt ngày 12/12 (04/11 âm), hôm trước ngày rước dâu
+      date: "2026-12-12", // 12/12/2026 = 04/11 âm lịch (ngày cỗ, hôm trước ngày rước dâu)
       time: "11:00", // TODO
       endTime: "14:00", // TODO
       lunar: "Nhằm ngày 04 tháng 11 năm Bính Ngọ",

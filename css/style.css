@@ -5583,3 +5583,122 @@ body.orn-none .intro-seal-badge {
   color: rgb(var(--c-accent-rgb) / 0.45);
   background: var(--c-soft);
 }
+
+/* ==========================================================================
+   LỜI CHÚC BAY — thẻ có ảnh đại diện chữ cái, tên + quan hệ, lời chúc
+   ========================================================================== */
+#blessing-box {
+  width: min(262px, 70%);
+  height: 150px;
+}
+.danmaku-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 100%;
+  padding: 7px 12px 8px 7px;
+  border-radius: 18px 18px 18px 6px;
+  background:
+    linear-gradient(135deg, rgb(var(--c-surface-rgb) / 0.98) 0%, rgb(var(--c-bg-rgb) / 0.97) 100%);
+  border: 1px solid rgb(var(--c-accent-rgb) / 0.45);
+  box-shadow:
+    0 8px 20px rgb(var(--c-text-rgb) / 0.14),
+    inset 0 1px 0 rgb(255 255 255 / 0.8);
+  color: var(--c-text);
+}
+.danmaku-avatar {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, var(--c-primary), var(--c-strong));
+  color: var(--c-on-primary);
+  font-family: var(--font-serif);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  box-shadow: 0 0 0 2px var(--c-surface), 0 0 0 3px rgb(var(--c-accent-rgb) / 0.7);
+}
+.danmaku-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 1px;
+}
+.danmaku-name {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  color: var(--c-accent-strong);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.danmaku-text {
+  font-size: 12px;
+  line-height: 1.38;
+  color: var(--c-text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+/* Lời chúc vừa gửi của chính khách */
+.danmaku-item.is-user {
+  background: linear-gradient(135deg, var(--c-primary) 0%, var(--c-strong) 100%);
+  border-color: rgb(var(--c-accent-rgb) / 0.8);
+}
+.danmaku-item.is-user .danmaku-avatar {
+  background: var(--c-accent);
+  color: var(--c-text);
+  box-shadow: 0 0 0 2px var(--c-primary), 0 0 0 3px rgb(var(--c-accent-rgb) / 0.9);
+}
+.danmaku-item.is-user .danmaku-name {
+  color: var(--c-accent);
+}
+.danmaku-item.is-user .danmaku-text {
+  color: var(--c-on-primary);
+}
+
+/* ==========================================================================
+   THÔNG BÁO (TOAST)
+   ========================================================================== */
+.toast-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px 10px 10px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgb(var(--c-primary-rgb) / 0.97), rgb(var(--c-strong-rgb) / 0.97));
+  border: 1px solid rgb(var(--c-accent-rgb) / 0.6);
+  box-shadow: 0 12px 28px rgb(var(--c-text-rgb) / 0.28);
+  color: var(--c-on-primary);
+  font-size: 0.82rem;
+  line-height: 1.4;
+  text-align: left;
+  transform: translate3d(-50%, -12px, 0) scale(0.96);
+}
+.toast-box.show {
+  transform: translate3d(-50%, 0, 0) scale(1);
+}
+.toast-box::before {
+  content: '囍';
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(var(--c-accent-rgb) / 0.95);
+  color: var(--c-text);
+  font-size: 13px;
+  font-weight: 700;
+}
+body.orn-none .toast-box::before {
+  content: '♥';
+}

@@ -211,6 +211,7 @@ function isHumanRequest_(b) {
 function cleanText_(v, max) {
   return String(v == null ? '' : v)
     .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
+    .replace(/<[^>]*>/g, '') // lời chúc chỉ là chữ thường, bỏ thẻ HTML
     .trim()
     .slice(0, max);
 }
