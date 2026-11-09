@@ -257,13 +257,17 @@ export function renderStatic(config) {
   // Lịch trình
   const row = $('#timelineRow');
   if (row) {
+    // Nhiều hơn 4 mốc: xếp thành nhiều hàng (3 mốc mỗi hàng)
+    row.classList.toggle('is-multi', (config.schedule || []).length > 4);
     row.replaceChildren(
       ...(config.schedule || []).map((s) => {
         const step = el('div', 'stt-timeline-step');
         const icon = el('div', 'stt-step-icon');
         // Icon lấy từ bảng SVG cố định ở trên (không phải chuỗi người dùng)
         icon.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">${SCHEDULE_ICONS[s.icon] || SCHEDULE_ICONS.heart}</svg>`;
-        step.append(icon, el('span', 'stt-step-time', s.time), el('span', 'stt-step-title', s.title));
+        step.append(icon, el('span', 'stt-step-time', s.time));
+        if (s.day) step.append(el('span', 'stt-step-day', s.day));
+        step.append(el('span', 'stt-step-title', s.title));
         return step;
       })
     );
@@ -402,6 +406,7 @@ export function renderEvents(config, guest) {
         card.append(el('h3', 'stt-loc-name', ev.name), el('p', 'stt-loc-time', `Thời gian: ${when}`));
         card.append(el('p', 'stt-loc-addr', [ev.venue, ev.address].filter(Boolean).join(' — ')));
         if (ev.lunar && ev.date !== main?.date) card.append(el('p', 'stt-loc-note', `(${ev.lunar})`));
+        if (ev.note) card.append(el('p', 'stt-loc-note stt-loc-extra', ev.note));
         if (ev.mapsUrl) {
           const a = el('a', 'stt-loc-btn', `Chỉ đường — ${ev.name}`);
           a.href = safeUrl(ev.mapsUrl);

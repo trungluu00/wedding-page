@@ -5837,3 +5837,26 @@ body.orn-none .toast-box::before {
     display: none;
   }
 }
+
+/* Lịch trình nhiều mốc (hơn 4): lưới 3 cột, bỏ đường nối ngang */
+.stt-timeline-row.is-multi {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  row-gap: 20px;
+}
+.stt-timeline-row.is-multi::before {
+  display: none;
+}
+.stt-timeline-row.is-multi .stt-step-title {
+  max-width: 96px;
+}
+.stt-step-day {
+  font-size: 0.62rem;
+  color: var(--c-muted);
+  margin-bottom: 3px;
+  letter-spacing: 0.3px;
+}
+.stt-loc-extra {
+  font-style: italic;
+  color: var(--c-strong);
+}
