@@ -1,77 +1,35 @@
 /**
- * CINELOVE THIỆP CƯỚI 1 - INTERACTIVE ENGINE
- * Đôi uyên ương: Nguyễn Duy Phương & Lê Thùy Dương (30.07.2026)
- * 
- * Tính năng chính:
- * 1. Web Audio Synthesizer: Nhạc nền lãng mạn không phụ thuộc file mp3
- * 2. Auto-Scroll Engine: Tự cuộn mượt mà trong .main-scroll-container
- * 3. CineLove Danmaku Blessings: Bong bóng lời chúc bay góc dưới trái
- * 4. Bắn tim (Shoot Hearts): Hiệu ứng tim bay lượn ngẫu nhiên
- * 5. Like Button: Bộ đếm lượt thích thời gian thực
- * 6. 3D Coverflow Slider: Album ảnh cưới đa chiều theo đúng CineLove
- * 7. Slide-up Bottom Sheets: Gửi lời chúc, Hộp mừng cưới VietQR & RSVP
- * 8. Đếm ngược thời gian thực, Phóng to ảnh (Lightbox) & Pháo hoa
+ * THIỆP CƯỚI — INTERACTIVE ENGINE
+ * Nội dung, ảnh, nhạc, màu đọc từ wedding.config.js (không sửa file này để đổi nội dung).
+ *
+ * Tính năng:
+ * 1. Nhạc nền + lời chạy (file .lrc)
+ * 2. Tự động cuộn trong .main-scroll-container
+ * 3. Lời chúc bay (danmaku)
+ * 4. Bắn tim, confetti
+ * 5. Album lật trang 3D (WeddingFlipbook) + xem toàn màn hình + phóng to từng trang
+ * 6. Bottom sheet: gửi lời chúc, RSVP, liên hệ; mừng cưới VietQR
+ * 7. Đếm ngược, lịch tháng, hiện dần khi cuộn
  */
+import config from '../wedding.config.js';
+import * as api from './api.js';
+import { loadLrc } from './lrc.js';
+import {
+  applySections,
+  renderStatic,
+  renderGifts,
+  renderEvents,
+  renderGuest,
+  renderCalendar,
+  startCountdown,
+  buildAlbum,
+} from './render.js';
+
+const MUSIC = config.music || {};
 
 // =============================================================================
-// 1. WEDDING BACKGROUND MUSIC & LIVE SYNCED LYRICS ("LỄ ĐƯỜNG" - KAI ĐINH)
+// 1. NHẠC NỀN & LỜI BÀI HÁT CHẠY THEO NHẠC
 // =============================================================================
-const WEDDING_LYRICS = [
-  { time: 15.5, text: "Người là nắng thiếu thời" },
-  { time: 18.2, text: "Cướp đi hồn anh" },
-  { time: 19.2, text: "Bằng một thoáng môi cười" },
-  { time: 21.7, text: "Tháng năm học trò ấy" },
-  { time: 23.3, text: "Dù muốn bên người" },
-  { time: 24.9, text: "Chẳng dám tỏ tình" },
-  { time: 26.5, text: "Vì sợ sẽ mất nhau..." },
-  { time: 29.7, text: "Rồi năm tháng trôi dần" },
-  { time: 31.9, text: "Vẫn là bạn của nhau" },
-  { time: 34.0, text: "Dù chẳng ở gần" },
-  { time: 35.6, text: "Nhưng tình đầu trong anh" },
-  { time: 37.2, text: "Thì vẫn chưa nguôi" },
-  { time: 39.3, text: "Lần nắm tay đầu như mới đây thôi" },
-  { time: 43.1, text: "Chẳng thể ngờ tình đầu giấc mơ thiếu thời" },
-  { time: 47.9, text: "Giờ trong màu trắng tinh khôi ✨" },
-  { time: 50.6, text: "Em là người đầu tiên mà anh yêu" },
-  { time: 53.8, text: "Anh muốn là người cuối cùng mà em yêu ❤️" },
-  { time: 59.1, text: "Khoảnh khắc thấy em trên lễ đường" },
-  { time: 62.3, text: "Cùng ánh mắt bóng dáng thân thương" },
-  { time: 65.5, text: "Nhiều năm ấy chớp mắt trôi qua" },
-  { time: 68.8, text: "Để ta giờ đây về chung một nhà 🏡" },
-  { time: 72.5, text: "Và anh hứa yêu em suốt đời" },
-  { time: 76.2, text: "Lời thiêng liêng anh hứa với trời" },
-  { time: 79.9, text: "Dù đau ốm, nghèo khó, sóng gió, tổn thương" },
-  { time: 83.7, text: "Thì anh vẫn luôn ở đây" },
-  { time: 87.9, text: "Mình già đi cùng nhau, có nhau 💍" },
-  { time: 109.0, text: "Chàng trai khiến em cười" },
-  { time: 111.7, text: "Đôi khi chẳng cần em phải nói ra lời" },
-  { time: 115.0, text: "Vẫn luôn hiểu từng điều" },
-  { time: 116.5, text: "Em giữ âm thầm" },
-  { time: 118.2, text: "Phải chăng anh là tương lai của em" },
-  { time: 121.9, text: "Ở bên người khiến em luôn thấy an toàn" },
-  { time: 127.6, text: "Để em là chính em" },
-  { time: 129.8, text: "Không phải sợ già đi hay cô đơn" },
-  { time: 133.0, text: "Vì từng ngày trôi anh luôn yêu em hơn ❤️" },
-  { time: 136.3, text: "Khoảnh khắc thấy em trên lễ đường" },
-  { time: 139.4, text: "Cùng ánh mắt bóng dáng thân thương" },
-  { time: 143.2, text: "Nhiều năm ấy chớp mắt trôi qua" },
-  { time: 146.5, text: "Để ta giờ đây về chung một nhà 🏡" },
-  { time: 150.2, text: "Và em hứa yêu anh suốt đời" },
-  { time: 153.7, text: "Lời thiêng liêng em hứa với trời" },
-  { time: 157.5, text: "Dù đau ốm, nghèo khó, sóng gió, tổn thương" },
-  { time: 161.3, text: "Thì em vẫn luôn ở đây" },
-  { time: 164.4, text: "Mình già đi cùng nhau, có nhau 💍" },
-  { time: 187.6, text: "Giờ ta có thêm một gia đình" },
-  { time: 190.8, text: "Hạnh phúc có thêm một sinh linh 👶" },
-  { time: 194.5, text: "Nhiều năm ấy chớp mắt trôi qua" },
-  { time: 197.7, text: "Và con giờ đây lớn lên từng ngày" },
-  { time: 201.4, text: "Và ta hứa yêu con suốt đời" },
-  { time: 205.2, text: "Lời thiêng liêng ta hứa với trời" },
-  { time: 208.4, text: "Dù đau ốm, nghèo khó, sóng gió, tổn thương" },
-  { time: 212.7, text: "Thì ba mẹ luôn ở đây" },
-  { time: 217.3, text: "Mình già đi cùng nhau, có nhau 💖" }
-];
-
 class WeddingBgMusicEngine {
   constructor(audioElementId = 'weddingBgMusic') {
     this.audio = document.getElementById(audioElementId);
@@ -81,6 +39,7 @@ class WeddingBgMusicEngine {
     this.targetVolume = 0.85;
     this.currentLyricIndex = -1;
     this.lyricElements = [];
+    this.lyrics = [];
 
     // UI Elements
     this.topToggleBtn = document.getElementById('cineloveAudioToggle');
@@ -101,7 +60,7 @@ class WeddingBgMusicEngine {
   }
 
   init() {
-    if (!this.audio) return;
+    if (!this.audio || !MUSIC.src) return;
 
     this.audio.loop = true;
     this.audio.volume = this.targetVolume;
@@ -195,7 +154,7 @@ class WeddingBgMusicEngine {
     this.lyricsList.innerHTML = '';
     this.lyricElements = [];
 
-    WEDDING_LYRICS.forEach((item, index) => {
+    this.lyrics.forEach((item, index) => {
       const lineDiv = document.createElement('div');
       lineDiv.className = 'lyric-line';
       lineDiv.textContent = item.text;
@@ -216,12 +175,20 @@ class WeddingBgMusicEngine {
     });
   }
 
+  setLyrics(list) {
+    this.lyrics = Array.isArray(list) ? list : [];
+    this.currentLyricIndex = -1;
+    this.renderLyrics();
+    const container = this.lyricsContainer;
+    if (container && !this.lyrics.length) container.hidden = true;
+  }
+
   updateLyrics(currentTime, forceScroll = false) {
     if (!this.lyricElements || this.lyricElements.length === 0) return;
 
     let activeIdx = -1;
-    for (let i = 0; i < WEDDING_LYRICS.length; i++) {
-      if (currentTime >= WEDDING_LYRICS[i].time) {
+    for (let i = 0; i < this.lyrics.length; i++) {
+      if (currentTime >= this.lyrics[i].time) {
         activeIdx = i;
       } else {
         break;
@@ -399,7 +366,7 @@ class WeddingBgMusicEngine {
     if (this.audio.paused) {
       this.playWithFade(500);
       if (typeof showToast === 'function') {
-        showToast('Đang phát: Lễ Đường — Kai Đinh 🎵');
+        showToast(`Đang phát: ${[MUSIC.title, MUSIC.artist].filter(Boolean).join(' — ')} 🎵`);
       }
     } else {
       this.pause();
@@ -573,74 +540,47 @@ class AutoScrollEngine {
   }
 }
 
+
 // =============================================================================
-// 3. CINELOVE FLOATING DANMAKU BLESSINGS ENGINE
+// 3. LỜI CHÚC BAY (DANMAKU)
 // =============================================================================
+const SAMPLE_WISHES = [
+  'Trăm năm hạnh phúc, mãi ngọt ngào! 🌸',
+  'Chúc hai bạn xứng đôi vừa lứa, bạc đầu răng long ❤️',
+  'Chúc mừng hạnh phúc! 囍',
+  'Mãi yêu nhau như ngày đầu nhé 💐',
+  'Vạn sự như ý, gia đạo an khang ✨',
+];
+
 class DanmakuEngine {
-  constructor(containerId = 'blessing-box') {
+  constructor(containerId = 'blessing-box', { enabled = true } = {}) {
     this.container = document.getElementById(containerId);
-    this.wishesPool = [
-      'Quỳnh Nga: Chúc hai bạn trăm năm hạnh phúc, mãi ngọt ngào! 🌸',
-      'Minh Tuấn: Phương & Dương xứng đôi vừa lứa nhất quả đất ❤️',
-      'Bác Ba: Chúc hai cháu trăm năm tình viên mãn 囍',
-      'Thảo My: Thùy Dương hôm nay xinh đẹp tuyệt trần! 👰',
-      'Hoàng Bách: Hạnh phúc viên mãn nha bạn hiền 🎉',
-      'Thuỳ Trang: Chúc anh chị sớm đón thiên thần nhỏ nhé 👶',
-      'Hải Đăng: Chúc mừng đám cưới trong mơ của cặp đôi vàng! ✨',
-      'Kim Oanh: Chúc hai con vạn sự như ý, gia đạo an khang 💐',
-      'Việt Anh: Nâng ly chúc mừng hạnh phúc của Duy Phương & Thùy Dương 🥂',
-      'Phương Linh: Đám cưới đẹp như trong truyện cổ tích! 💖'
-    ];
+    this.enabled = enabled && !!this.container && !this.container.hidden;
+    this.wishesPool = [];
     this.timer = null;
+    // Màu bong bóng theo theme (biến CSS do plugin sinh ra)
     this.colors = [
-      'rgba(255, 110, 135, 0.85)', // Rose pink
-      'rgba(91, 140, 94, 0.85)',   // Mint green
-      'rgba(197, 160, 89, 0.85)',  // Gold Champagne
-      'rgba(240, 98, 146, 0.85)',  // Hot pink
-      'rgba(42, 82, 45, 0.85)'     // Lotus deep green
+      'rgb(var(--c-primary-rgb) / 0.85)',
+      'rgb(var(--c-accent-rgb) / 0.88)',
+      'rgb(var(--c-strong-rgb) / 0.85)',
+      'rgb(var(--c-accent-strong-rgb) / 0.85)',
+      'rgb(var(--c-muted-rgb) / 0.85)',
     ];
     this.init();
   }
 
   init() {
-    if (!this.container) return;
-
-    // Load any user wishes stored in localStorage
-    try {
-      const stored = JSON.parse(localStorage.getItem('wedding_wishes') || '[]');
-      stored.forEach(w => {
-        if (w.author && w.text) {
-          this.wishesPool.unshift(`${w.author}: ${w.text}`);
-        }
-      });
-    } catch (e) {
-      console.warn(e);
-    }
-
-    // Load wishes from BE API
-    this.loadWishesFromApi();
-
-    // Spawn first bubble shortly after load
+    if (!this.enabled) return;
+    this.loadWishes();
     setTimeout(() => this.spawnBubble(), 1200);
-
-    // Regularly spawn bubbles every 3.8 - 4.5 seconds
     this.startLoop();
   }
 
-  async loadWishesFromApi() {
-    try {
-      const res = await fetch('/api/wishes');
-      if (res.ok) {
-        const json = await res.json();
-        const list = Array.isArray(json) ? json : (json.data || []);
-        if (list.length > 0) {
-          const apiWishes = list.map(w => `${w.author}: ${w.text}`);
-          this.wishesPool = [...apiWishes, ...this.wishesPool];
-        }
-      }
-    } catch (e) {
-      console.warn('API wishes load error:', e);
-    }
+  async loadWishes() {
+    const list = await api.fetchWishes();
+    const real = list.filter((w) => w && w.author && w.text).map((w) => `${w.author}: ${w.text}`);
+    // Chưa có lời chúc thật thì hiện vài câu chúc chung (không gắn tên người)
+    this.wishesPool = real.length ? real : [...SAMPLE_WISHES];
   }
 
   startLoop() {
@@ -652,16 +592,16 @@ class DanmakuEngine {
   }
 
   spawnBubble(customText = null, isUser = false) {
-    if (!this.container) return;
-
-    const text = customText || this.wishesPool[Math.floor(Math.random() * this.wishesPool.length)];
+    if (!this.enabled) return;
+    const pool = this.wishesPool.length ? this.wishesPool : SAMPLE_WISHES;
+    const text = customText || pool[Math.floor(Math.random() * pool.length)];
     const bubble = document.createElement('div');
     bubble.className = 'danmaku-item';
-    
+
     if (isUser) {
-      bubble.style.background = 'linear-gradient(135deg, #FF4969, #FF8E53)';
+      bubble.style.background = 'linear-gradient(135deg, var(--c-accent), var(--c-primary))';
       bubble.style.fontWeight = '500';
-      bubble.style.boxShadow = '0 4px 15px rgba(255, 73, 105, 0.4)';
+      bubble.style.boxShadow = '0 4px 15px rgb(var(--c-accent-rgb) / 0.4)';
     } else {
       bubble.style.background = this.colors[Math.floor(Math.random() * this.colors.length)];
     }
@@ -669,12 +609,10 @@ class DanmakuEngine {
     bubble.textContent = text;
     this.container.appendChild(bubble);
 
-    // Keep max 4 bubbles inside DOM
     while (this.container.children.length > 4) {
       this.container.removeChild(this.container.firstChild);
     }
 
-    // Auto remove after animation completes
     setTimeout(() => {
       if (bubble.parentNode === this.container) {
         this.container.removeChild(bubble);
@@ -684,13 +622,14 @@ class DanmakuEngine {
 
   addWish(author, text) {
     const wishStr = `${author}: ${text}`;
+    if (this.wishesPool.every((w) => SAMPLE_WISHES.includes(w))) this.wishesPool = [];
     this.wishesPool.unshift(wishStr);
     this.spawnBubble(wishStr, true);
   }
 }
 
 // =============================================================================
-// 4. FLOATING HEARTS ANIMATION (BẮN TIM THEO PHONG CÁCH CINELOVE)
+// 4. BẮN TIM
 // =============================================================================
 function shootHearts(burstCount = 7) {
   const container = document.getElementById('cinelove-animation-box');
@@ -728,310 +667,14 @@ function shootHearts(burstCount = 7) {
   }
 }
 
-// =============================================================================
-// 5. 3D COVERFLOW SLIDER (ALBUM HÌNH CƯỚI THEO MẪU CINELOVE)
-// =============================================================================
-class CoverflowSlider {
-  constructor(wrapperId = 'coverflowWrapper') {
-    this.wrapper = document.getElementById(wrapperId);
-    if (!this.wrapper) return;
-
-    this.slides = Array.from(this.wrapper.querySelectorAll('.coverflow-slide'));
-    this.prevBtn = document.getElementById('coverflowPrevBtn');
-    this.nextBtn = document.getElementById('coverflowNextBtn');
-    this.paginationEl = document.getElementById('coverflowPagination');
-
-    this.total = this.slides.length;
-    this.currentIndex = 2; // Start focused on center hero slide (index 2)
-    this.autoPlayTimer = null;
-    this.resumeTimer = null;
-    this.autoPlayInterval = 3200; // Nhịp nhàng 3.2 giây chuyển ảnh
-
-    this.init();
-  }
-
-  init() {
-    this.renderPagination();
-    this.update();
-
-    if (this.prevBtn) {
-      this.prevBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.prev();
-        this.resetAutoPlay();
-      });
-    }
-
-    if (this.nextBtn) {
-      this.nextBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.next();
-        this.resetAutoPlay();
-      });
-    }
-
-    // Click on slides
-    this.slides.forEach((slide, idx) => {
-      slide.addEventListener('click', () => {
-        if (this.currentIndex === idx) {
-          // Open lightbox when clicking the active center slide
-          if (window.openWeddingLightbox) window.openWeddingLightbox(idx);
-        } else {
-          // Rotate clicked slide to center
-          this.goTo(idx);
-          this.resetAutoPlay();
-        }
-      });
-    });
-
-    // Touch and drag swipe gestures (horizontal switch and vertical pull-up)
-    let touchStartX = 0;
-    let touchStartY = 0;
-    this.wrapper.addEventListener('touchstart', (e) => {
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
-    }, { passive: true });
-
-    this.wrapper.addEventListener('touchend', (e) => {
-      const touchEndX = e.changedTouches[0].clientX;
-      const touchEndY = e.changedTouches[0].clientY;
-      const diffX = touchEndX - touchStartX;
-      const diffY = touchEndY - touchStartY;
-
-      // Vertical pull-up swipe (kéo ảnh lên) to expand photo into fullscreen
-      if (diffY < -50 && Math.abs(diffY) > Math.abs(diffX)) {
-        if (window.openWeddingLightbox) window.openWeddingLightbox(this.currentIndex);
-        return;
-      }
-
-      // Horizontal swipe to flip photos
-      if (Math.abs(diffX) > 35) {
-        if (diffX > 0) this.prev();
-        else this.next();
-        this.resetAutoPlay();
-      }
-    }, { passive: true });
-
-    // Auto rotate
-    this.startAutoPlay();
-    this.wrapper.addEventListener('mouseenter', () => this.pauseAutoPlay());
-    this.wrapper.addEventListener('mouseleave', () => this.startAutoPlay());
-    this.wrapper.addEventListener('touchstart', () => this.pauseAutoPlay(), { passive: true });
-    this.wrapper.addEventListener('touchend', () => this.resetAutoPlay(), { passive: true });
-  }
-
-  renderPagination() {
-    if (!this.paginationEl) return;
-    this.paginationEl.innerHTML = '';
-    for (let i = 0; i < this.total; i++) {
-      const dot = document.createElement('div');
-      dot.className = `coverflow-dot ${i === this.currentIndex ? 'active' : ''}`;
-      dot.addEventListener('click', () => {
-        this.goTo(i);
-        this.resetAutoPlay();
-      });
-      this.paginationEl.appendChild(dot);
-    }
-  }
-
-  updatePagination() {
-    if (!this.paginationEl) return;
-    const dots = this.paginationEl.querySelectorAll('.coverflow-dot');
-    dots.forEach((dot, idx) => {
-      dot.classList.toggle('active', idx === this.currentIndex);
-    });
-  }
-
-  update() {
-    this.slides.forEach((slide, i) => {
-      let offset = (i - this.currentIndex + this.total) % this.total;
-      if (offset > this.total / 2) {
-        offset -= this.total;
-      }
-
-      slide.classList.remove('is-active', 'is-next-1', 'is-next-2', 'is-prev-1', 'is-prev-2', 'is-hidden');
-
-      if (offset === 0) {
-        slide.classList.add('is-active');
-      } else if (offset === 1) {
-        slide.classList.add('is-next-1');
-      } else if (offset === 2) {
-        slide.classList.add('is-next-2');
-      } else if (offset === -1) {
-        slide.classList.add('is-prev-1');
-      } else if (offset === -2) {
-        slide.classList.add('is-prev-2');
-      } else {
-        slide.classList.add('is-hidden');
-      }
-    });
-
-    this.updatePagination();
-  }
-
-  next() {
-    this.currentIndex = (this.currentIndex + 1) % this.total;
-    this.update();
-  }
-
-  prev() {
-    this.currentIndex = (this.currentIndex - 1 + this.total) % this.total;
-    this.update();
-  }
-
-  goTo(index) {
-    this.currentIndex = index;
-    this.update();
-  }
-
-  startAutoPlay() {
-    this.pauseAutoPlay();
-    this.autoPlayTimer = setInterval(() => this.next(), this.autoPlayInterval);
-  }
-
-  pauseAutoPlay() {
-    if (this.autoPlayTimer) {
-      clearInterval(this.autoPlayTimer);
-      this.autoPlayTimer = null;
-    }
-  }
-
-  resetAutoPlay() {
-    this.pauseAutoPlay();
-    if (this.resumeTimer) clearTimeout(this.resumeTimer);
-    this.resumeTimer = setTimeout(() => {
-      this.startAutoPlay();
-    }, 2400);
-  }
-}
 
 // =============================================================================
-// 5B. 3D PAGE-FLIPPING WEDDING PHOTOBOOK ENGINE (ALBUM PRE-WEDDING LẬT TRANG)
+// 5. ALBUM LẬT TRANG 3D — dữ liệu lấy từ config.album.leaves
 // =============================================================================
-const ALBUM_LEAVES = [
-  {
-    front: 'assets/images/pre-wedding/pages/cover-front.jpg',
-    back: 'assets/images/pre-wedding/pages/page-01-L.jpg',
-    frontHardcover: true,
-    frontAlt: 'You Are My Destiny',
-    backAlt: 'Pure Beginnings'
-  },
-  {
-    front: 'assets/images/pre-wedding/pages/page-01-R.jpg',
-    back: 'assets/images/pre-wedding/pages/page-02-L.jpg',
-    frontAlt: 'Pure Beginnings',
-    backAlt: 'Chasing You'
-  },
-  {
-    front: 'assets/images/pre-wedding/pages/page-02-R.jpg',
-    back: 'assets/images/pre-wedding/pages/page-03-L.jpg',
-    frontAlt: 'Chasing You',
-    backAlt: 'Waltz of Love'
-  },
-  {
-    front: 'assets/images/pre-wedding/pages/page-03-R.jpg',
-    back: 'assets/images/pre-wedding/pages/page-04-L.jpg',
-    frontAlt: 'Waltz of Love',
-    backAlt: 'By Your Side'
-  },
-  {
-    front: 'assets/images/pre-wedding/pages/page-04-R.jpg',
-    back: 'assets/images/pre-wedding/pages/page-05-L.jpg',
-    frontAlt: 'By Your Side',
-    backAlt: 'Forever Together'
-  },
-  {
-    front: 'assets/images/pre-wedding/pages/page-05-R.jpg',
-    back: 'assets/images/pre-wedding/pages/page-06-L.jpg',
-    frontAlt: 'Forever Together',
-    backAlt: 'Hello Muse'
-  },
-  {
-    front: 'assets/images/pre-wedding/pages/page-06-R.jpg',
-    back: 'assets/images/pre-wedding/pages/page-07-L.jpg',
-    frontAlt: 'Hello Muse',
-    backAlt: 'Mother & Little Angel'
-  },
-  {
-    front: 'assets/images/pre-wedding/pages/page-07-R.jpg',
-    back: 'assets/images/pre-wedding/pages/page-08-L.jpg',
-    frontAlt: 'Mother & Little Angel',
-    backAlt: 'Our Happy Family'
-  },
-  {
-    front: 'assets/images/pre-wedding/pages/page-08-R.jpg',
-    back: 'assets/images/pre-wedding/pages/page-09-L.jpg',
-    frontAlt: 'Our Happy Family',
-    backAlt: 'She — Under the Veil'
-  },
-  {
-    front: 'assets/images/pre-wedding/pages/page-09-R.jpg',
-    back: 'assets/images/pre-wedding/pages/page-10-L.jpg',
-    frontAlt: 'She — Under the Veil',
-    backAlt: 'Tender Gaze'
-  },
-  {
-    front: 'assets/images/pre-wedding/pages/page-10-R.jpg',
-    back: 'assets/images/pre-wedding/pages/page-11-L.jpg',
-    frontAlt: 'Tender Gaze',
-    backAlt: 'Captured on Film'
-  },
-  {
-    front: 'assets/images/pre-wedding/pages/page-11-R.jpg',
-    back: 'assets/images/pre-wedding/pages/page-12-L.jpg',
-    frontAlt: 'Captured on Film',
-    backAlt: 'My Heart Will Go On'
-  },
-  {
-    front: 'assets/images/pre-wedding/pages/page-12-R.jpg',
-    back: 'assets/images/pre-wedding/pages/cover-back.jpg',
-    backHardcover: true,
-    frontAlt: 'My Heart Will Go On',
-    backAlt: 'The Wedding Book'
-  }
-];
-
-const ALBUM_SPREAD_META = [
-  { label: 'Bìa', title: 'You Are My Destiny', counter: 'Bìa trước · 12 trang đôi', leftThumb: null, rightThumb: 'assets/images/pre-wedding/thumbs/cover-front.jpg', zoomIdx: 0 },
-  { label: '01', title: 'Pure Beginnings', counter: 'Trang 01–02 / 24', leftThumb: 'assets/images/pre-wedding/thumbs/page-01-L.jpg', rightThumb: 'assets/images/pre-wedding/thumbs/page-01-R.jpg', zoomIdx: 1 },
-  { label: '02', title: 'Chasing You', counter: 'Trang 03–04 / 24', leftThumb: 'assets/images/pre-wedding/thumbs/page-02-L.jpg', rightThumb: 'assets/images/pre-wedding/thumbs/page-02-R.jpg', zoomIdx: 3 },
-  { label: '03', title: 'Waltz of Love', counter: 'Trang 05–06 / 24', leftThumb: 'assets/images/pre-wedding/thumbs/page-03-L.jpg', rightThumb: 'assets/images/pre-wedding/thumbs/page-03-R.jpg', zoomIdx: 5 },
-  { label: '04', title: 'By Your Side', counter: 'Trang 07–08 / 24', leftThumb: 'assets/images/pre-wedding/thumbs/page-04-L.jpg', rightThumb: 'assets/images/pre-wedding/thumbs/page-04-R.jpg', zoomIdx: 7 },
-  { label: '05', title: 'Forever Together', counter: 'Trang 09–10 / 24', leftThumb: 'assets/images/pre-wedding/thumbs/page-05-L.jpg', rightThumb: 'assets/images/pre-wedding/thumbs/page-05-R.jpg', zoomIdx: 9 },
-  { label: '06', title: 'Hello Muse', counter: 'Trang 11–12 / 24', leftThumb: 'assets/images/pre-wedding/thumbs/page-06-L.jpg', rightThumb: 'assets/images/pre-wedding/thumbs/page-06-R.jpg', zoomIdx: 11 },
-  { label: '07', title: 'Mother & Little Angel', counter: 'Trang 13–14 / 24', leftThumb: 'assets/images/pre-wedding/thumbs/page-07-L.jpg', rightThumb: 'assets/images/pre-wedding/thumbs/page-07-R.jpg', zoomIdx: 13 },
-  { label: '08', title: 'Our Happy Family', counter: 'Trang 15–16 / 24', leftThumb: 'assets/images/pre-wedding/thumbs/page-08-L.jpg', rightThumb: 'assets/images/pre-wedding/thumbs/page-08-R.jpg', zoomIdx: 15 },
-  { label: '09', title: 'She — Under the Veil', counter: 'Trang 17–18 / 24', leftThumb: 'assets/images/pre-wedding/thumbs/page-09-L.jpg', rightThumb: 'assets/images/pre-wedding/thumbs/page-09-R.jpg', zoomIdx: 17 },
-  { label: '10', title: 'Tender Gaze', counter: 'Trang 19–20 / 24', leftThumb: 'assets/images/pre-wedding/thumbs/page-10-L.jpg', rightThumb: 'assets/images/pre-wedding/thumbs/page-10-R.jpg', zoomIdx: 19 },
-  { label: '11', title: 'Captured on Film', counter: 'Trang 21–22 / 24', leftThumb: 'assets/images/pre-wedding/thumbs/page-11-L.jpg', rightThumb: 'assets/images/pre-wedding/thumbs/page-11-R.jpg', zoomIdx: 21 },
-  { label: '12', title: 'My Heart Will Go On', counter: 'Trang 23–24 / 24', leftThumb: 'assets/images/pre-wedding/thumbs/page-12-L.jpg', rightThumb: 'assets/images/pre-wedding/thumbs/page-12-R.jpg', zoomIdx: 23 },
-  { label: 'Kết', title: 'The Wedding Book', counter: 'Bìa sau · Trọn vẹn yêu thương', leftThumb: 'assets/images/pre-wedding/thumbs/cover-back.jpg', rightThumb: null, zoomIdx: 25 }
-];
-
-const ALBUM_SINGLE_PAGES = (() => {
-  const list = [
-    { src: 'assets/images/pre-wedding/pages/cover-front.jpg', caption: 'You Are My Destiny' }
-  ];
-  for (let i = 1; i <= 12; i++) {
-    const num = String(i).padStart(2, '0');
-    const meta = ALBUM_SPREAD_META[i];
-    const pLeft = i * 2 - 1;
-    const pRight = i * 2;
-    list.push({
-      src: `assets/images/pre-wedding/pages/page-${num}-L.jpg`,
-      caption: `${meta.title} (${String(pLeft).padStart(2, '0')} / 24)`
-    });
-    list.push({
-      src: `assets/images/pre-wedding/pages/page-${num}-R.jpg`,
-      caption: `${meta.title} (${String(pRight).padStart(2, '0')} / 24)`
-    });
-  }
-  list.push({
-    src: 'assets/images/pre-wedding/pages/cover-back.jpg',
-    caption: 'The Wedding Book'
-  });
-  return list;
-})();
+const ALBUM = buildAlbum(config.album?.leaves || []);
+const ALBUM_LEAVES = ALBUM.leaves;
+const ALBUM_SPREAD_META = ALBUM.spreads;
+const ALBUM_SINGLE_PAGES = ALBUM.pages;
 
 let flipAudioCtx = null;
 let lastFlipAudioTime = 0;
@@ -1801,11 +1444,13 @@ class WeddingFlipbook {
   }
 }
 
+
 // =============================================================================
 // 6. CONFETTI CELEBRATION
 // =============================================================================
 function launchConfetti() {
-  const colors = ['#C5A059', '#6E9E6C', '#FFFFFF', '#EBF5EA', '#FF9AA6', '#FF4969'];
+  // Màu theo theme (biến CSS)
+  const colors = ['var(--c-accent)', 'var(--c-primary)', '#ffffff', 'var(--c-soft)', 'var(--c-accent-strong)', 'var(--c-strong)'];
   const confettiCount = 55;
   const container = document.createElement('div');
   container.style.position = 'fixed';
@@ -1862,508 +1507,53 @@ function showToast(message) {
   }, 3000);
 }
 
+
 // =============================================================================
-// 8. MAIN INITIALIZATION & DOM CONTROLLERS
+// 8. KHỞI TẠO
 // =============================================================================
 document.addEventListener('DOMContentLoaded', () => {
-  // Initialize Core Engines
-  const weddingMusic = new WeddingBgMusicEngine('weddingBgMusic');
-  const autoScroll = new AutoScrollEngine('mainScrollContainer');
-  const danmaku = new DanmakuEngine('blessing-box');
-  const coverflow = new CoverflowSlider('coverflowWrapper');
-
-  // --- PERSONALIZED GUEST & BACKEND SYNC ---
+  // --- ĐỔ NỘI DUNG TỪ wedding.config.js ---
+  const params = new URLSearchParams(window.location.search);
+  const guestCode = api.normalizeCode(params.get('to') || params.get('code') || params.get('guest'));
   let currentGuest = null;
 
-  async function checkPersonalizedGuest() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const guestCode = urlParams.get('to') || urlParams.get('code') || urlParams.get('guest');
+  applySections(config);
+  renderStatic(config);
+  renderGifts(config, null);
+  renderGuest(config, null);
+  const defaultMainEvent = renderEvents(config, null);
+  renderCalendar(defaultMainEvent);
+  startCountdown(defaultMainEvent);
+
+  const audioEl = document.getElementById('weddingBgMusic');
+  if (audioEl && MUSIC.src) audioEl.src = MUSIC.src;
+
+  // Mã QR mở thiệp trên điện thoại (chỉ hiện ở màn hình lớn)
+  const desktopQrImg = document.getElementById('desktopQrImg');
+  if (desktopQrImg) {
+    const qrColor = getComputedStyle(document.documentElement).getPropertyValue('--c-primary').trim().replace('#', '') || '000000';
+    desktopQrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=0&color=${qrColor}&data=${encodeURIComponent(window.location.href)}`;
+  }
+
+  // --- CÁC ENGINE HIỆU ỨNG ---
+  const weddingMusic = new WeddingBgMusicEngine('weddingBgMusic');
+  loadLrc(MUSIC.lyrics).then((lines) => weddingMusic.setLyrics(lines));
+  const autoScroll = new AutoScrollEngine('mainScrollContainer');
+  const danmaku = new DanmakuEngine('blessing-box', { enabled: (config.sections || []).includes('wishes') });
+
+  // --- KHÁCH MỜI RIÊNG (?to=ma-khach) ---
+  async function applyGuest() {
     if (!guestCode) return;
-
-    try {
-      const res = await fetch(`/api/guests/lookup?code=${encodeURIComponent(guestCode)}`);
-      if (!res.ok) return;
-      const json = await res.json();
-      const guest = json.data || json;
-      if (!guest || !guest.name) return;
-
-      currentGuest = guest;
-
-      // 1. Update Cover Screen Greeting
-      const introSubGreeting = document.getElementById('introSubGreeting');
-      if (introSubGreeting) {
-        introSubGreeting.innerHTML = `Thân Mời: <strong style="color: #1C1917; font-weight: 600;">${guest.title || guest.name}</strong>`;
-      }
-
-      // 2. Update Invitation Letter Card
-      const letterPersonalizedBox = document.getElementById('letterPersonalizedBox');
-      const letterGuestName = document.getElementById('letterGuestName');
-      if (letterPersonalizedBox && letterGuestName) {
-        letterPersonalizedBox.style.display = 'block';
-        const companionText = guest.companion ? ' & Người thương' : '';
-        letterGuestName.textContent = `${guest.title || guest.name}${companionText}`;
-      }
-
-      // 3. Pre-fill RSVP Form
-      const guestNameInput = document.getElementById('guestName');
-      if (guestNameInput) {
-        guestNameInput.value = guest.name;
-      }
-      if (guest.side) {
-        const sideRadio = document.querySelector(`input[name="guestSide"][value="${guest.side}"]`);
-        if (sideRadio) sideRadio.checked = true;
-      }
-      const rsvpBadge = document.getElementById('rsvpPersonalizedBadge');
-      const rsvpTitle = document.getElementById('rsvpGuestTitle');
-      if (rsvpBadge && rsvpTitle) {
-        rsvpBadge.style.display = 'block';
-        rsvpTitle.textContent = `${guest.title || guest.name}`;
-      }
-
-      // 4. Pre-fill Wish Form
-      const wishSenderInput = document.getElementById('wishSender');
-      const wishRelationInput = document.getElementById('wishRelation');
-      if (wishSenderInput) wishSenderInput.value = guest.name;
-      if (wishRelationInput) wishRelationInput.value = guest.group || (guest.side ? `Khách ${guest.side}` : '');
-
-    } catch (err) {
-      console.warn('Personalized guest lookup error:', err);
-    }
+    const guest = await api.lookupGuest(guestCode);
+    if (!guest) return;
+    currentGuest = guest;
+    renderGuest(config, guest);
+    renderGifts(config, guest);
+    const main = renderEvents(config, guest);
+    renderCalendar(main);
+    startCountdown(main);
   }
-
-  // ===========================================================================
-  // REAL-TIME COUNTDOWN TIMER ENGINE (ẢNH 1 - ĐẾM NGƯỢC THỜI GIAN CƯỚI)
-  // ===========================================================================
-  let countdownTimerInterval = null;
-
-  function initCountdown(weddingDate, weddingTime) {
-    if (countdownTimerInterval) {
-      clearInterval(countdownTimerInterval);
-      countdownTimerInterval = null;
-    }
-
-    const daysEl = document.getElementById('daysVal');
-    const hoursEl = document.getElementById('hoursVal');
-    const minsEl = document.getElementById('minutesVal');
-    const secsEl = document.getElementById('secondsVal');
-    const remDaysEl = document.getElementById('cdRemainingDays');
-
-    if (!daysEl || !hoursEl || !minsEl || !secsEl) return;
-
-    // Parse target date and time
-    // Fallback default: 2026-11-28T12:00:00+07:00
-    let target = null;
-    const timeStr = (weddingTime && weddingTime.trim().length >= 4) ? weddingTime.trim().slice(0, 5) : '12:00';
-    const dateStr = (weddingDate && weddingDate.trim()) ? weddingDate.trim() : '2026-11-28';
-
-    try {
-      // Use Vietnam timezone (+07:00)
-      target = new Date(`${dateStr}T${timeStr.length === 5 ? timeStr : '12:00'}:00+07:00`);
-      if (isNaN(target.getTime())) {
-        target = new Date(`${dateStr} ${timeStr}`);
-      }
-    } catch {
-      target = new Date('2026-11-28T12:00:00+07:00');
-    }
-
-    if (!target || isNaN(target.getTime())) {
-      target = new Date('2026-11-28T12:00:00+07:00');
-    }
-
-    function tick() {
-      const now = new Date();
-      const diff = target.getTime() - now.getTime();
-
-      if (diff <= 0) {
-        daysEl.textContent = '00';
-        hoursEl.textContent = '00';
-        minsEl.textContent = '00';
-        secsEl.textContent = '00';
-        if (remDaysEl) remDaysEl.textContent = '0';
-        return;
-      }
-
-      const totalSecs = Math.floor(diff / 1000);
-      const days = Math.floor(totalSecs / 86400);
-      const hours = Math.floor((totalSecs % 86400) / 3600);
-      const mins = Math.floor((totalSecs % 3600) / 60);
-      const secs = totalSecs % 60;
-
-      daysEl.textContent = days < 10 ? `0${days}` : String(days);
-      hoursEl.textContent = hours < 10 ? `0${hours}` : String(hours);
-      minsEl.textContent = mins < 10 ? `0${mins}` : String(mins);
-      secsEl.textContent = secs < 10 ? `0${secs}` : String(secs);
-      if (remDaysEl) remDaysEl.textContent = String(days);
-    }
-
-    // Run tick immediately and schedule every second
-    tick();
-    countdownTimerInterval = setInterval(tick, 1000);
-  }
-
-  // ===========================================================================
-  // DYNAMIC CALENDAR GENERATOR
-  // ===========================================================================
-  function renderCalendar(weddingDateStr, weddingDateDisplay, lunarDateDisplay) {
-    const calMatrixEl = document.getElementById('calDaysMatrix');
-    const calHeaderDateEl = document.getElementById('calHeaderDateDisplay');
-    const calHeaderSubEl = document.getElementById('calHeaderSubDisplay');
-    if (!calMatrixEl) return;
-
-    let targetDate = null;
-    try {
-      if (weddingDateStr) {
-        const parts = weddingDateStr.split('-');
-        if (parts.length === 3) {
-          targetDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-        }
-      }
-    } catch (e) {
-      targetDate = null;
-    }
-
-    if (!targetDate || isNaN(targetDate.getTime())) {
-      targetDate = new Date(2026, 10, 28); // 28 Nov 2026
-    }
-
-    const year = targetDate.getFullYear();
-    const month = targetDate.getMonth();
-    const day = targetDate.getDate();
-
-    // Update Header Date e.g. 28.11.2026
-    if (calHeaderDateEl) {
-      const padM = String(month + 1).padStart(2, '0');
-      const padD = String(day).padStart(2, '0');
-      calHeaderDateEl.textContent = `${padD}.${padM}.${year}`;
-    }
-
-    // Update Header Sub e.g. Thứ Bảy, 10:00 AM
-    if (calHeaderSubEl) {
-      const dows = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
-      const dowText = dows[targetDate.getDay()] || 'Thứ Bảy';
-      calHeaderSubEl.textContent = `${dowText}, 10:00 AM`;
-    }
-
-    // Days in this month
-    const totalDays = new Date(year, month + 1, 0).getDate();
-    // 1st of month: 0=Sun, 1=Mon, ..., 6=Sat
-    // Sunday-start grid: offset = targetDate's 1st day of month day-of-week
-    const offset = new Date(year, month, 1).getDay();
-
-    let html = '';
-    for (let i = 0; i < offset; i++) {
-      html += '<span class="cal-cell other-month"></span>';
-    }
-
-    for (let d = 1; d <= totalDays; d++) {
-      if (d === day) {
-        html += `<span class="cal-cell is-wedding-day" title="Ngày cưới trọng đại">${d}</span>`;
-      } else {
-        html += `<span class="cal-cell">${d}</span>`;
-      }
-    }
-
-    calMatrixEl.innerHTML = html;
-  }
-
-  function updateGoogleCalendarLink(data) {
-    const linkEl = document.getElementById('calGoogleCalendarLink');
-    if (!linkEl) return;
-
-    const groom = data.groomShortName || 'Duy Phương';
-    const bride = data.brideShortName || 'Thùy Dương';
-    const title = encodeURIComponent(`Tiệc Cưới ${groom} & ${bride}`);
-    const venue = encodeURIComponent(data.venueName ? `${data.venueName}, ${data.venueAddress || ''}` : 'Gala Center');
-    const details = encodeURIComponent(`Trân trọng kính mời quý khách tham dự tiệc cưới của ${groom} & ${bride}.`);
-
-    let datePart = (data.weddingDate || '2026-11-28').replace(/-/g, '');
-    const calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${datePart}T050000Z/${datePart}T090000Z&details=${details}&location=${venue}`;
-    linkEl.href = calUrl;
-  }
-
-  // ===========================================================================
-  // DYNAMIC WEDDING CONFIG SYNC (ĐỒNG BỘ THÔNG TIN TỪ CÀI ĐẶT ADMIN)
-  // ===========================================================================
-  async function syncWeddingData() {
-    try {
-      const res = await fetch('/api/wedding');
-      if (!res.ok) return;
-      const json = await res.json();
-      const data = json.data || json;
-      if (!data) return;
-
-      const groomShort = data.groomShortName || (data.groomName ? data.groomName.split(' ').slice(-2).join(' ') : 'Duy Phương');
-      const brideShort = data.brideShortName || (data.brideName ? data.brideName.split(' ').slice(-2).join(' ') : 'Thùy Dương');
-      const groomFull = data.groomName || 'Nguyễn Duy Phương';
-      const brideFull = data.brideName || 'Lê Thùy Dương';
-      const dateDisplay = data.weddingDateDisplay || '28 tháng 11, 2026';
-      const dateRaw = data.weddingDate || '2026-11-28';
-      const weddingTime = data.weddingTime || '12:00';
-      const lunarDisplay = data.lunarDateDisplay || '20 tháng 10 năm Bính Ngọ';
-      const venueName = data.venueName || 'Sảnh Grand Crystal · GALA CENTER';
-      const venueAddress = data.venueAddress || '415 Hoàng Văn Thụ, Phường 2, Quận Tân Bình, TP. Hồ Chí Minh';
-      const mapsUrl = data.googleMapsUrl || `https://maps.google.com/?q=${encodeURIComponent(venueName + ', ' + venueAddress)}`;
-      const shortVenue = (venueName.includes('·') ? venueName.split('·')[1] : venueName).trim();
-
-      // Format date like 28.11.2026
-      let formattedDotDate = '28.11.2026';
-      if (dateRaw && dateRaw.includes('-')) {
-        const parts = dateRaw.split('-');
-        if (parts.length === 3) formattedDotDate = `${parts[2]}.${parts[1]}.${parts[0]}`;
-      }
-
-      // 1. Cover
-      const introGroom = document.getElementById('introGroomName');
-      const introBride = document.getElementById('introBrideName');
-      const introDate = document.getElementById('introWeddingDate');
-      if (introGroom) introGroom.textContent = groomShort;
-      if (introBride) introBride.textContent = brideShort;
-      if (introDate) introDate.textContent = dateDisplay;
-
-      // 2. Hero Section
-      const heroGroom = document.getElementById('heroGroomName');
-      const heroBride = document.getElementById('heroBrideName');
-      const heroCallout = document.getElementById('heroCalloutDate');
-      const heroKwDate = document.getElementById('heroKeywordsDate');
-      const heroKwVenue = document.getElementById('heroKeywordsVenue');
-      if (heroGroom) heroGroom.textContent = groomShort;
-      if (heroBride) heroBride.textContent = brideShort;
-      if (heroCallout) heroCallout.textContent = formattedDotDate;
-      if (heroKwDate) heroKwDate.textContent = formattedDotDate;
-      if (heroKwVenue) heroKwVenue.textContent = shortVenue.toUpperCase();
-
-      // 3. Family Announcement
-      const fGroomFather = document.getElementById('familyGroomFather');
-      const fGroomMother = document.getElementById('familyGroomMother');
-      const fGroomAddr = document.getElementById('familyGroomAddress');
-      const fBrideFather = document.getElementById('familyBrideFather');
-      const fBrideMother = document.getElementById('familyBrideMother');
-      const fBrideAddr = document.getElementById('familyBrideAddress');
-      if (fGroomFather && data.groomFather) fGroomFather.textContent = data.groomFather;
-      if (fGroomMother && data.groomMother) fGroomMother.textContent = data.groomMother;
-      if (fGroomAddr && data.groomAddress) fGroomAddr.textContent = data.groomAddress;
-      if (fBrideFather && data.brideFather) fBrideFather.textContent = data.brideFather;
-      if (fBrideMother && data.brideMother) fBrideMother.textContent = data.brideMother;
-      if (fBrideAddr && data.brideAddress) fBrideAddr.textContent = data.brideAddress;
-
-      // 4. Couple Profiles
-      const profGroom = document.getElementById('profileGroomName');
-      const profBride = document.getElementById('profileBrideName');
-      if (profGroom) profGroom.textContent = groomFull;
-      if (profBride) profBride.textContent = brideFull;
-
-      // 5. Countdown Timer
-      initCountdown(dateRaw, weddingTime);
-
-      // 6. Calendar & Google Calendar Link
-      renderCalendar(dateRaw, dateDisplay, lunarDisplay);
-      updateGoogleCalendarLink(data);
-
-      // 7. Ceremony & Reception Cards
-      const cerTitle = document.getElementById('ceremonyTitleDisplay');
-      const cerTime = document.getElementById('ceremonyTimeDisplay');
-      const cerDate = document.getElementById('ceremonyDateDisplay');
-      const cerLunar = document.getElementById('ceremonyLunarDisplay');
-      const cerLoc = document.getElementById('ceremonyLocationName');
-      const cerAddr = document.getElementById('ceremonyLocationAddress');
-      const cerMap = document.getElementById('ceremonyMapLink');
-
-      const ceremonyVenueLabel = data.ceremonyVenue || 'Tư Gia Nhà Trai';
-      if (cerTitle) cerTitle.textContent = data.ceremonyName || 'Lễ Thành Hôn tại Tư Gia Nhà Trai';
-      
-      // Parse Ceremony Time and Date cleanly from config
-      if (data.ceremonyTime) {
-        let rawCerTime = String(data.ceremonyTime).trim();
-        if (rawCerTime.includes('-')) {
-          const parts = rawCerTime.split('-');
-          const timePart = parts[0].trim();
-          let datePart = parts.slice(1).join('-').trim();
-          if (datePart.includes('30.07') || datePart.includes('30/07')) {
-            datePart = dateDisplay;
-          }
-          if (cerTime) cerTime.textContent = timePart;
-          if (cerDate) cerDate.textContent = datePart;
-        } else {
-          if (cerTime) cerTime.textContent = rawCerTime;
-          if (cerDate) cerDate.textContent = dateDisplay;
-        }
-      } else {
-        if (cerTime) cerTime.textContent = '09:00';
-        if (cerDate) cerDate.textContent = dateDisplay;
-      }
-
-      if (cerLunar && data.lunarDateDisplay) cerLunar.textContent = `(Nhằm ngày ${data.lunarDateDisplay})`;
-      if (cerLoc && data.ceremonyName) cerLoc.textContent = data.ceremonyName;
-      if (cerAddr && data.ceremonyAddress) cerAddr.textContent = `${ceremonyVenueLabel} — ${data.ceremonyAddress}`;
-      if (cerMap && data.ceremonyAddress) cerMap.href = `https://maps.google.com/?q=${encodeURIComponent(data.ceremonyAddress)}`;
-
-      const recTime = document.getElementById('receptionTimeDisplay');
-      const recDate = document.getElementById('receptionDateDisplay');
-      const recLunar = document.getElementById('receptionLunarDisplay');
-      const recVenue = document.getElementById('receptionVenueName');
-      const recAddr = document.getElementById('receptionVenueAddress');
-      const recMap = document.getElementById('receptionMapLink');
-      const recMapBtn = document.getElementById('receptionMapBtnText');
-
-      if (recTime) recTime.textContent = weddingTime;
-      if (recDate) recDate.textContent = dateDisplay;
-      if (recLunar && data.lunarDateDisplay) recLunar.textContent = `(Âm lịch: ${data.lunarDateDisplay})`;
-      if (recVenue) recVenue.textContent = data.receptionName || 'Tiệc Cưới Chính Thức Tại Nhà Hàng';
-      if (recAddr) recAddr.textContent = `${venueName} — ${venueAddress}`;
-      if (recMap) recMap.href = mapsUrl;
-      if (recMapBtn) recMapBtn.textContent = `Chỉ Đường ${shortVenue}`;
-
-      // 8. Address Section
-      const addrVenue = document.getElementById('addressVenueName');
-      const addrMapLink = document.getElementById('addressMapLink');
-      if (addrVenue) addrVenue.textContent = venueName;
-      if (addrMapLink) addrMapLink.href = mapsUrl;
-
-      // 9. Bank Accounts & QR Codes
-      const tabGroomBtn = document.getElementById('tabGroomBtn');
-      const tabBrideBtn = document.getElementById('tabBrideBtn');
-      if (tabGroomBtn) tabGroomBtn.textContent = `CHÚ RỂ (${groomShort.toUpperCase()})`;
-      if (tabBrideBtn) tabBrideBtn.textContent = `CÔ DÂU (${brideShort.toUpperCase()})`;
-
-      const groomBankEl = document.getElementById('groomBankTitle');
-      const groomAccEl = document.getElementById('groomAccNumber');
-      const groomAccNameEl = document.getElementById('groomAccName');
-      const groomQrImg = document.getElementById('groomQrImg');
-
-      if (groomBankEl && data.groomBank) groomBankEl.textContent = data.groomBank;
-      if (groomAccEl && data.groomAccount) groomAccEl.textContent = data.groomAccount;
-      if (groomAccNameEl && data.groomAccountName) groomAccNameEl.textContent = data.groomAccountName.toUpperCase();
-      if (groomQrImg) {
-        if (data.groomQrImage && data.groomQrImage.trim()) {
-          groomQrImg.src = data.groomQrImage.trim();
-        } else if (data.groomAccount) {
-          const bin = data.groomBank?.toLowerCase().includes('vietcombank') ? '970436' : (data.groomBank?.toLowerCase().includes('bidv') ? '970418' : '970436');
-          groomQrImg.src = `https://api.vietqr.io/image/${bin}-${data.groomAccount}-compact2.png?amount=0&addInfo=Mung+cuoi+${encodeURIComponent(groomShort)}&accountName=${encodeURIComponent(data.groomAccountName || groomFull)}`;
-        }
-      }
-
-      const brideBankEl = document.getElementById('brideBankTitle');
-      const brideAccEl = document.getElementById('brideAccNumber');
-      const brideAccNameEl = document.getElementById('brideAccName');
-      const brideQrImg = document.getElementById('brideQrImg');
-
-      if (brideBankEl && data.brideBank) brideBankEl.textContent = data.brideBank;
-      if (brideAccEl && data.brideAccount) brideAccEl.textContent = data.brideAccount;
-      if (brideAccNameEl && data.brideAccountName) brideAccNameEl.textContent = data.brideAccountName.toUpperCase();
-      if (brideQrImg) {
-        if (data.brideQrImage && data.brideQrImage.trim()) {
-          brideQrImg.src = data.brideQrImage.trim();
-        } else if (data.brideAccount) {
-          const bin = data.brideBank?.toLowerCase().includes('bidv') ? '970418' : (data.brideBank?.toLowerCase().includes('vietcombank') ? '970436' : '970418');
-          brideQrImg.src = `https://api.vietqr.io/image/${bin}-${data.brideAccount}-compact2.png?amount=0&addInfo=Mung+cuoi+${encodeURIComponent(brideShort)}&accountName=${encodeURIComponent(data.brideAccountName || brideFull)}`;
-        }
-      }
-
-      // 10. Footer & Ending Couple Names
-      const footerNames = document.getElementById('footerCoupleNames');
-      if (footerNames) footerNames.textContent = `${groomShort} & ${brideShort}`;
-      const endNames = document.querySelector('.stt-ending-names');
-      if (endNames) endNames.textContent = `${groomShort} & ${brideShort}`;
-
-      // 11. STT Big Date Display (Ceremony & Reception)
-      let dayVal = '28';
-      let monthVal = 'THÁNG 11';
-      let dowVal = 'THỨ BẢY';
-      let yearVal = '2026';
-
-      try {
-        if (dateRaw && dateRaw.includes('-')) {
-          const parts = dateRaw.split('-');
-          if (parts.length === 3) {
-            const dt = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-            dayVal = String(parseInt(parts[2], 10));
-            monthVal = `THÁNG ${parseInt(parts[1], 10)}`;
-            yearVal = String(parts[0]);
-            const dows = ['CHỦ NHẬT', 'THỨ HAI', 'THỨ BA', 'THỨ TƯ', 'THỨ NĂM', 'THỨ SÁU', 'THỨ BẢY'];
-            dowVal = dows[dt.getDay()] || 'THỨ BẢY';
-          }
-        }
-      } catch (e) {}
-
-      document.querySelectorAll('.stt-big-day').forEach(el => el.textContent = dayVal);
-      document.querySelectorAll('.stt-month').forEach(el => el.textContent = monthVal);
-      document.querySelectorAll('.stt-dow').forEach(el => el.textContent = dowVal);
-      document.querySelectorAll('.stt-big-year').forEach(el => el.textContent = yearVal);
-
-      // Hero bar date display: e.g. NOVEMBER —— 28TH
-      const englishMonths = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
-      let englishMonth = 'NOVEMBER';
-      if (dateRaw && dateRaw.includes('-')) {
-        const mIdx = parseInt(dateRaw.split('-')[1], 10) - 1;
-        if (englishMonths[mIdx]) englishMonth = englishMonths[mIdx];
-      }
-      function getDaySuffix(d) {
-        if (d > 3 && d < 21) return 'TH';
-        switch (d % 10) {
-          case 1:  return 'ST';
-          case 2:  return 'ND';
-          case 3:  return 'RD';
-          default: return 'TH';
-        }
-      }
-      if (heroCallout) {
-        heroCallout.textContent = formattedDotDate;
-      }
-
-      // Update copy button data-acc attributes
-      const copyGroomBtn = document.getElementById('copyGroomAccBtn');
-      if (copyGroomBtn && data.groomAccount) copyGroomBtn.setAttribute('data-acc', data.groomAccount);
-      const copyBrideBtn = document.getElementById('copyBrideAccBtn');
-      if (copyBrideBtn && data.brideAccount) copyBrideBtn.setAttribute('data-acc', data.brideAccount);
-
-      // 12. Dynamic Contact Information in Contact Modal
-      const contactGroomName = document.getElementById('contactGroomName');
-      const contactGroomMeta = document.getElementById('contactGroomMeta');
-      const contactGroomCallBtn = document.getElementById('contactGroomCallBtn');
-      const groomPhone = data.groomPhone || '0988 888 888';
-      if (contactGroomName) contactGroomName.textContent = groomFull;
-      if (contactGroomMeta) contactGroomMeta.textContent = `Chú rể · ${groomPhone}`;
-      if (contactGroomCallBtn) contactGroomCallBtn.href = `tel:${groomPhone.replace(/\s+/g, '')}`;
-
-      const contactBrideName = document.getElementById('contactBrideName');
-      const contactBrideMeta = document.getElementById('contactBrideMeta');
-      const contactBrideCallBtn = document.getElementById('contactBrideCallBtn');
-      const bridePhone = data.bridePhone || '0977 777 777';
-      if (contactBrideName) contactBrideName.textContent = brideFull;
-      if (contactBrideMeta) contactBrideMeta.textContent = `Cô dâu · ${bridePhone}`;
-      if (contactBrideCallBtn) contactBrideCallBtn.href = `tel:${bridePhone.replace(/\s+/g, '')}`;
-
-      const contactGroomRepName = document.getElementById('contactGroomRepName');
-      const contactGroomRepMeta = document.getElementById('contactGroomRepMeta');
-      const contactGroomRepCallBtn = document.getElementById('contactGroomRepCallBtn');
-      const repGroomName = data.groomRepName || data.groomFather || 'Nguyễn Đơn Cương';
-      const repGroomRole = data.groomRepRole || 'Đại diện Nhà trai (Bố chú rể)';
-      const repGroomPhone = data.groomRepPhone || '0912 345 678';
-      if (contactGroomRepName) contactGroomRepName.textContent = repGroomName;
-      if (contactGroomRepMeta) contactGroomRepMeta.textContent = `${repGroomRole} · ${repGroomPhone}`;
-      if (contactGroomRepCallBtn) contactGroomRepCallBtn.href = `tel:${repGroomPhone.replace(/\s+/g, '')}`;
-
-      const contactBrideRepName = document.getElementById('contactBrideRepName');
-      const contactBrideRepMeta = document.getElementById('contactBrideRepMeta');
-      const contactBrideRepCallBtn = document.getElementById('contactBrideRepCallBtn');
-      const repBrideName = data.brideRepName || data.brideFather || 'Nguyễn Văn Nam';
-      const repBrideRole = data.brideRepRole || 'Đại diện Nhà gái (Bố cô dâu)';
-      const repBridePhone = data.brideRepPhone || '0987 654 321';
-      if (contactBrideRepName) contactBrideRepName.textContent = repBrideName;
-      if (contactBrideRepMeta) contactBrideRepMeta.textContent = `${repBrideRole} · ${repBridePhone}`;
-      if (contactBrideRepCallBtn) contactBrideRepCallBtn.href = `tel:${repBridePhone.replace(/\s+/g, '')}`;
-
-    } catch (err) {
-      console.warn('Wedding sync error:', err);
-    }
-  }
-
-  // Initial countdown kick-off with fallbacks while API loads
-  initCountdown('2026-11-28', '10:00');
-
-  // Trigger guest personalization & wedding sync
-  checkPersonalizedGuest();
-  syncWeddingData();
+  applyGuest();
 
   // --- INTRO ENVELOPE COVER ENGINE (MÀN HÌNH BÌA SONG HỶ XANH) ---
   const weddingIntroCover = document.getElementById('weddingIntroCover');
@@ -2384,6 +1574,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof launchConfetti === 'function') {
       launchConfetti();
     }
+
+    // Ghi nhận khách đã mở thiệp (chỉ khi có mã khách hợp lệ)
+    if (currentGuest) api.trackOpen(currentGuest.code);
 
     // 3. Trigger opening transition
     weddingIntroCover.classList.add('opening');
@@ -2468,49 +1661,32 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- CINELOVE TOOLBAR: LIKE BUTTON WITH LIVE COUNTER & GOOGLE SYNC ---
+
+  // --- THẢ TIM (đếm trong trình duyệt này) ---
   const likeBtn = document.getElementById('likeButton');
   const likeBadge = document.getElementById('likeCountBadge');
-  let currentLikes = parseInt(localStorage.getItem('cinelove_like_count') || '88', 10);
+  let currentLikes = 0;
+  try {
+    currentLikes = parseInt(localStorage.getItem('wedding_like_count') || '0', 10) || 0;
+  } catch (_) {}
   if (likeBadge) likeBadge.textContent = String(currentLikes);
-
-  // Fetch latest like count from server / Google database
-  fetch('/api/likes')
-    .then(r => r.json())
-    .then(data => {
-      if (data && data.success && typeof data.count === 'number') {
-        currentLikes = data.count;
-        localStorage.setItem('cinelove_like_count', String(currentLikes));
-        if (likeBadge) likeBadge.textContent = String(currentLikes);
-      }
-    })
-    .catch(() => {});
 
   if (likeBtn) {
     likeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       currentLikes += 1;
-      localStorage.setItem('cinelove_like_count', String(currentLikes));
+      try {
+        localStorage.setItem('wedding_like_count', String(currentLikes));
+      } catch (_) {}
       if (likeBadge) likeBadge.textContent = String(currentLikes);
-
-      // Heart burst
       shootHearts(4);
-
-      // Bounce like button
       likeBtn.style.transform = 'scale(1.25)';
-      setTimeout(() => likeBtn.style.transform = '', 180);
+      setTimeout(() => (likeBtn.style.transform = ''), 180);
       showToast('Cảm ơn bạn đã thả tim! ❤️');
-
-      // Persist to server and auto-sync to Google Drive / Sheet
-      fetch('/api/likes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ count: 1 })
-      }).catch(err => console.warn('Sync like error:', err));
     });
   }
 
-  // --- MODAL UTILITIES (Slide-up Bottom Sheets) ---
+  // --- BOTTOM SHEET ---
   function openSheet(modal) {
     if (!modal) return;
     modal.classList.add('open');
@@ -2523,16 +1699,21 @@ document.addEventListener('DOMContentLoaded', () => {
     modal.setAttribute('aria-hidden', 'true');
   }
 
-  // Close when clicking modal backdrop
-  document.querySelectorAll('.cl-bottom-sheet-backdrop').forEach(modal => {
+  document.querySelectorAll('.cl-bottom-sheet-backdrop').forEach((modal) => {
     modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        closeSheet(modal);
-      }
+      if (e.target === modal) closeSheet(modal);
     });
   });
 
-  // --- POPUP 1: WISH / SỔ LƯU BÚT MODAL ---
+  function setBusy(form, busy) {
+    const btn = form.querySelector('[type="submit"]');
+    if (btn) {
+      btn.disabled = busy;
+      btn.classList.toggle('is-busy', busy);
+    }
+  }
+
+  // --- GỬI LỜI CHÚC ---
   const wishModal = document.getElementById('wishModal');
   const openWishModalBtn = document.getElementById('openWishModalBtn');
   const closeWishModalBtn = document.getElementById('closeWishModalBtn');
@@ -2542,14 +1723,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const wishRelation = document.getElementById('wishRelation');
   const wishMessage = document.getElementById('wishMessage');
 
-  if (openWishModalBtn) {
-    openWishModalBtn.addEventListener('click', () => openSheet(wishModal));
-  }
-  if (closeWishModalBtn) {
-    closeWishModalBtn.addEventListener('click', () => closeSheet(wishModal));
-  }
+  if (openWishModalBtn) openWishModalBtn.addEventListener('click', () => openSheet(wishModal));
+  if (closeWishModalBtn) closeWishModalBtn.addEventListener('click', () => closeSheet(wishModal));
 
-  // Suggestion chips
   if (promptChips && wishMessage) {
     promptChips.addEventListener('click', (e) => {
       const chip = e.target.closest('.chip');
@@ -2563,117 +1739,85 @@ document.addEventListener('DOMContentLoaded', () => {
   if (wishForm) {
     wishForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const sender = wishSender.value.trim();
-      const relation = wishRelation.value.trim();
-      const message = wishMessage.value.trim();
+      const author = wishSender.value.trim().slice(0, 80);
+      const relation = wishRelation.value.trim().slice(0, 80);
+      const text = wishMessage.value.trim().slice(0, 500);
+      const hp = document.getElementById('wishHp')?.value || '';
 
-      if (!sender || !message) {
-        alert('Vui lòng điền tên và lời chúc của bạn!');
+      if (!author || !text) {
+        showToast('Vui lòng điền tên và lời chúc của bạn!');
         return;
       }
 
-      // Add to live Danmaku stream immediately
-      danmaku.addWish(sender, message);
-
-      // Save to BE API
-      try {
-        await fetch('/api/wishes', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            author: sender,
-            relation: relation,
-            text: message
-          })
-        });
-      } catch (err) {
-        console.warn('API wish save error:', err);
+      setBusy(wishForm, true);
+      const res = await api.sendWish({ code: currentGuest?.code || guestCode || '', author, relation, text, hp });
+      setBusy(wishForm, false);
+      if (!res || !res.success) {
+        showToast((res && res.message) || 'Chưa gửi được lời chúc, vui lòng thử lại.');
+        return;
       }
 
-      // Local storage fallback
-      try {
-        const stored = JSON.parse(localStorage.getItem('wedding_wishes') || '[]');
-        stored.unshift({ author: sender, relation, text: message, time: 'Vừa xong' });
-        localStorage.setItem('wedding_wishes', JSON.stringify(stored));
-      } catch (err) {
-        console.error(err);
-      }
-
-      // Celebrate
+      danmaku.addWish(author, text);
       launchConfetti();
       shootHearts(6);
       wishForm.reset();
+      renderGuest(config, currentGuest);
       closeSheet(wishModal);
       showToast('Lời chúc của bạn đã được gửi & bay lên màn hình thiệp cưới! ❤️');
     });
   }
 
-  // --- CHỨC NĂNG GỬI QUÀ MỪNG CƯỚI: CUỘN TRỰC TIẾP ĐẾN THÔNG TIN MỪNG CƯỚI (KHÔNG DÙNG POPUP) ---
+  // --- NÚT QUÀ: CUỘN ĐẾN PHẦN MỪNG CƯỚI ---
   const openGiftModalBtn = document.getElementById('openGiftModalBtn');
 
   function scrollToAccountSection(e) {
     if (e) e.preventDefault();
     const target = document.getElementById('accountSection');
-    if (!target) return;
+    if (!target || target.hidden) return;
 
-    // Tự động mở accordion Nhà trai & Nhà gái nếu đang đóng để khách thấy ngay
-    const accToggleGroom = document.getElementById('accToggleGroom');
-    const accBodyGroom = document.getElementById('accBodyGroom');
-    if (accToggleGroom && accBodyGroom && !accBodyGroom.classList.contains('show')) {
-      accToggleGroom.classList.add('active');
-      accBodyGroom.classList.add('show');
-    }
-
-    const accToggleBride = document.getElementById('accToggleBride');
-    const accBodyBride = document.getElementById('accBodyBride');
-    if (accToggleBride && accBodyBride && !accBodyBride.classList.contains('show')) {
-      accToggleBride.classList.add('active');
-      accBodyBride.classList.add('show');
-    }
+    // Mở hết các nhóm tài khoản để khách thấy ngay
+    document.querySelectorAll('#giftGroups .stt-acc-toggle').forEach((t) => {
+      t.classList.add('active');
+      if (t.nextElementSibling) t.nextElementSibling.classList.add('show');
+    });
 
     const mainScroll = document.getElementById('mainScrollContainer');
     if (mainScroll) {
-      const targetTop = target.offsetTop;
-      mainScroll.scrollTo({
-        top: Math.max(0, targetTop - 20),
-        behavior: 'smooth'
-      });
+      mainScroll.scrollTo({ top: Math.max(0, target.offsetTop - 20), behavior: 'smooth' });
     }
     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-    // Hiệu ứng phát sáng nhẹ báo hiệu vị trí thông tin mừng cưới
     target.classList.remove('account-section-pulse');
     void target.offsetWidth;
     target.classList.add('account-section-pulse');
-    setTimeout(() => {
-      target.classList.remove('account-section-pulse');
-    }, 2000);
+    setTimeout(() => target.classList.remove('account-section-pulse'), 2000);
   }
 
-  if (openGiftModalBtn) {
-    openGiftModalBtn.addEventListener('click', scrollToAccountSection);
-  }
+  if (openGiftModalBtn) openGiftModalBtn.addEventListener('click', scrollToAccountSection);
 
-  // Copy account number buttons
-  document.querySelectorAll('.btn-copy-acc').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const targetId = btn.getAttribute('data-target');
-      const targetEl = document.getElementById(targetId);
-      if (targetEl) {
-        const text = targetEl.textContent.trim();
-        navigator.clipboard.writeText(text).then(() => {
-          const original = btn.textContent;
-          btn.textContent = 'Đã chép!';
-          showToast(`Đã sao chép số tài khoản: ${text}`);
-          setTimeout(() => btn.textContent = original, 2000);
-        }).catch(() => {
-          showToast(`Số tài khoản: ${text}`);
-        });
+  // Accordion nhà trai / nhà gái + nút sao chép số tài khoản
+  const giftGroups = document.getElementById('giftGroups');
+  if (giftGroups) {
+    giftGroups.addEventListener('click', (e) => {
+      const toggle = e.target.closest('.stt-acc-toggle');
+      if (toggle) {
+        toggle.classList.toggle('active');
+        if (toggle.nextElementSibling) toggle.nextElementSibling.classList.toggle('show');
+        return;
+      }
+      const copyBtn = e.target.closest('.stt-copy-btn');
+      if (copyBtn) {
+        const acc = copyBtn.dataset.acc || '';
+        const who = copyBtn.dataset.owner ? ` ${copyBtn.dataset.owner.toLowerCase()}` : '';
+        Promise.resolve()
+          .then(() => navigator.clipboard.writeText(acc))
+          .then(() => showToast(`Đã sao chép STK${who}: ${acc}`))
+          .catch(() => showToast(`STK${who}: ${acc}`));
       }
     });
-  });
+  }
 
-  // --- POPUP 3: RSVP MODAL ---
+  // --- XÁC NHẬN THAM DỰ (RSVP) ---
   const rsvpModal = document.getElementById('rsvpModal');
   const triggerRsvpModalBtn = document.getElementById('triggerRsvpModalBtn');
   const closeRsvpModalBtn = document.getElementById('closeRsvpModalBtn');
@@ -2684,22 +1828,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const decStepBtn = document.getElementById('decStepBtn');
   const incStepBtn = document.getElementById('incStepBtn');
   const guestCountInput = document.getElementById('guestCount');
+  const maxGuests = () => parseInt(guestCountInput?.max || '4', 10) || 4;
 
-  if (triggerRsvpModalBtn) {
-    triggerRsvpModalBtn.addEventListener('click', () => openSheet(rsvpModal));
-  }
-  if (closeRsvpModalBtn) {
-    closeRsvpModalBtn.addEventListener('click', () => closeSheet(rsvpModal));
-  }
+  if (triggerRsvpModalBtn) triggerRsvpModalBtn.addEventListener('click', () => openSheet(rsvpModal));
+  if (closeRsvpModalBtn) closeRsvpModalBtn.addEventListener('click', () => closeSheet(rsvpModal));
 
-  // Radio Choices
   if (choiceYes && choiceNo) {
     choiceYes.addEventListener('click', () => {
       choiceYes.classList.add('active');
       choiceNo.classList.remove('active');
       if (guestCountRow) guestCountRow.style.display = 'block';
     });
-
     choiceNo.addEventListener('click', () => {
       choiceNo.classList.add('active');
       choiceYes.classList.remove('active');
@@ -2707,67 +1846,46 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Guest Stepper
   if (decStepBtn && incStepBtn && guestCountInput) {
     decStepBtn.addEventListener('click', () => {
-      let val = parseInt(guestCountInput.value, 10) || 1;
+      const val = parseInt(guestCountInput.value, 10) || 1;
       if (val > 1) guestCountInput.value = val - 1;
     });
-
     incStepBtn.addEventListener('click', () => {
-      let val = parseInt(guestCountInput.value, 10) || 1;
-      if (val < 10) guestCountInput.value = val + 1;
+      const val = parseInt(guestCountInput.value, 10) || 1;
+      if (val < maxGuests()) guestCountInput.value = val + 1;
     });
   }
 
   if (rsvpForm) {
     rsvpForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const guestName = document.getElementById('guestName').value.trim();
-      if (!guestName) {
-        alert('Vui lòng nhập họ và tên của quý khách!');
+      const name = document.getElementById('guestName').value.trim().slice(0, 80);
+      if (!name) {
+        showToast('Vui lòng nhập họ và tên của quý khách!');
         return;
       }
-
-      const guestSide = rsvpForm.querySelector('input[name="guestSide"]:checked')?.value || 'Nhà Trai';
+      const side = rsvpForm.querySelector('input[name="guestSide"]:checked')?.value || 'nha-trai';
       const willAttend = rsvpForm.querySelector('input[name="willAttend"]:checked')?.value === 'yes';
-      const count = willAttend ? (parseInt(guestCountInput.value, 10) || 1) : 0;
-      const notes = (document.getElementById('rsvpNotes')?.value || '').trim();
+      const guestCount = willAttend ? Math.min(maxGuests(), Math.max(1, parseInt(guestCountInput.value, 10) || 1)) : 0;
+      const notes = (document.getElementById('rsvpNotes')?.value || '').trim().slice(0, 500);
+      const hp = document.getElementById('rsvpHp')?.value || '';
 
-      // Post to BE API
-      try {
-        await fetch('/api/rsvp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: guestName,
-            side: guestSide,
-            willAttend,
-            guestCount: count,
-            guestCode: currentGuest?.code,
-            notes
-          })
-        });
-      } catch (err) {
-        console.warn('API RSVP save error:', err);
-      }
-
-      // Local storage fallback
-      try {
-        const stored = JSON.parse(localStorage.getItem('wedding_rsvps') || '[]');
-        stored.push({ name: guestName, side: guestSide, willAttend, guestCount: count, guestCode: currentGuest?.code, notes, timestamp: new Date().toISOString() });
-        localStorage.setItem('wedding_rsvps', JSON.stringify(stored));
-      } catch (err) {
-        console.error(err);
+      setBusy(rsvpForm, true);
+      const res = await api.sendRsvp({ code: currentGuest?.code || guestCode || '', name, side, willAttend, guestCount, notes, hp });
+      setBusy(rsvpForm, false);
+      if (!res || !res.success) {
+        showToast((res && res.message) || 'Chưa gửi được xác nhận, vui lòng thử lại.');
+        return;
       }
 
       launchConfetti();
       closeSheet(rsvpModal);
+      const dateText = document.getElementById('heroCalloutDate')?.textContent || '';
       if (willAttend) {
-        const weddingDateStr = document.getElementById('receptionDateDisplay')?.textContent || '28.11.2026';
-        showToast(`Cảm ơn ${guestName}! Hẹn gặp quý khách vào ngày ${weddingDateStr} ❤️`);
+        showToast(`Cảm ơn ${name}! Hẹn gặp quý khách${dateText ? ` vào ngày ${dateText}` : ''} ❤️`);
       } else {
-        showToast(`Cảm ơn ${guestName} đã phản hồi. Chúc bạn luôn an khang! 🌸`);
+        showToast(`Cảm ơn ${name} đã phản hồi. Chúc bạn luôn an khang! 🌸`);
       }
     });
   }
@@ -2964,6 +2082,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
   }
 
+
   // --- STT MODAL & ACCORDION & CONTACT INTERACTIONS ---
   const contactModal = document.getElementById('contactModal');
   const btnOpenContactModal = document.getElementById('btnOpenContactModal');
@@ -2975,49 +2094,6 @@ document.addEventListener('DOMContentLoaded', () => {
     closeContactModalBtn.addEventListener('click', () => closeSheet(contactModal));
   }
 
-  // Account section accordions
-  const accToggleGroom = document.getElementById('accToggleGroom');
-  const accBodyGroom = document.getElementById('accBodyGroom');
-  if (accToggleGroom && accBodyGroom) {
-    accToggleGroom.addEventListener('click', () => {
-      accToggleGroom.classList.toggle('active');
-      accBodyGroom.classList.toggle('show');
-    });
-  }
-
-  const accToggleBride = document.getElementById('accToggleBride');
-  const accBodyBride = document.getElementById('accBodyBride');
-  if (accToggleBride && accBodyBride) {
-    accToggleBride.addEventListener('click', () => {
-      accToggleBride.classList.toggle('active');
-      accBodyBride.classList.toggle('show');
-    });
-  }
-
-  // Copy buttons in Account section
-  const copyGroomAccBtn = document.getElementById('copyGroomAccBtn');
-  if (copyGroomAccBtn) {
-    copyGroomAccBtn.addEventListener('click', () => {
-      const acc = copyGroomAccBtn.getAttribute('data-acc') || '1018899888';
-      navigator.clipboard.writeText(acc).then(() => {
-        showToast(`Đã sao chép STK chú rể: ${acc}`);
-      }).catch(() => {
-        showToast(`STK chú rể: ${acc}`);
-      });
-    });
-  }
-
-  const copyBrideAccBtn = document.getElementById('copyBrideAccBtn');
-  if (copyBrideAccBtn) {
-    copyBrideAccBtn.addEventListener('click', () => {
-      const acc = copyBrideAccBtn.getAttribute('data-acc') || '68899887766';
-      navigator.clipboard.writeText(acc).then(() => {
-        showToast(`Đã sao chép STK cô dâu: ${acc}`);
-      }).catch(() => {
-        showToast(`STK cô dâu: ${acc}`);
-      });
-    });
-  }
 
   // --- DESKTOP QR BADGE CLOSE BUTTON ---
   const closeQrBadgeBtn = document.getElementById('closeQrBadgeBtn');
@@ -3062,7 +2138,6 @@ document.addEventListener('DOMContentLoaded', () => {
     .cl-calendar-card,
     .cl-events-section,
     .cl-event-card,
-    .coverflow-carousel-wrapper,
     .cl-dresscode-section,
     .cl-dresscode-card,
     .cl-address-section,
@@ -3130,7 +2205,6 @@ document.addEventListener('DOMContentLoaded', () => {
     .stt-profile-card,
     .stt-middle-photo-wrap,
     #inlineAlbumWrapper,
-    .stt-qr-box,
     .stt-ending-section
   `));
 

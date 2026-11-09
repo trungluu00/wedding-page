@@ -3,85 +3,62 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Thiệp Cưới Duy Phương &amp; Thùy Dương | CineLove Style</title>
-  <meta name="description" content="Thiệp cưới online phong cách CineLove hiện đại: Duy Phương & Thùy Dương. Trân trọng kính mời quý khách tham dự lễ cưới vào ngày 28.11.2026.">
-  <meta name="keywords" content="thiệp cưới cinelove, thiệp cưới online, duy phương thùy dương, đám cưới online">
-  
-  <!-- Open Graph / Facebook -->
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="Thiệp Cưới: Duy Phương &amp; Thùy Dương 囍 28.11.2026">
-  <meta property="og:description" content="Gửi đến bạn tấm thiệp cưới đầy yêu thương. Mong bạn và gia đình sẽ đến chung vui cùng chúng mình!">
-  <meta property="og:image" content="assets/images/pre-wedding/site/statement-couple.jpg">
-
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Be+Vietnam+Pro:ital,wght@0,200;0,300;0,400;0,500;0,600;1,300;1,400&family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="css/style.css">
+  <!-- Tiêu đề, mô tả, og:*, font và màu theme được build/wedding-plugin.js chèn vào đây từ wedding.config.js -->
+  <!--WEDDING_HEAD-->
+  <link rel="stylesheet" href="/css/style.css">
   <noscript><style>.stt-photo-reveal,.stt-photo-reveal img,.stt-ending-section.stt-photo-reveal .stt-ending-content{opacity:1!important;transform:none!important;clip-path:none!important;filter:none!important;}</style></noscript>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💍</text></svg>">
 </head>
 <body class="cinelove-body">
 
   <!-- ==============================================
-       0. WEDDING INTRO ENVELOPE COVER (MÀN HÌNH BÌA SONG HỶ XANH)
+       0. BÌA THƯ MỞ THIỆP
   =============================================== -->
-  <aside id="weddingIntroCover" class="wedding-intro-overlay" aria-label="Bìa thiệp cưới Song Hỷ">
-    <!-- Ambient Floating 囍 (Song Hỷ) Symbols & Soft Glow Lights -->
+  <aside id="weddingIntroCover" class="wedding-intro-overlay" data-section="cover" aria-label="Bìa thiệp cưới">
     <div class="intro-bg-ambient" aria-hidden="true">
-      <span class="ambient-xi xi-1">囍</span>
-      <span class="ambient-xi xi-2">囍</span>
-      <span class="ambient-xi xi-3">囍</span>
-      <span class="ambient-xi xi-4">囍</span>
-      <span class="ambient-xi xi-5">囍</span>
-      <span class="ambient-xi xi-6">囍</span>
-      <span class="ambient-xi xi-7">囍</span>
-      <span class="ambient-xi xi-8">囍</span>
+      <span class="ambient-xi xi-1"></span>
+      <span class="ambient-xi xi-2"></span>
+      <span class="ambient-xi xi-3"></span>
+      <span class="ambient-xi xi-4"></span>
+      <span class="ambient-xi xi-5"></span>
+      <span class="ambient-xi xi-6"></span>
+      <span class="ambient-xi xi-7"></span>
+      <span class="ambient-xi xi-8"></span>
       <div class="ambient-radial-glow glow-1"></div>
       <div class="ambient-radial-glow glow-2"></div>
     </div>
 
-    <!-- Center Luxury Invitation Card (Matches Reference Screenshot) -->
     <div class="intro-envelope-card" id="introEnvelopeCard">
-      <!-- Ornate Seal / Wax Monogram Emblem -->
       <div class="intro-seal-badge">
         <div class="seal-ring">
           <svg class="seal-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="50" cy="50" r="46" stroke="#B68246" stroke-width="2" stroke-dasharray="4 2"/>
-            <circle cx="50" cy="50" r="40" stroke="#E5BD82" stroke-width="1.5"/>
-            <text x="50%" y="56%" text-anchor="middle" dominant-baseline="middle" font-family="'Cinzel', serif" font-weight="700" font-size="30" fill="#B68246">囍</text>
+            <circle cx="50" cy="50" r="46" style="stroke: var(--c-accent)" stroke-width="2" stroke-dasharray="4 2"/>
+            <circle cx="50" cy="50" r="40" style="stroke: rgb(var(--c-accent-rgb) / 0.6)" stroke-width="1.5"/>
+            <text id="sealText" x="50%" y="56%" text-anchor="middle" dominant-baseline="middle" font-family="var(--font-serif)" font-weight="700" font-size="30" style="fill: var(--c-accent)"></text>
           </svg>
         </div>
       </div>
 
-      <!-- Couple Names -->
       <div class="intro-names-wrap">
-        <h2 class="intro-name" id="introGroomName">Duy Phương</h2>
+        <h2 class="intro-name" id="introGroomName"></h2>
         <span class="intro-amp">&amp;</span>
-        <h2 class="intro-name" id="introBrideName">Thùy Dương</h2>
+        <h2 class="intro-name" id="introBrideName"></h2>
       </div>
 
-      <!-- Ornate Separator Line -->
       <div class="intro-divider">
         <span class="div-line"></span>
         <span class="div-icon">❖</span>
         <span class="div-line"></span>
       </div>
 
-      <!-- Wedding Date -->
-      <div class="intro-date" id="introWeddingDate">28 tháng 11, 2026</div>
+      <div class="intro-date" id="introWeddingDate"></div>
+      <div class="intro-sub-greeting" id="introSubGreeting">Trân trọng kính mời</div>
 
-      <!-- Greeting -->
-      <div class="intro-sub-greeting" id="introSubGreeting">Thân Mời</div>
-
-      <!-- Open Invitation Button -->
       <button type="button" class="intro-open-btn" id="btnOpenInvitation" aria-label="Mở thiệp cưới">
         <span class="btn-open-text">Mở thiệp</span>
         <span class="btn-glow-pulse" aria-hidden="true"></span>
       </button>
 
-      <!-- Corner Ornaments -->
       <div class="envelope-corner top-left"></div>
       <div class="envelope-corner top-right"></div>
       <div class="envelope-corner bottom-left"></div>
@@ -89,16 +66,10 @@
     </div>
   </aside>
 
-  <!-- Desktop Backdrop Container -->
   <div class="desktop-backdrop">
-    
-    <!-- Phone Screen Mockup Container (Mobile First) -->
     <div class="phone-frame-wrapper" id="phoneWrapper">
 
-      <!-- ==============================================
-           1. TOP FIXED CONTROLS
-      =============================================== -->
-      <!-- Audio Toggle Button (CineLove style spinning vinyl with mute line) -->
+      <!-- 1. NÚT CỐ ĐỊNH -->
       <div id="audio-control-wrapper" class="audio-control-box" title="Bật / Tắt âm thanh">
         <button id="cineloveAudioToggle" class="audio-toggle mrotate" type="button" aria-label="Bật tắt nhạc">
           <div class="music-disc-icon">
@@ -111,329 +82,219 @@
         </button>
       </div>
 
-      <!-- Auto Scroll & Re-open Envelope Floating Buttons (Top Left) -->
       <div class="top-left-actions-group">
         <button class="auto-scroll-btn-pill" id="autoScrollToggleBtn" type="button" title="Tự động cuộn trang">
           <span class="btn-scroll-icon" id="scrollIcon">⏵</span>
           <span class="btn-scroll-text" id="scrollLabel">Tự cuộn</span>
         </button>
-
-        <button class="cover-reopen-btn-pill" id="reopenCoverBtn" type="button" title="Xem lại bìa thiệp">
+        <button class="cover-reopen-btn-pill" id="reopenCoverBtn" type="button" title="Xem lại bìa thiệp" data-section="cover">
           <span class="btn-cover-icon">✉</span>
           <span class="btn-cover-text">Bìa thiệp</span>
         </button>
       </div>
 
-      <!-- Autoplay Prompt Pill (if initial cold load is blocked by browser) -->
-      <button class="cl-autoplay-prompt-pill" id="audioAutoplayPrompt" type="button" style="display: none;" title="Bật nhạc Lễ Đường">
+      <button class="cl-autoplay-prompt-pill" id="audioAutoplayPrompt" type="button" style="display: none;" title="Bật nhạc">
         <span class="prompt-icon">🎵</span>
-        <span class="prompt-text">Chạm màn hình để nghe bài hát Lễ Đường</span>
+        <span class="prompt-text" id="autoplayPromptText">Chạm màn hình để nghe nhạc</span>
       </button>
 
-      <!-- Canvas for Floating Hearts & Confetti -->
-      <div id="cinelove-animation-box" class="animation-overlay">
-        <!-- Floating hearts spawned here -->
-      </div>
+      <div id="cinelove-animation-box" class="animation-overlay"></div>
 
-      <!-- ==============================================
-           2. MAIN SCROLLABLE INVITATION CONTENT
-      =============================================== -->
+      <!-- 2. NỘI DUNG CUỘN — thứ tự các khối được sắp lại theo `sections` trong wedding.config.js -->
       <div class="main-scroll-container" id="mainScrollContainer">
 
-        <!-- SECTION 1: EDITORIAL HERO (INVITÉ) -->
-        <section class="stt-hero-section" id="heroSection">
+        <audio id="weddingBgMusic" preload="auto" loop playsinline></audio>
+
+        <!-- HERO -->
+        <section class="stt-hero-section" id="heroSection" data-section="hero">
           <div class="stt-hero-header">
             <h1 class="stt-hero-invite">INVITÉ</h1>
           </div>
           <div class="stt-hero-image-wrap stt-photo-reveal">
-            <img src="assets/images/pre-wedding/site/hero-couple.jpg" alt="Duy Phương &amp; Thùy Dương" class="stt-hero-img" loading="eager">
+            <img id="heroImg" alt="" class="stt-hero-img" loading="eager">
           </div>
           <div class="stt-hero-bar">
             <div class="stt-hero-names">
-              <span id="heroGroomName">DUY PHƯƠNG</span>
+              <span id="heroGroomName"></span>
               <span class="stt-heart" aria-hidden="true">♥</span>
-              <span id="heroBrideName">THÙY DƯƠNG</span>
+              <span id="heroBrideName"></span>
             </div>
             <div class="stt-hero-date">
-              <span id="heroCalloutDate">28.11.2026</span>
+              <span id="heroCalloutDate"></span>
             </div>
           </div>
         </section>
 
-        <!-- SECTION 2: INVITATION STATEMENT (CHÚNG CON KẾT HÔN) -->
-        <section class="stt-statement-section" id="statementSection">
+        <!-- LỜI MỜI -->
+        <section class="stt-statement-section" id="statementSection" data-section="invitation">
           <div class="stt-section-tag">INVITATION</div>
           <h2 class="stt-section-title">Chúng con kết hôn</h2>
-          
+
           <div class="stt-personalized-box" id="letterPersonalizedBox" style="display: none;">
             <span>Trân trọng kính gửi:</span>
-            <strong id="letterGuestName">Quý khách</strong>
+            <strong id="letterGuestName"></strong>
           </div>
 
-          <div class="stt-statement-text">
-            <p>Kính mời quý khách đến dự</p>
-            <p>lễ thành hôn của hai con</p>
-            <p>và cùng chia sẻ niềm hạnh phúc trọn vẹn nhất.</p>
-          </div>
+          <div class="stt-statement-text" id="statementText"></div>
+          <p class="stt-couple-quote" id="coupleQuote"></p>
 
           <div class="stt-statement-img-wrap stt-photo-reveal">
-            <img src="assets/images/pre-wedding/site/statement-couple.jpg" alt="Duy Phương &amp; Thùy Dương nắm tay" loading="eager" decoding="async">
+            <img id="statementImg" alt="" loading="eager" decoding="async">
           </div>
 
           <div class="stt-contact-action">
             <button type="button" class="stt-pill-btn" id="btnOpenContactModal">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.840 12.840 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
               <span>Liên hệ</span>
             </button>
           </div>
         </section>
 
-        <!-- Background Audio Element: LỄ ĐƯỜNG (Kai Đinh) -->
-        <audio id="weddingBgMusic" src="assets/audio/le-duong.mp3" preload="auto" loop autoplay playsinline></audio>
-
-        <!-- SECTION 3: WEDDING INFO & PARENTS (THÔNG TIN LỄ CƯỚI) -->
-        <section class="stt-info-section" id="infoSection">
+        <!-- THÔNG TIN LỄ CƯỚI & BỐ MẸ HAI BÊN -->
+        <section class="stt-info-section" id="infoSection" data-section="invitation">
           <div class="stt-section-tag">WEDDING INFO</div>
           <h2 class="stt-section-title">THÔNG TIN LỄ CƯỚI</h2>
 
-          <!-- Parents two-column grid with vertical hairline -->
           <div class="stt-parents-grid">
             <div class="stt-parent-col">
-              <span class="stt-parent-label">Ông Bà</span>
-              <h4 class="stt-parent-name" id="familyGroomFather">Nguyễn Đơn Cương</h4>
-              <h4 class="stt-parent-name" id="familyGroomMother">Nguyễn Thị Hương</h4>
-              <p class="stt-parent-addr" id="familyGroomAddress">Tô Hiệu, Bình Gia, Lạng Sơn</p>
+              <span class="stt-parent-label">Nhà trai</span>
+              <h4 class="stt-parent-name" id="familyGroomFather"></h4>
+              <h4 class="stt-parent-name" id="familyGroomMother"></h4>
+              <p class="stt-parent-addr" id="familyGroomAddress"></p>
             </div>
             <div class="stt-parents-vdiv"></div>
             <div class="stt-parent-col">
-              <span class="stt-parent-label">Ông Bà</span>
-              <h4 class="stt-parent-name" id="familyBrideFather">Nguyễn Văn Nam</h4>
-              <h4 class="stt-parent-name" id="familyBrideMother">Phạm Thị Hà</h4>
-              <p class="stt-parent-addr" id="familyBrideAddress">Tô Hiệu, Bình Gia, Lạng Sơn</p>
+              <span class="stt-parent-label">Nhà gái</span>
+              <h4 class="stt-parent-name" id="familyBrideFather"></h4>
+              <h4 class="stt-parent-name" id="familyBrideMother"></h4>
+              <p class="stt-parent-addr" id="familyBrideAddress"></p>
             </div>
           </div>
 
           <div class="stt-announce-block">
             <span class="stt-announce-line1">TRÂN TRỌNG BÁO TIN</span>
             <span class="stt-announce-line2">LỄ THÀNH HÔN CỦA CON CHÚNG TÔI</span>
-
             <div class="stt-couple-announce">
               <div class="stt-person-announce">
-                <h3 class="stt-announce-name" id="profileGroomName">Nguyễn Duy Phương</h3>
-                <span class="stt-announce-role">TRƯỞNG NAM</span>
+                <h3 class="stt-announce-name" id="profileGroomName"></h3>
+                <span class="stt-announce-role" id="groomRole"></span>
               </div>
               <div class="stt-announce-amp">&amp;</div>
               <div class="stt-person-announce">
-                <h3 class="stt-announce-name" id="profileBrideName">Lê Thùy Dương</h3>
-                <span class="stt-announce-role">ÚT NỮ</span>
+                <h3 class="stt-announce-name" id="profileBrideName"></h3>
+                <span class="stt-announce-role" id="brideRole"></span>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- SECTION 4: PROFILE (GIỚI THIỆU HAI BÊN) -->
-        <section class="stt-profile-section" id="profileSection">
+        <!-- CHÂN DUNG HAI BẠN -->
+        <section class="stt-profile-section" id="profileSection" data-section="couple">
           <div class="stt-section-tag">PROFILE</div>
           <h2 class="stt-section-title">Giới thiệu hai bên</h2>
-
           <div class="stt-profile-grid">
-            <!-- Groom Card -->
             <div class="stt-profile-card stt-photo-reveal">
               <div class="stt-profile-img-wrap">
-                <img src="assets/images/pre-wedding/site/groom-portrait.jpg" alt="Chú rể Nguyễn Duy Phương" loading="eager" decoding="async">
+                <img id="groomPortrait" alt="" loading="eager" decoding="async">
               </div>
               <span class="stt-profile-role">Chú rể</span>
-              <h4 class="stt-profile-name">Nguyễn Duy Phương</h4>
+              <h4 class="stt-profile-name" id="groomProfileName"></h4>
+              <p class="stt-profile-bio" id="groomBio"></p>
             </div>
-
-            <!-- Bride Card -->
             <div class="stt-profile-card stt-photo-reveal">
               <div class="stt-profile-img-wrap">
-                <img src="assets/images/pre-wedding/site/bride-portrait.jpg" alt="Cô dâu Lê Thùy Dương" loading="eager" decoding="async">
+                <img id="bridePortrait" alt="" loading="eager" decoding="async">
               </div>
               <span class="stt-profile-role">Cô dâu</span>
-              <h4 class="stt-profile-name">Lê Thùy Dương</h4>
+              <h4 class="stt-profile-name" id="brideProfileName"></h4>
+              <p class="stt-profile-bio" id="brideBio"></p>
             </div>
           </div>
         </section>
 
-        <!-- SECTION 5: WEDDING INVITATION & LOCATION (TRÂN TRỌNG KÍNH MỜI) -->
-        <section class="stt-invitation-dates-section" id="invitationDatesSection">
+        <!-- SỰ KIỆN: NGÀY + ĐỊA ĐIỂM -->
+        <section class="stt-invitation-dates-section" id="invitationDatesSection" data-section="events">
           <div class="stt-section-tag">WEDDING INVITATION</div>
           <h2 class="stt-section-title">Trân trọng kính mời</h2>
-
-          <!-- Ngày cưới (hiển thị một lần duy nhất) -->
           <div class="stt-inv-date">
             <div class="stt-big-date-row">
-              <span class="stt-dow">THỨ BẢY</span>
-              <span class="stt-big-day">28</span>
-              <span class="stt-month">THÁNG 11</span>
+              <span class="stt-dow" id="bigDow"></span>
+              <span class="stt-big-day" id="bigDay"></span>
+              <span class="stt-month" id="bigMonth"></span>
             </div>
-            <div class="stt-big-year">2026</div>
-            <p class="stt-lunar-note" id="ceremonyLunarDisplay">(Nhằm ngày 20 tháng 10 năm Bính Ngọ)</p>
+            <div class="stt-big-year" id="bigYear"></div>
+            <p class="stt-lunar-note" id="ceremonyLunarDisplay"></p>
           </div>
-
-          <!-- Địa điểm tổ chức (gộp trực tiếp ngay dưới ngày cưới) -->
-          <div class="stt-loc-cards-wrap" id="locationSection">
-            <!-- Location 1: Lễ Thành Hôn -->
-            <div class="stt-loc-card">
-              <h3 class="stt-loc-name" id="ceremonyTitleDisplay">Lễ Thành Hôn tại Tư Gia Nhà Trai</h3>
-              <p class="stt-loc-time">Thời gian: 08:30 — 10:00</p>
-              <p class="stt-loc-addr" id="ceremonyLocationAddress">Tư Gia Nhà Trai — Số nhà 97, Thôn Tô Hiệu, Xã Bình Gia, Tỉnh Lạng Sơn</p>
-              <a href="https://maps.google.com/?q=T%C3%B4+Hi%E1%BB%87u,+B%C3%ACnh+Gia,+L%E1%BA%A1ng+S%C6%A1n" id="ceremonyMapLink" target="_blank" rel="noopener noreferrer" class="stt-loc-btn">
-                Chỉ đường - Lễ Thành Hôn
-              </a>
-            </div>
-
-            <!-- Location 2: Tiệc Cưới -->
-            <div class="stt-loc-card">
-              <h3 class="stt-loc-name" id="receptionVenueName">Tiệc Cưới Chính Thức Tại Nhà Hàng</h3>
-              <p class="stt-loc-time">Thời gian: 10:00 — 13:00</p>
-              <p class="stt-loc-addr" id="receptionVenueAddress">Nhà Hàng Điệp Hưởng — Thôn 6B, Xã Bình Gia, Tỉnh Lạng Sơn</p>
-              <a href="https://maps.app.goo.gl/gn848PEtsFr638i27" id="receptionMapLink" target="_blank" rel="noopener noreferrer" class="stt-loc-btn">
-                Chỉ đường - Tiệc Cưới
-              </a>
-            </div>
-          </div>
+          <div class="stt-loc-cards-wrap" id="eventCards"></div>
         </section>
 
-        <!-- SECTION 6: MIDDLE PHOTO 1 (FULL BLEED) -->
-        <section class="stt-middle-photo-section">
+        <!-- ẢNH GIỮA 1 -->
+        <section class="stt-middle-photo-section" data-section="photo" data-after="events" data-photo-index="0">
           <div class="stt-middle-photo-wrap stt-photo-reveal">
-            <img src="assets/images/pre-wedding/site/middle-photo-1.jpg" alt="Khoảnh khắc ngọt ngào Duy Phương &amp; Thùy Dương" loading="eager" decoding="async">
+            <img alt="" loading="eager" decoding="async">
           </div>
         </section>
 
-        <!-- SECTION 7: WEDDING TIMELINE (LỊCH TRÌNH NGÀY CƯỚI) -->
-        <section class="stt-timeline-section" id="timelineSection">
+        <!-- LỊCH TRÌNH -->
+        <section class="stt-timeline-section" id="timelineSection" data-section="schedule">
           <div class="stt-section-tag">WEDDING TIMELINE</div>
           <h2 class="stt-section-title">Lịch trình ngày cưới</h2>
-
-          <div class="stt-timeline-row">
-            <!-- Step 1 -->
-            <div class="stt-timeline-step">
-              <div class="stt-step-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-              </div>
-              <span class="stt-step-time">08:30</span>
-              <span class="stt-step-title">ĐÓN KHÁCH</span>
-            </div>
-
-            <!-- Step 2 -->
-            <div class="stt-timeline-step">
-              <div class="stt-step-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="14" r="5"/><circle cx="16" cy="14" r="5"/><path d="M12 5l1.5 3h-3z"/></svg>
-              </div>
-              <span class="stt-step-time">09:00</span>
-              <span class="stt-step-title">LỄ THÀNH HÔN</span>
-            </div>
-
-            <!-- Step 3 -->
-            <div class="stt-timeline-step">
-              <div class="stt-step-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-              </div>
-              <span class="stt-step-time">09:30</span>
-              <span class="stt-step-title">CHỤP ẢNH LƯU NIỆM</span>
-            </div>
-
-            <!-- Step 4 -->
-            <div class="stt-timeline-step">
-              <div class="stt-step-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 22h8M12 15v7M17 3l-5 7-5-7h10z"/></svg>
-              </div>
-              <span class="stt-step-time">10:00</span>
-              <span class="stt-step-title">KHAI TIỆC</span>
-            </div>
-          </div>
+          <div class="stt-timeline-row" id="timelineRow"></div>
         </section>
 
-        <!-- SECTION 8: CALENDAR & D-DAY COUNTDOWN -->
-        <section class="stt-calendar-countdown-section" id="calendarSection">
-          <div class="stt-cal-header-date" id="calHeaderDateDisplay">28.11.2026</div>
-          <div class="stt-cal-header-sub" id="calHeaderSubDisplay">Thứ Bảy, 10:00 AM</div>
-
-          <!-- Calendar Grid Card -->
+        <!-- LỊCH & ĐẾM NGƯỢC -->
+        <section class="stt-calendar-countdown-section" id="calendarSection" data-section="countdown">
+          <div class="stt-cal-header-date" id="calHeaderDateDisplay"></div>
+          <div class="stt-cal-header-sub" id="calHeaderSubDisplay"></div>
           <div class="stt-calendar-wrap">
             <div class="stt-cal-grid-header">
               <span>CN</span><span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span>
             </div>
-            <div class="stt-cal-days-matrix" id="calDaysMatrix">
-              <!-- Dynamically populated by renderCalendar -->
-            </div>
+            <div class="stt-cal-days-matrix" id="calDaysMatrix"></div>
           </div>
-
-          <!-- D-Day Minimalist Countdown -->
           <div class="stt-countdown-wrap">
-            <div class="stt-cd-unit">
-              <span class="stt-cd-lbl">ngày</span>
-              <span class="stt-cd-num" id="daysVal">00</span>
-            </div>
+            <div class="stt-cd-unit"><span class="stt-cd-lbl">ngày</span><span class="stt-cd-num" id="daysVal">00</span></div>
             <span class="stt-cd-dot">·</span>
-            <div class="stt-cd-unit">
-              <span class="stt-cd-lbl">giờ</span>
-              <span class="stt-cd-num" id="hoursVal">00</span>
-            </div>
+            <div class="stt-cd-unit"><span class="stt-cd-lbl">giờ</span><span class="stt-cd-num" id="hoursVal">00</span></div>
             <span class="stt-cd-dot">·</span>
-            <div class="stt-cd-unit">
-              <span class="stt-cd-lbl">phút</span>
-              <span class="stt-cd-num" id="minutesVal">00</span>
-            </div>
+            <div class="stt-cd-unit"><span class="stt-cd-lbl">phút</span><span class="stt-cd-num" id="minutesVal">00</span></div>
             <span class="stt-cd-dot">·</span>
-            <div class="stt-cd-unit">
-              <span class="stt-cd-lbl">giây</span>
-              <span class="stt-cd-num" id="secondsVal">00</span>
-            </div>
+            <div class="stt-cd-unit"><span class="stt-cd-lbl">giây</span><span class="stt-cd-num" id="secondsVal">00</span></div>
           </div>
-
           <p class="stt-countdown-note" id="countdownSummaryNote">
-            Còn <strong id="cdRemainingDays">33</strong> ngày nữa là đến đám cưới của Duy Phương và Thùy Dương.
+            Còn <strong id="cdRemainingDays">0</strong> ngày nữa là đến đám cưới của <span id="cdCoupleNames"></span>.
           </p>
         </section>
 
-        <!-- SECTION 9: MIDDLE PHOTO 2 -->
-        <section class="stt-middle-photo-section">
+        <!-- ẢNH GIỮA 2 -->
+        <section class="stt-middle-photo-section" data-section="photo" data-after="countdown" data-photo-index="1">
           <div class="stt-middle-photo-wrap stt-photo-reveal">
-            <img src="assets/images/pre-wedding/site/middle-photo-2.jpg" alt="Khoảnh khắc dưới khăn voan cô dâu" loading="eager" decoding="async">
+            <img alt="" loading="eager" decoding="async">
           </div>
         </section>
 
-        <!-- SECTION 10: WEDDING PHOTOBOOK ALBUM (LẬT TỪNG TRANG ALBUM PRE-WEDDING) -->
-        <section class="stt-gallery-section alb-section" id="gallerySection">
+        <!-- ALBUM LẬT TRANG 3D -->
+        <section class="stt-gallery-section alb-section" id="gallerySection" data-section="album">
           <div class="stt-section-tag">WEDDING PHOTOBOOK</div>
           <h2 class="stt-section-title">Album ảnh cưới</h2>
-
-          <!-- Interactive 3D Page-Flipping Photobook -->
           <div class="alb-wrapper stt-photo-reveal" id="inlineAlbumWrapper">
-            <!-- Top micro status bar -->
             <div class="alb-top-bar">
-              <span class="alb-chapter-badge" id="inlineAlbumTitle">You Are My Destiny</span>
+              <span class="alb-chapter-badge" id="inlineAlbumTitle"></span>
               <button type="button" class="alb-expand-icon-btn" id="albOpenTheaterBtnTop" title="Xem album cỡ lớn" aria-label="Xem album cỡ lớn">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
               </button>
             </div>
-
-            <!-- 3D Book Stage -->
             <div class="alb-stage" id="inlineAlbumStage">
               <div class="alb-book-viewport" id="inlineAlbumViewport">
-                <div class="alb-book is-cover-front" id="inlineAlbumBook" role="region" aria-label="Album ảnh cưới mở từng trang 3D">
-                  <!-- Book board shadow -->
+                <div class="alb-book is-cover-front" id="inlineAlbumBook" role="region" aria-label="Album ảnh cưới lật từng trang">
                   <div class="alb-board-shadow shadow-left"></div>
                   <div class="alb-board-shadow shadow-right"></div>
-
-                  <!-- Dynamic stacked page edges -->
                   <div class="alb-paper-stack stack-left" id="inlineStackLeft"></div>
                   <div class="alb-paper-stack stack-right" id="inlineStackRight"></div>
-
-                  <!-- Center spine groove -->
                   <div class="alb-spine-crease" id="inlineSpineCrease"></div>
-
-                  <!-- 13 flip leaves rendered dynamically by WeddingFlipbook -->
                   <div class="alb-leaves-layer" id="inlineAlbumLeaves"></div>
                 </div>
               </div>
-
-              <!-- Subtle open-cover prompt overlay when closed on front cover -->
               <button type="button" class="alb-cover-cta" id="inlineCoverCta">
                 <span>📖 Chạm hoặc vuốt mở từng trang</span>
               </button>
@@ -441,121 +302,62 @@
           </div>
         </section>
 
-        <!-- SECTION 12: MUSIC MELODY (LỄ ĐƯỜNG) -->
-        <section class="stt-music-section" id="musicSection">
+        <!-- NHẠC + LỜI CHẠY -->
+        <section class="stt-music-section" id="musicSection" data-section="music">
           <div class="stt-section-tag">WEDDING MELODY</div>
-          <h2 class="stt-section-title">Lễ Đường</h2>
-          
+          <h2 class="stt-section-title" id="musicSectionTitle"></h2>
           <div class="stt-music-card">
             <div class="stt-music-header">
               <div class="stt-disc-icon" id="musicCardDisc">♪</div>
               <div class="stt-music-info">
-                <span class="stt-song-title">Lễ Đường</span>
-                <span class="stt-song-artist">Kai Đinh · Lời tự động chạy</span>
+                <span class="stt-song-title" id="songTitle"></span>
+                <span class="stt-song-artist" id="songArtist"></span>
               </div>
               <button type="button" class="stt-music-btn" id="musicCardPlayBtn">
                 <span id="playPillIcon">⏸</span>
                 <span id="playPillText">Đang phát</span>
               </button>
             </div>
-
             <div class="cl-lyrics-container" id="lyricsContainer">
               <div class="cl-lyrics-list" id="lyricsList"></div>
             </div>
-
             <div class="music-progress-bar-wrap" id="musicProgressBar">
               <div class="music-progress-fill" id="musicProgressFill"></div>
             </div>
           </div>
         </section>
 
-        <!-- SECTION 13: ACCOUNT (MỪNG CƯỚI) -->
-        <section class="stt-account-section" id="accountSection">
+        <!-- MỪNG CƯỚI -->
+        <section class="stt-account-section" id="accountSection" data-section="gifts">
           <div class="stt-section-tag">ACCOUNT</div>
           <h2 class="stt-section-title">Mừng cưới</h2>
           <p class="stt-account-desc">
             Sự hiện diện của bạn là món quà ý nghĩa nhất.<br>
             Nếu muốn gửi lời chúc mừng, xin vui lòng chuyển khoản:
           </p>
-
-          <!-- Accordion -->
-          <div class="stt-accordion-wrap">
-            <!-- Group 1: Nhà trai -->
-            <div class="stt-acc-group" id="accGroupGroom">
-              <button type="button" class="stt-acc-toggle active" id="accToggleGroom">
-                <span>Nhà trai</span>
-                <svg class="stt-acc-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
-              </button>
-              <div class="stt-acc-body show" id="accBodyGroom">
-                <div class="stt-acc-card">
-                  <div class="stt-acc-meta">
-                    <span class="stt-bank-name" id="groomBankTitle">Vietcombank - CN Lạng Sơn</span>
-                    <strong class="stt-acc-num" id="groomAccNumber">1018899888</strong>
-                    <span class="stt-acc-holder" id="groomAccName">NGUYEN DUY PHUONG</span>
-                  </div>
-                  <div class="stt-qr-box stt-photo-reveal">
-                    <img id="groomQrImg" src="https://api.vietqr.io/image/970436-1018899888-compact2.png?amount=0&amp;addInfo=Mung+cuoi+Duy+Phuong&amp;accountName=NGUYEN+DUY+PHUONG" alt="VietQR Chú Rể" loading="lazy">
-                  </div>
-                  <button type="button" class="stt-copy-btn" id="copyGroomAccBtn" data-acc="1018899888">
-                    Sao chép số tài khoản
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Group 2: Nhà gái -->
-            <div class="stt-acc-group" id="accGroupBride">
-              <button type="button" class="stt-acc-toggle active" id="accToggleBride">
-                <span>Nhà gái</span>
-                <svg class="stt-acc-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
-              </button>
-              <div class="stt-acc-body show" id="accBodyBride">
-                <div class="stt-acc-card">
-                  <div class="stt-acc-meta">
-                    <span class="stt-bank-name" id="brideBankTitle">BIDV - CN Lạng Sơn</span>
-                    <strong class="stt-acc-num" id="brideAccNumber">68899887766</strong>
-                    <span class="stt-acc-holder" id="brideAccName">LE THUY DUONG</span>
-                  </div>
-                  <div class="stt-qr-box stt-photo-reveal">
-                    <img id="brideQrImg" src="https://api.vietqr.io/image/970418-68899887766-compact2.png?amount=0&amp;addInfo=Mung+cuoi+Thuy+Duong&amp;accountName=LE+THUY+DUONG" alt="VietQR Cô Dâu" loading="lazy">
-                  </div>
-                  <button type="button" class="stt-copy-btn" id="copyBrideAccBtn" data-acc="68899887766">
-                    Sao chép số tài khoản
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+          <div class="stt-accordion-wrap" id="giftGroups"></div>
         </section>
 
-        <!-- SECTION 14: RSVP (XÁC NHẬN THAM DỰ) -->
-        <section class="stt-rsvp-section" id="rsvpSection">
+        <!-- XÁC NHẬN THAM DỰ -->
+        <section class="stt-rsvp-section" id="rsvpSection" data-section="rsvp">
           <div class="stt-section-tag">R.S.V.P.</div>
           <h2 class="stt-section-title">Xác nhận tham dự</h2>
-          <p class="stt-rsvp-desc">
-            Vui lòng xác nhận trước ngày cưới để Duy Phương &amp; Thùy Dương chuẩn bị đón tiếp chu đáo nhất.
-          </p>
-
+          <p class="stt-rsvp-desc" id="rsvpDesc"></p>
           <button type="button" class="stt-pill-btn primary" id="triggerRsvpModalBtn">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
             <span>Gửi xác nhận</span>
           </button>
         </section>
 
-        <!-- SECTION 16: ENDING PHOTO & THANK YOU (WITH LOVE) -->
-        <footer class="stt-ending-section stt-photo-reveal">
+        <!-- ẢNH KẾT & LỜI CẢM ƠN -->
+        <footer class="stt-ending-section stt-photo-reveal" data-section="ending">
           <div class="stt-ending-photo-wrap">
-            <img src="assets/images/pre-wedding/site/ending-couple.jpg" alt="Duy Phương &amp; Thùy Dương" class="stt-ending-img" loading="eager" decoding="async">
+            <img id="endingImg" alt="" class="stt-ending-img" loading="eager" decoding="async">
             <div class="stt-ending-overlay">
               <div class="stt-ending-content">
-                <p class="stt-ending-p">Cảm ơn bạn đã ghé thăm tấm thiệp nhỏ này.</p>
-                <p class="stt-ending-p">Sự hiện diện và lời chúc của bạn<br>là món quà ý nghĩa nhất với chúng mình.</p>
+                <div id="thankYouText"></div>
                 <div class="stt-ending-withlove">With love,</div>
-                <h3 class="stt-ending-names">Duy Phương &amp; Thùy Dương</h3>
-                
-                <div class="stt-credits-wrap">
-                  <span class="stt-credits-text">Thiệp thiết kế và tạo bởi Leo Nguyen</span>
-                </div>
+                <h3 class="stt-ending-names" id="endingNames"></h3>
               </div>
             </div>
           </div>
@@ -563,125 +365,96 @@
 
       </div> <!-- /main-scroll-container -->
 
-      <!-- ==============================================
-           3. CINELOVE FLOATING DANMAKU BLESSINGS
-           (Lời chúc bay lơ lửng góc dưới trái)
-      =============================================== -->
-      <div id="blessing-box" class="cl-blessing-danmaku-container" aria-hidden="true">
-        <!-- Blessing bubbles fly up smoothly here -->
-      </div>
+      <!-- 3. LỜI CHÚC BAY -->
+      <div id="blessing-box" class="cl-blessing-danmaku-container" data-section="wishes" aria-hidden="true"></div>
 
-      <!-- ==============================================
-           4. CINELOVE FLOATING BOTTOM TOOLBAR
-      =============================================== -->
+      <!-- 4. THANH CÔNG CỤ DƯỚI -->
       <nav id="cinelove-toolbar" class="cl-bottom-toolbar" aria-label="Thanh công cụ tương tác">
         <div class="toolbar-inner">
-          
-          <!-- Left: Send Wish Input Trigger -->
-          <button class="message-box-button" id="openWishModalBtn" type="button">
+          <button class="message-box-button" id="openWishModalBtn" type="button" data-section="wishes">
             <span class="btn-text">Gửi lời chúc...</span>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           </button>
-
-          <!-- Right: Interactive Buttons -->
           <div class="toolbar-right">
-            <!-- Shoot Hearts Button (Bắn tim) -->
             <button class="cl-tool-btn heart-shoot-btn" id="shootHeartsBtn" type="button" title="Bắn tim chúc mừng">
               <span class="btn-icon">💖</span>
               <span class="btn-text">Bắn tim</span>
             </button>
-
-            <!-- Gift Button (Bouncing gift box) -->
-            <button class="cl-tool-btn gift-btn" id="openGiftModalBtn" type="button" title="Gửi quà mừng cưới">
+            <button class="cl-tool-btn gift-btn" id="openGiftModalBtn" type="button" title="Mừng cưới" data-section="gifts">
               <div class="gift-icon-bounce">🎁</div>
             </button>
-
-            <!-- Like Heart Button with Counter -->
             <button class="cl-tool-btn like-btn" id="likeButton" type="button" title="Thả tim">
               <span class="like-heart">❤</span>
-              <span class="like-count" id="likeCountBadge">88</span>
+              <span class="like-count" id="likeCountBadge">0</span>
             </button>
           </div>
-
         </div>
       </nav>
 
-      <!-- Watermark Badge on the right border -->
-      <div class="cinelove-vertical-watermark">
-        <span>Made with CineLove</span>
-      </div>
-
     </div> <!-- /phone-frame-wrapper -->
 
-    <!-- Desktop Floating QR Code Badge (Matches CineLove Desktop View) -->
+    <!-- QR xem trên điện thoại (chỉ hiện trên màn hình lớn) -->
     <aside class="desktop-qr-card" aria-label="Quét mã QR để xem trên điện thoại">
       <button class="btn-close-qr" id="closeQrBadgeBtn" aria-label="Ẩn mã QR">&times;</button>
       <div class="qr-image-wrapper">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://localhost:5173/&color=19381C" alt="Mã QR xem trên điện thoại" class="qr-code-img">
+        <img id="desktopQrImg" alt="Mã QR xem trên điện thoại" class="qr-code-img">
       </div>
       <p class="qr-caption">Quét mã QR để xem trên điện thoại</p>
     </aside>
 
   </div> <!-- /desktop-backdrop -->
 
-  <!-- ==============================================
-       5. CINELOVE BOTTOM SHEET POPUPS / MODALS
-  =============================================== -->
+  <!-- 5. BOTTOM SHEETS -->
 
-  <!-- POPUP 1: WISH / SỔ LƯU BÚT MODAL -->
+  <!-- GỬI LỜI CHÚC -->
   <div id="wishModal" class="cl-bottom-sheet-backdrop" aria-hidden="true" role="dialog">
     <div class="cl-bottom-sheet-box">
-      <button class="cl-sheet-close" id="closeWishModalBtn">&times;</button>
+      <button class="cl-sheet-close" id="closeWishModalBtn" aria-label="Đóng">&times;</button>
       <div class="cl-sheet-head">
         <h3>Gửi Lời Chúc Mừng</h3>
         <p>Lời chúc của bạn sẽ xuất hiện trên màn hình thiệp cưới</p>
       </div>
-
-      <!-- Quick Suggestion Chips -->
       <div class="cl-quick-chips" id="promptChips">
         <button type="button" class="chip" data-text="Chúc hai bạn trăm năm hòa hợp, vạn sự cát tường!">Trăm năm hòa hợp</button>
         <button type="button" class="chip" data-text="Mãi mãi hạnh phúc bên nhau nhé hai bạn ơi!">Mãi mãi hạnh phúc</button>
-        <button type="button" class="chip" data-text="Chúc anh chị sớm đón thiên thần nhỏ đáng yêu!">Sớm có quý tử</button>
-        <button type="button" class="chip" data-text="Xứng lứa vừa đôi! Chúc đôi bạn trẻ luôn yêu như ngày đầu.">Xứng lứa vừa đôi</button>
+        <button type="button" class="chip" data-text="Chúc hai bạn sớm đón thiên thần nhỏ đáng yêu!">Sớm có thiên thần nhỏ</button>
+        <button type="button" class="chip" data-text="Xứng lứa vừa đôi! Chúc hai bạn luôn yêu nhau như ngày đầu.">Xứng lứa vừa đôi</button>
       </div>
-
-      <form id="wishForm" class="cl-sheet-form">
+      <form id="wishForm" class="cl-sheet-form" autocomplete="on">
+        <!-- Ô bẫy bot: người thật không thấy, không điền -->
+        <input type="text" name="website" id="wishHp" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
         <div class="input-row">
-          <input type="text" id="wishSender" placeholder="Tên hoặc biệt danh của bạn *" required>
-          <input type="text" id="wishRelation" placeholder="Bạn chú rể / Bạn cô dâu...">
+          <input type="text" id="wishSender" placeholder="Tên hoặc biệt danh của bạn *" maxlength="80" required>
+          <input type="text" id="wishRelation" placeholder="Bạn chú rể / Bạn cô dâu..." maxlength="80">
         </div>
-        <textarea id="wishMessage" rows="3" placeholder="Viết lời chúc yêu thương của bạn ở đây..." required></textarea>
-        <button type="submit" class="btn-sheet-submit">
-          GỬI LỜI CHÚC YÊU THƯƠNG ❤
-        </button>
+        <textarea id="wishMessage" rows="3" placeholder="Viết lời chúc yêu thương của bạn ở đây..." maxlength="500" required></textarea>
+        <button type="submit" class="btn-sheet-submit">GỬI LỜI CHÚC YÊU THƯƠNG ❤</button>
       </form>
     </div>
   </div>
 
-  <!-- POPUP 3: RSVP MODAL -->
+  <!-- XÁC NHẬN THAM DỰ -->
   <div id="rsvpModal" class="cl-bottom-sheet-backdrop" aria-hidden="true" role="dialog">
     <div class="cl-bottom-sheet-box">
-      <button class="cl-sheet-close" id="closeRsvpModalBtn">&times;</button>
+      <button class="cl-sheet-close" id="closeRsvpModalBtn" aria-label="Đóng">&times;</button>
       <div class="cl-sheet-head">
         <h3>Xác Nhận Tham Dự</h3>
-        <p>Xin vui lòng phản hồi trước ngày 20.11.2026 để chuẩn bị chu đáo</p>
+        <p id="rsvpDeadlineText">Xin vui lòng phản hồi sớm để chúng mình chuẩn bị chu đáo</p>
       </div>
-
       <form id="rsvpForm" class="cl-sheet-form">
+        <input type="text" name="website" id="rsvpHp" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
         <div class="form-field">
-          <label>Họ và tên của quý khách *</label>
-          <input type="text" id="guestName" placeholder="Ví dụ: Anh Nguyễn Văn An" required>
+          <label for="guestName">Họ và tên của quý khách *</label>
+          <input type="text" id="guestName" placeholder="Ví dụ: Anh Nguyễn Văn An" maxlength="80" required>
         </div>
-
         <div class="form-field">
           <label>Khách mời của ai?</label>
           <div class="side-options">
-            <label class="side-btn"><input type="radio" name="guestSide" value="Nhà Trai" checked><span>Nhà Trai</span></label>
-            <label class="side-btn"><input type="radio" name="guestSide" value="Nhà Gái"><span>Nhà Gái</span></label>
-            <label class="side-btn"><input type="radio" name="guestSide" value="Bạn Chung"><span>Bạn Cả Hai</span></label>
+            <label class="side-btn"><input type="radio" name="guestSide" value="nha-trai" checked><span>Nhà Trai</span></label>
+            <label class="side-btn"><input type="radio" name="guestSide" value="nha-gai"><span>Nhà Gái</span></label>
+            <label class="side-btn"><input type="radio" name="guestSide" value="ban-chung"><span>Bạn Cả Hai</span></label>
           </div>
         </div>
-
         <div class="form-field">
           <label>Quý khách sẽ tham dự chứ?</label>
           <div class="attend-options">
@@ -695,81 +468,45 @@
             </label>
           </div>
         </div>
-
-        <div id="rsvpPersonalizedBadge" style="display: none; background: rgba(182, 130, 70, 0.12); border-left: 3px solid #B68246; padding: 8px 12px; border-radius: 6px; font-size: 0.82rem; color: #5C4030; margin-bottom: 12px;">
+        <div id="rsvpPersonalizedBadge" class="rsvp-personal-badge" style="display: none;">
           💌 Thiệp mời riêng: <strong id="rsvpGuestTitle"></strong>
         </div>
-
         <div class="form-field" id="guestCountRow">
-          <label>Số lượng người đi cùng</label>
+          <label>Số người tham dự (tính cả bạn)</label>
           <div class="stepper-wrap">
-            <button type="button" class="btn-step" id="decStepBtn">-</button>
-            <input type="number" id="guestCount" value="1" min="1" max="10" readonly>
-            <button type="button" class="btn-step" id="incStepBtn">+</button>
+            <button type="button" class="btn-step" id="decStepBtn" aria-label="Bớt">-</button>
+            <input type="number" id="guestCount" value="1" min="1" max="4" readonly>
+            <button type="button" class="btn-step" id="incStepBtn" aria-label="Thêm">+</button>
           </div>
         </div>
-
         <div class="form-field">
-          <label>Lời nhắn gửi dâu rể (Tùy chọn)</label>
-          <textarea id="rsvpNotes" rows="2" placeholder="Ví dụ: Chúc mừng hai bạn, mình sẽ đến đúng giờ nhé!" style="width: 100%; border: 1px solid #dcd7ce; border-radius: 8px; padding: 8px 12px; font-size: 0.85rem; font-family: inherit; resize: vertical;"></textarea>
+          <label for="rsvpNotes">Lời nhắn gửi dâu rể (Tùy chọn)</label>
+          <textarea id="rsvpNotes" class="rsvp-notes" rows="2" maxlength="500" placeholder="Ví dụ: Chúc mừng hai bạn, mình sẽ đến đúng giờ nhé!"></textarea>
         </div>
-
-        <button type="submit" class="btn-sheet-submit">
-          GỬI XÁC NHẬN THAM DỰ 💌
-        </button>
+        <button type="submit" class="btn-sheet-submit">GỬI XÁC NHẬN THAM DỰ 💌</button>
       </form>
     </div>
   </div>
 
-  <!-- POPUP: CONTACT MODAL (LIÊN HỆ) -->
+  <!-- LIÊN HỆ -->
   <div id="contactModal" class="cl-bottom-sheet-backdrop" aria-hidden="true" role="dialog">
     <div class="cl-bottom-sheet-box">
-      <button class="cl-sheet-close" id="closeContactModalBtn">&times;</button>
+      <button class="cl-sheet-close" id="closeContactModalBtn" aria-label="Đóng">&times;</button>
       <div class="cl-sheet-head">
         <span class="head-emoji">📞</span>
         <h3>Thông Tin Liên Hệ</h3>
         <p>Liên hệ trực tiếp với cô dâu, chú rể và hai bên gia đình</p>
       </div>
-
-      <div class="stt-contact-list">
-        <div class="stt-contact-item" id="itemContactGroom">
-          <div class="stt-contact-info">
-            <strong id="contactGroomName">Nguyễn Duy Phương</strong>
-            <span id="contactGroomMeta">Chú rể · 0988 888 888</span>
-          </div>
-          <a href="tel:0988888888" id="contactGroomCallBtn" class="stt-call-btn">Gọi ngay</a>
-        </div>
-        <div class="stt-contact-item" id="itemContactBride">
-          <div class="stt-contact-info">
-            <strong id="contactBrideName">Lê Thùy Dương</strong>
-            <span id="contactBrideMeta">Cô dâu · 0977 777 777</span>
-          </div>
-          <a href="tel:0977777777" id="contactBrideCallBtn" class="stt-call-btn">Gọi ngay</a>
-        </div>
-        <div class="stt-contact-item" id="itemContactGroomRep">
-          <div class="stt-contact-info">
-            <strong id="contactGroomRepName">Nguyễn Đơn Cương</strong>
-            <span id="contactGroomRepMeta">Đại diện Nhà trai (Bố chú rể) · 0912 345 678</span>
-          </div>
-          <a href="tel:0912345678" id="contactGroomRepCallBtn" class="stt-call-btn">Gọi ngay</a>
-        </div>
-        <div class="stt-contact-item" id="itemContactBrideRep">
-          <div class="stt-contact-info">
-            <strong id="contactBrideRepName">Nguyễn Văn Nam</strong>
-            <span id="contactBrideRepMeta">Đại diện Nhà gái (Bố cô dâu) · 0987 654 321</span>
-          </div>
-          <a href="tel:0987654321" id="contactBrideRepCallBtn" class="stt-call-btn">Gọi ngay</a>
-        </div>
-      </div>
+      <div class="stt-contact-list" id="contactList"></div>
     </div>
   </div>
 
-  <!-- POPUP 4A: FULLSCREEN 3D ALBUM THEATER MODAL -->
+  <!-- ALBUM TOÀN MÀN HÌNH -->
   <div id="albumTheaterModal" class="alb-theater-modal" aria-hidden="true" role="dialog" aria-label="Xem album ảnh cưới toàn màn hình">
     <div class="alb-theater-header">
       <div class="alb-theater-title-wrap">
-        <span class="alb-theater-eyebrow">THE WEDDING PHOTOBOOK · DUY PHƯƠNG &amp; THÙY DƯƠNG</span>
-        <strong class="alb-theater-chapter" id="theaterAlbumTitle">You Are My Destiny</strong>
+        <span class="alb-theater-eyebrow" id="theaterEyebrow"></span>
+        <strong class="alb-theater-chapter" id="theaterAlbumTitle"></strong>
       </div>
       <div class="alb-theater-head-actions">
         <button type="button" class="alb-theater-pill" id="theaterAlbAutoBtn" title="Tự động lật trang">
@@ -783,7 +520,6 @@
         <button type="button" class="alb-theater-close" id="theaterAlbCloseBtn" aria-label="Đóng album">&times;</button>
       </div>
     </div>
-
     <div class="alb-theater-body">
       <div class="alb-theater-stage">
         <div class="alb-book-viewport alb-theater-viewport" id="theaterAlbumViewport">
@@ -798,29 +534,26 @@
         </div>
       </div>
     </div>
-
     <div class="alb-theater-footer">
-      <div class="alb-theater-counter" id="theaterAlbCounter">Bìa trước · 12 trang đôi · Chạm trang hoặc vuốt ngang để lật</div>
+      <div class="alb-theater-counter" id="theaterAlbCounter"></div>
       <div class="alb-thumb-strip alb-theater-thumbs" id="theaterAlbThumbStrip"></div>
     </div>
   </div>
 
-  <!-- POPUP 4B: FULLSCREEN SINGLE-PAGE ZOOM LIGHTBOX -->
+  <!-- PHÓNG TO MỘT TRANG -->
   <div id="lightboxModal" class="lightbox-modal" aria-hidden="true" role="dialog">
     <button class="lightbox-close" id="lightboxCloseBtn" aria-label="Đóng">&times;</button>
     <button class="lightbox-nav prev" id="lightboxPrevBtn" aria-label="Trang trước">&#10094;</button>
     <button class="lightbox-nav next" id="lightboxNextBtn" aria-label="Trang sau">&#10095;</button>
     <div class="lightbox-content">
-      <img src="" alt="" id="lightboxImg" class="lightbox-img">
+      <img src="data:," alt="" id="lightboxImg" class="lightbox-img">
       <p id="lightboxCaption" class="lightbox-caption"></p>
       <span id="lightboxCounter" class="lightbox-counter"></span>
     </div>
   </div>
 
-  <!-- Toast Notification -->
   <div id="toastNotification" class="toast-box" aria-live="polite"></div>
 
-  <!-- Scripts -->
-  <script type="module" src="js/main.js"></script>
+  <script type="module" src="/js/main.js"></script>
 </body>
 </html>
