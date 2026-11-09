@@ -1381,38 +1381,68 @@ html, body {
    13. CINELOVE DANMAKU BLESSINGS BOX (LỜI CHÚC BAY)
    ========================================================================== */
 #blessing-box {
+  /* Feed lời chúc: mỗi bong bóng định vị tuyệt đối, JS dịch bằng transform */
   position: absolute;
-  bottom: 70px;
   left: 12px;
-  width: 260px;
-  height: 160px;
+  bottom: calc(62px + 12px);
+  width: min(250px, 66%);
+  height: 132px;
   z-index: 990;
   pointer-events: none;
   overflow: hidden;
-  display: flex;
-  flex-direction: column-reverse;
-  gap: 5px;
+  contain: layout paint;
 }
 
 .danmaku-item {
-  background: rgb(var(--c-accent-rgb) / 0.78);
-  backdrop-filter: blur(4px);
-  color: #FFFFFF;
-  font-size: 11px;
-  padding: 4px 10px;
-  border-radius: 12px;
-  width: fit-content;
-  max-width: 95%;
-  line-height: 1.35;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  animation: floatDanmaku 6.5s ease-out forwards;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  max-width: 100%;
+  width: max-content;
+  background: rgb(var(--c-surface-rgb) / 0.96);
+  border: 1px solid var(--c-line);
+  color: var(--c-text);
+  font-size: 11.5px;
+  line-height: 1.4;
+  padding: 5px 11px;
+  border-radius: 12px 12px 12px 4px;
+  box-shadow: 0 3px 10px rgb(var(--c-text-rgb) / 0.12);
+  opacity: 0;
+  /* Bong bóng mới hiện tại chỗ (không trồi từ dưới), chờ 0.22s cho các bong bóng cũ dịch lên xong */
+  transform: translate3d(0, 0, 0) scale(0.96);
+  transform-origin: left bottom;
+  transition: transform 0.45s cubic-bezier(0.22, 0.8, 0.3, 1), opacity 0.35s ease 0.22s;
+  will-change: transform, opacity;
 }
 
-@keyframes floatDanmaku {
-  0% { transform: translateY(20px); opacity: 0; }
-  10% { transform: translateY(0); opacity: 1; }
-  75% { opacity: 0.95; }
-  100% { transform: translateY(-70px); opacity: 0; }
+.danmaku-item b {
+  color: var(--c-strong);
+  font-weight: 600;
+}
+
+.danmaku-item.is-user {
+  background: rgb(var(--c-primary-rgb) / 0.96);
+  border-color: var(--c-primary);
+  color: var(--c-on-primary);
+}
+
+.danmaku-item.is-user b {
+  color: var(--c-on-primary);
+}
+
+.danmaku-item.is-in {
+  opacity: 1;
+}
+
+.danmaku-item.is-out {
+  opacity: 0;
+  transition-delay: 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .danmaku-item {
+    transition: opacity 0.3s ease;
+  }
 }
 
 /* ==========================================================================
@@ -2038,24 +2068,29 @@ html, body {
 
 /* Toast */
 .toast-box {
+  /* Đặt phía trên, tránh thanh công cụ dưới và khối lời chúc */
   position: fixed;
-  bottom: 24px;
+  top: calc(60px + env(safe-area-inset-top, 0px));
   left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  background: rgb(var(--c-strong-rgb) / 0.95);
-  backdrop-filter: blur(8px);
-  color: #FFFFFF;
-  padding: 10px 20px;
+  max-width: min(440px, calc(100vw - 32px));
+  width: max-content;
+  text-align: center;
+  transform: translate3d(-50%, -12px, 0);
+  background: rgb(var(--c-strong-rgb) / 0.96);
+  color: var(--c-on-primary);
+  padding: 10px 18px;
   border-radius: 20px;
   font-size: 0.82rem;
+  line-height: 1.4;
+  box-shadow: 0 6px 18px rgb(var(--c-text-rgb) / 0.2);
   z-index: 10002;
   pointer-events: none;
   opacity: 0;
-  transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
 .toast-box.show {
-  transform: translateX(-50%) translateY(0);
+  transform: translate3d(-50%, 0, 0);
   opacity: 1;
 }
 

@@ -542,89 +542,144 @@ class AutoScrollEngine {
 
 
 // =============================================================================
-// 3. LỜI CHÚC BAY (DANMAKU)
+// 3. LỜI CHÚC BAY (DANMAKU) — dạng feed chat: tối đa 3 bong bóng, bong bóng mới
+//    hiện ở dưới, các bong bóng cũ trượt lên đúng chiều cao của nó (chỉ animate
+//    transform/opacity, không reflow), cái trên cùng mờ dần rồi mới gỡ.
 // =============================================================================
 const SAMPLE_WISHES = [
-  'Trăm năm hạnh phúc, mãi ngọt ngào! 🌸',
-  'Chúc hai bạn xứng đôi vừa lứa, bạc đầu răng long ❤️',
-  'Chúc mừng hạnh phúc! 囍',
-  'Mãi yêu nhau như ngày đầu nhé 💐',
-  'Vạn sự như ý, gia đạo an khang ✨',
+  { author: '', text: 'Trăm năm hạnh phúc, mãi ngọt ngào! 🌸' },
+  { author: '', text: 'Chúc hai bạn xứng đôi vừa lứa, bạc đầu răng long ❤️' },
+  { author: '', text: 'Chúc mừng hạnh phúc! 囍' },
+  { author: '', text: 'Mãi yêu nhau như ngày đầu nhé 💐' },
+  { author: '', text: 'Vạn sự như ý, gia đạo an khang ✨' },
 ];
 
 class DanmakuEngine {
   constructor(containerId = 'blessing-box', { enabled = true } = {}) {
     this.container = document.getElementById(containerId);
     this.enabled = enabled && !!this.container && !this.container.hidden;
-    this.wishesPool = [];
+    this.pool = [];
+    this.poolIndex = 0;
+    this.items = []; // bong bóng đang hiện, cũ → mới
+    this.maxVisible = 3;
+    this.gap = 6;
+    this.lifetime = 9000; // ms mỗi bong bóng
+    this.interval = 3600; // ms giữa hai bong bóng
     this.timer = null;
-    // Màu bong bóng theo theme (biến CSS do plugin sinh ra)
-    this.colors = [
-      'rgb(var(--c-primary-rgb) / 0.85)',
-      'rgb(var(--c-accent-rgb) / 0.88)',
-      'rgb(var(--c-strong-rgb) / 0.85)',
-      'rgb(var(--c-accent-strong-rgb) / 0.85)',
-      'rgb(var(--c-muted-rgb) / 0.85)',
-    ];
+    this.reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.init();
   }
 
   init() {
     if (!this.enabled) return;
+    // Chỉ một engine cho mỗi khung (tránh hai vòng lặp chạy song song làm bong bóng chồng nhau)
+    if (this.container.__danmaku) this.container.__danmaku.destroy();
+    this.container.__danmaku = this;
     this.loadWishes();
-    setTimeout(() => this.spawnBubble(), 1200);
-    this.startLoop();
+    // Dừng hẳn khi tab ẩn (tránh dồn nhiều bong bóng khi quay lại)
+    this.onVisibility = () => {
+      if (document.hidden) this.stopLoop();
+      else this.startLoop(1500);
+    };
+    document.addEventListener('visibilitychange', this.onVisibility);
+    this.startLoop(1500);
   }
 
   async loadWishes() {
     const list = await api.fetchWishes();
-    const real = list.filter((w) => w && w.author && w.text).map((w) => `${w.author}: ${w.text}`);
+    const real = list.filter((w) => w && w.author && w.text).map((w) => ({ author: String(w.author), text: String(w.text) }));
     // Chưa có lời chúc thật thì hiện vài câu chúc chung (không gắn tên người)
-    this.wishesPool = real.length ? real : [...SAMPLE_WISHES];
+    this.pool = real.length ? real : SAMPLE_WISHES.slice();
+    this.poolIndex = Math.floor(Math.random() * this.pool.length);
   }
 
-  startLoop() {
-    const nextInterval = Math.floor(Math.random() * 1000 + 3600);
+  /** Không chạy khi bìa thư đang mở, đang mở bottom sheet / album / ảnh phóng to. */
+  isPaused() {
+    if (document.hidden) return true;
+    const cover = document.getElementById('weddingIntroCover');
+    if (cover && cover.style.display !== 'none' && !cover.hidden) return true;
+    return !!document.querySelector('.cl-bottom-sheet-backdrop.open, .alb-theater-modal.open, .lightbox-modal.open');
+  }
+
+  startLoop(delay = this.interval) {
+    this.stopLoop();
     this.timer = setTimeout(() => {
-      this.spawnBubble();
-      this.startLoop();
-    }, nextInterval);
+      this.timer = null;
+      if (!this.isPaused()) this.spawnNext();
+      this.startLoop(this.reduceMotion ? this.interval * 1.6 : this.interval + Math.random() * 900);
+    }, delay);
   }
 
-  spawnBubble(customText = null, isUser = false) {
-    if (!this.enabled) return;
-    const pool = this.wishesPool.length ? this.wishesPool : SAMPLE_WISHES;
-    const text = customText || pool[Math.floor(Math.random() * pool.length)];
+  stopLoop() {
+    if (this.timer) clearTimeout(this.timer);
+    this.timer = null;
+  }
+
+  destroy() {
+    this.stopLoop();
+    this.enabled = false;
+    document.removeEventListener('visibilitychange', this.onVisibility);
+    this.items.forEach((it) => clearTimeout(it.timer));
+    this.items = [];
+    this.container.replaceChildren();
+  }
+
+  spawnNext() {
+    const pool = this.pool.length ? this.pool : SAMPLE_WISHES;
+    this.poolIndex = (this.poolIndex + 1) % pool.length;
+    this.spawnBubble(pool[this.poolIndex], false);
+  }
+
+  spawnBubble(wish, isUser = false) {
+    if (!this.enabled || !wish) return;
     const bubble = document.createElement('div');
-    bubble.className = 'danmaku-item';
-
-    if (isUser) {
-      bubble.style.background = 'linear-gradient(135deg, var(--c-accent), var(--c-primary))';
-      bubble.style.fontWeight = '500';
-      bubble.style.boxShadow = '0 4px 15px rgb(var(--c-accent-rgb) / 0.4)';
+    bubble.className = isUser ? 'danmaku-item is-user' : 'danmaku-item';
+    if (wish.author) {
+      const b = document.createElement('b');
+      b.textContent = wish.author;
+      bubble.append(b, document.createTextNode(` · ${wish.text}`));
     } else {
-      bubble.style.background = this.colors[Math.floor(Math.random() * this.colors.length)];
+      bubble.textContent = wish.text;
     }
-
-    bubble.textContent = text;
     this.container.appendChild(bubble);
 
-    while (this.container.children.length > 4) {
-      this.container.removeChild(this.container.firstChild);
-    }
+    const entry = { el: bubble, height: bubble.offsetHeight, timer: null };
+    this.items.push(entry);
+    entry.timer = setTimeout(() => this.removeItem(entry), this.lifetime);
 
-    setTimeout(() => {
-      if (bubble.parentNode === this.container) {
-        this.container.removeChild(bubble);
-      }
-    }, 6600);
+    // Quá số lượng: cái cũ nhất mờ dần rồi gỡ
+    while (this.items.length > this.maxVisible) this.removeItem(this.items[0]);
+
+    // offsetHeight ở trên đã chốt trạng thái ban đầu (mờ, lệch xuống 14px),
+    // nên đổi class/transform ngay bây giờ sẽ chạy transition mượt.
+    bubble.classList.add('is-in');
+    this.layout();
+  }
+
+  layout() {
+    let y = 0;
+    for (let i = this.items.length - 1; i >= 0; i--) {
+      const it = this.items[i];
+      it.el.style.transform = `translate3d(0, ${-y}px, 0)`;
+      y += it.height + this.gap;
+    }
+  }
+
+  removeItem(entry) {
+    const idx = this.items.indexOf(entry);
+    if (idx === -1) return;
+    this.items.splice(idx, 1);
+    clearTimeout(entry.timer);
+    entry.el.classList.add('is-out');
+    setTimeout(() => entry.el.remove(), 450);
+    this.layout();
   }
 
   addWish(author, text) {
-    const wishStr = `${author}: ${text}`;
-    if (this.wishesPool.every((w) => SAMPLE_WISHES.includes(w))) this.wishesPool = [];
-    this.wishesPool.unshift(wishStr);
-    this.spawnBubble(wishStr, true);
+    const wish = { author, text };
+    if (this.pool.every((w) => !w.author)) this.pool = [];
+    this.pool.push(wish);
+    this.spawnBubble(wish, true);
   }
 }
 
@@ -675,6 +730,8 @@ const ALBUM = buildAlbum(config.album?.leaves || []);
 const ALBUM_LEAVES = ALBUM.leaves;
 const ALBUM_SPREAD_META = ALBUM.spreads;
 const ALBUM_SINGLE_PAGES = ALBUM.pages;
+// Mỗi trang album chiếm ~nửa khung; trình duyệt chọn cỡ ảnh theo đó (màn retina tự lấy cỡ lớn hơn)
+const ALBUM_PAGE_SIZES = '(max-width: 500px) 50vw, (orientation: landscape) 34vw, 50vw';
 
 let flipAudioCtx = null;
 let lastFlipAudioTime = 0;
@@ -780,9 +837,12 @@ class WeddingFlipbook {
       const frontImg = document.createElement('img');
       frontImg.alt = leaf.frontAlt || `Trang album`;
       frontImg.draggable = false;
+      if (leaf.frontSrcset) frontImg.sizes = ALBUM_PAGE_SIZES;
       if (idx <= 2) {
+        if (leaf.frontSrcset) frontImg.srcset = leaf.frontSrcset;
         frontImg.src = leaf.front;
       } else {
+        if (leaf.frontSrcset) frontImg.dataset.srcset = leaf.frontSrcset;
         frontImg.dataset.src = leaf.front;
       }
       const frontShade = document.createElement('div');
@@ -799,9 +859,12 @@ class WeddingFlipbook {
       const backImg = document.createElement('img');
       backImg.alt = leaf.backAlt || `Trang album`;
       backImg.draggable = false;
+      if (leaf.backSrcset) backImg.sizes = ALBUM_PAGE_SIZES;
       if (idx <= 2) {
+        if (leaf.backSrcset) backImg.srcset = leaf.backSrcset;
         backImg.src = leaf.back;
       } else {
+        if (leaf.backSrcset) backImg.dataset.srcset = leaf.backSrcset;
         backImg.dataset.src = leaf.back;
       }
       const backShade = document.createElement('div');
@@ -1144,6 +1207,10 @@ class WeddingFlipbook {
     const leaf = this.leafEls[idx];
     if (!leaf) return;
     leaf.querySelectorAll('img[data-src]').forEach(img => {
+      if (img.dataset.srcset) {
+        img.srcset = img.dataset.srcset;
+        img.removeAttribute('data-srcset');
+      }
       img.src = img.dataset.src;
       img.removeAttribute('data-src');
     });
@@ -1497,13 +1564,17 @@ function launchConfetti() {
 // =============================================================================
 // 7. TOAST NOTIFICATION UTILITY
 // =============================================================================
+let toastTimer = null;
 function showToast(message) {
   const toast = document.getElementById('toastNotification');
   if (!toast) return;
+  // Thông báo mới thay thông báo cũ; hủy hẹn giờ cũ để không tắt sớm thông báo mới
+  if (toastTimer) clearTimeout(toastTimer);
   toast.textContent = message;
   toast.classList.add('show');
-  setTimeout(() => {
+  toastTimer = setTimeout(() => {
     toast.classList.remove('show');
+    toastTimer = null;
   }, 3000);
 }
 
