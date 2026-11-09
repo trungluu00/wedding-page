@@ -299,7 +299,12 @@ function setupDatabase() {
       ['ban-lan', 'Lan', 'Bạn', 'nha-gai', 'ban-be', '', 'Khách mẫu — xóa khi dùng thật'],
     ]);
   }
-  SpreadsheetApp.getUi().alert('Đã tạo xong các sheet. Nhớ điền tên miền vào CauHinh!B1 rồi triển khai Web App.');
+  var msg = 'Đã tạo xong các sheet. Nhớ điền tên miền vào CauHinh!B1 rồi triển khai Web App.';
+  try {
+    SpreadsheetApp.getUi().alert(msg); // chỉ có khi chạy từ menu trong Google Sheet
+  } catch (uiErr) {
+    Logger.log(msg); // chạy từ trình soạn Apps Script: xem ở "Nhật ký thực thi"
+  }
 }
 
 function ensureSheet_(ss, name, headers) {

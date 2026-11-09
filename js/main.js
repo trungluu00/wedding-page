@@ -851,6 +851,7 @@ class WeddingFlipbook {
       frontSheen.className = 'alb-page-sheen';
       const cornerPeelRight = document.createElement('div');
       cornerPeelRight.className = 'alb-corner-peel peel-right';
+      frontImg.addEventListener('error', () => frontDiv.classList.add('is-broken'));
       frontDiv.append(frontImg, frontShade, frontSheen, cornerPeelRight);
 
       // Back face (Left side page when flipped open)
@@ -873,6 +874,7 @@ class WeddingFlipbook {
       backSheen.className = 'alb-page-sheen';
       const cornerPeelLeft = document.createElement('div');
       cornerPeelLeft.className = 'alb-corner-peel peel-left';
+      backImg.addEventListener('error', () => backDiv.classList.add('is-broken'));
       backDiv.append(backImg, backShade, backSheen, cornerPeelLeft);
 
       leafDiv.appendChild(frontDiv);

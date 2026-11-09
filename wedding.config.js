@@ -94,7 +94,7 @@ export default {
     {
       id: "le-vu-quy",
       name: "Lễ Vu Quy",
-      date: "2026-12-13", // TODO: xác nhận (đang khác ngày Lễ Thành Hôn/Tiệc cưới bên dưới)
+      date: "2026-12-13", // 13/12/2026 = 05/11 âm lịch
       time: "08:00", // TODO
       endTime: "09:30", // TODO (tùy chọn)
       lunar: "Nhằm ngày 05 tháng 11 năm Bính Ngọ", // tính từ ngày 13/12/2026
@@ -106,10 +106,10 @@ export default {
     {
       id: "le-thanh-hon",
       name: "Lễ Thành Hôn",
-      date: "2027-01-16", // TODO: ngày giữ chỗ
-      time: "10:00", // TODO
+      date: "2026-12-13", // 13/12/2026 = 05/11 âm lịch
+      time: "10:00", // TODO: giờ làm lễ ở nhà trai (nhà gái ở Hải Phòng, nhà trai ở Lào Cai — tính thời gian đi đường)
       endTime: "11:00", // TODO
-      lunar: "Nhằm ngày 09 tháng 12 năm Bính Ngọ", // tính từ ngày 16/01/2027 — đổi ngày thì tính lại
+      lunar: "Nhằm ngày 05 tháng 11 năm Bính Ngọ",
       venue: "Tư gia nhà trai",
       address: "Thôn Phúc Hòa, Xã Thác Bà, Tỉnh Lào Cai", // lấy theo địa chỉ nhà trai
       mapsUrl: "https://www.google.com/maps/search/?api=1&query=Th%C3%B4n%20Ph%C3%BAc%20H%C3%B2a%2C%20X%C3%A3%20Th%C3%A1c%20B%C3%A0%2C%20L%C3%A0o%20Cai", // TODO: thay bằng link ghim đúng cổng nhà
@@ -119,10 +119,10 @@ export default {
       id: "tiec-cuoi",
       name: "Tiệc cưới",
       main: true,
-      date: "2027-01-16", // TODO: ngày giữ chỗ
-      time: "11:30", // TODO
+      date: "2026-12-12", // TODO: xác nhận — đang đặt ngày 12/12 (04/11 âm), hôm trước ngày rước dâu
+      time: "11:00", // TODO
       endTime: "14:00", // TODO
-      lunar: "Nhằm ngày 09 tháng 12 năm Bính Ngọ", // tính từ ngày 16/01/2027 — đổi ngày thì tính lại
+      lunar: "Nhằm ngày 04 tháng 11 năm Bính Ngọ",
       venue: "Nhà hàng TODO", // TODO: tên nhà hàng / nơi tổ chức
       address: "TODO: địa chỉ nhà hàng", // TODO
       mapsUrl: "https://maps.google.com/?q=TODO", // TODO
@@ -134,12 +134,12 @@ export default {
   // 5. LỊCH TRÌNH NGÀY CƯỚI
   //  icon: "heart" | "rings" | "camera" | "cheers" | "car" | "music" | "home"
   // ---------------------------------------------------------------------------
-  // TODO: chỉnh giờ theo giờ tiệc thật (tên các mốc là gợi ý)
+  // Lịch trình ngày tiệc. TODO: chỉnh giờ theo giờ thật (tên các mốc là gợi ý)
   schedule: [
-    { time: "11:00", title: "Đón khách", icon: "heart" },
-    { time: "11:30", title: "Cử hành hôn lễ", icon: "rings" },
-    { time: "11:45", title: "Chụp ảnh cùng dâu rể", icon: "camera" },
-    { time: "12:00", title: "Khai tiệc", icon: "cheers" },
+    { time: "10:30", title: "Đón khách", icon: "heart" },
+    { time: "11:00", title: "Khai tiệc", icon: "cheers" },
+    { time: "12:30", title: "Chụp ảnh cùng dâu rể", icon: "camera" },
+    { time: "14:00", title: "Tiễn khách", icon: "home" },
   ],
 
   // ---------------------------------------------------------------------------
@@ -277,7 +277,7 @@ export default {
   // ---------------------------------------------------------------------------
   backend: {
     appsScriptUrl: "", // TODO: dán URL Web App dạng https://script.google.com/macros/s/.../exec
-    rsvpDeadline: "2027-01-06", // (gợi ý) 10 ngày trước tiệc cưới — đổi theo ngày thật
+    rsvpDeadline: "2026-12-02", // (gợi ý) 10 ngày trước tiệc cưới
     maxGuestsPerInvite: 4, // số người tối đa một thiệp được đăng ký
   },
 };

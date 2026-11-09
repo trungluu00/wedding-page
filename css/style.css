@@ -5567,3 +5567,19 @@ body.orn-none .intro-seal-badge {
 .stt-middle-photo-wrap.is-landscape {
   aspect-ratio: 3 / 2;
 }
+
+/* Ảnh album tải lỗi (mất mạng / server tắt): ẩn biểu tượng ảnh vỡ, hiện nền giấy có hoa văn */
+.alb-face.is-broken img {
+  visibility: hidden;
+}
+.alb-face.is-broken::after {
+  content: '囍';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.4rem;
+  color: rgb(var(--c-accent-rgb) / 0.45);
+  background: var(--c-soft);
+}

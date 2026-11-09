@@ -372,7 +372,10 @@ export function renderGifts(config, guest) {
 // Phần phụ thuộc khách: lời chào, sự kiện, ngày chính
 // ---------------------------------------------------------------------------
 export function renderEvents(config, guest) {
-  const events = visibleEvents(config, guest);
+  // Hiển thị theo thời gian diễn ra (không phụ thuộc thứ tự trong config)
+  const events = visibleEvents(config, guest)
+    .slice()
+    .sort((x, y) => (eventDateTime(x)?.getTime() ?? 0) - (eventDateTime(y)?.getTime() ?? 0));
   const main = mainEvent(config, guest);
   const mp = parseDate(main?.date);
 

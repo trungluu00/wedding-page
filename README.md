@@ -173,7 +173,7 @@ Facebook giữ cache ảnh xem trước; dùng [Sharing Debugger](https://develo
 ## 7. Danh sách TODO cần điền
 
 Trong `wedding.config.js`: `// TODO` là thông tin thật cần điền/xác nhận; `// (gợi ý)` là câu chữ đã viết sẵn,
-sửa tùy ý. Ngày âm lịch tính bằng `npm run lunar -- YYYY-MM-DD`.
+sửa tùy ý. Ngày âm lịch tính bằng `npm run lunar -- YYYY-MM-DD` (vd `npm run lunar -- 2026-12-13`).
 
 **Đã có (bạn điền hoặc đã soạn sẵn)**
 - [x] Tên, bố mẹ, địa chỉ, số điện thoại hai bên
@@ -186,8 +186,8 @@ sửa tùy ý. Ngày âm lịch tính bằng `npm run lunar -- YYYY-MM-DD`.
 - [ ] `site.domain` — tên miền thật (và ô `CauHinh!B1` trong Sheet)
 - [ ] `couple.*.role` — Trưởng nam/Thứ nam…, Trưởng nữ/Út nữ…
 - [ ] `couple.bride.familyPhone` — đang trùng số cô dâu
-- [ ] **Ngày giờ các sự kiện**: Lễ Vu Quy đang 13/12/2026, còn Lễ Thành Hôn và Tiệc cưới đang là ngày giữ chỗ
-      16/01/2027 — sửa `date`/`time`/`endTime`, rồi chạy `npm run lunar` để cập nhật `lunar`
+- [ ] **Ngày giờ các sự kiện**: Lễ Vu Quy và Lễ Thành Hôn 13/12/2026 (05/11 âm); Tiệc cưới đang đặt 12/12/2026
+      (04/11 âm) — xác nhận ngày tiệc và giờ từng sự kiện; đổi ngày thì chạy `npm run lunar` để cập nhật `lunar`
 - [ ] `mapsUrl` hai lễ tại nhà — đang là link tìm theo địa chỉ; nên thay bằng link ghim đúng cổng nhà
 - [ ] Tiệc cưới: `venue`, `address`, `mapsUrl` (tên và địa chỉ nơi tổ chức)
 - [ ] Kiểm tra `audience` từng sự kiện (ai được thấy) cho đúng thực tế
