@@ -1,0 +1,13 @@
+node_modules
+public
+
+# Ảnh gốc chưa nén: không bao giờ commit (chỉ commit photos/w/*.webp và share-1200x630.jpg)
+photos/goc/
+photos/originals/
+IMG_*.jpg
+IMG_*.JPG
+*+*.jpg
+*.CR2
+*.NEF
+*.ARW
+*.HEIC
