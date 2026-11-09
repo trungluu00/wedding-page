@@ -81,52 +81,68 @@ export default {
   },
 
   // ---------------------------------------------------------------------------
-  // 4. CÁC SỰ KIỆN
+  // 4. CÁC SỰ KIỆN — tổ chức tại tư gia hai nhà (không ở nhà hàng)
   //  audience: ai được thấy sự kiện này.
-  //   - "all": mọi người (kể cả khi mở link không có ?to=)
-  //   - "nha-trai" / "nha-gai": khớp cột "side" của khách trong Google Sheet
+  //   - "nha-trai" / "nha-gai" / "ban-chung": khớp cột "side" của khách trong Google Sheet
+  //   - "public": người mở link KHÔNG có mã khách (?to=) hoặc mã không có trong Sheet
+  //   - "all": mọi người
   //   - tên nhóm bất kỳ (vd "gia-dinh"): khớp cột "groups" của khách
-  //  main: true → sự kiện dùng cho đếm ngược, lịch và ngày lớn trên thiệp
-  //  (nếu khách không thấy sự kiện main thì dùng sự kiện đầu tiên họ thấy).
-  //  lunar: ghi sẵn bằng chữ. Đổi ngày thì tính lại bằng: npm run lunar -- 2027-01-16
+  //  main: true → sự kiện dùng cho ngày lớn, lịch và đếm ngược (lấy sự kiện main đầu tiên khách thấy).
+  //  lunar: ghi sẵn bằng chữ. Đổi ngày thì tính lại bằng: npm run lunar -- 2026-12-12
+  //  Trên thiệp, sự kiện tự sắp theo thời gian.
   // ---------------------------------------------------------------------------
   events: [
+    // ----- Ngày 12/12/2026 (04/11 âm): tiệc cưới tại hai nhà -----
+    {
+      id: "tiec-nha-gai",
+      name: "Tiệc cưới nhà gái",
+      main: true,
+      date: "2026-12-12", // 12/12/2026 = 04/11 âm lịch
+      time: "11:00", // TODO: giờ khai tiệc nhà gái
+      endTime: "14:00", // TODO
+      lunar: "Nhằm ngày 04 tháng 11 năm Bính Ngọ",
+      venue: "Tư gia nhà gái",
+      address: "Thôn Tứ Kỳ, Xã Đại Sơn, Tỉnh Hải Phòng",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Th%C3%B4n%20T%E1%BB%A9%20K%E1%BB%B3%2C%20X%C3%A3%20%C4%90%E1%BA%A1i%20S%C6%A1n%2C%20H%E1%BA%A3i%20Ph%C3%B2ng", // TODO: thay bằng link ghim đúng cổng nhà
+      audience: ["nha-gai", "ban-chung", "public"],
+    },
+    {
+      id: "tiec-nha-trai",
+      name: "Tiệc cưới nhà trai",
+      main: true,
+      date: "2026-12-12", // 12/12/2026 = 04/11 âm lịch
+      time: "11:00", // TODO: giờ khai tiệc nhà trai
+      endTime: "14:00", // TODO
+      lunar: "Nhằm ngày 04 tháng 11 năm Bính Ngọ",
+      venue: "Tư gia nhà trai",
+      address: "Thôn Phúc Hòa, Xã Thác Bà, Tỉnh Lào Cai",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Th%C3%B4n%20Ph%C3%BAc%20H%C3%B2a%2C%20X%C3%A3%20Th%C3%A1c%20B%C3%A0%2C%20L%C3%A0o%20Cai", // TODO: thay bằng link ghim đúng cổng nhà
+      audience: ["nha-trai", "ban-chung", "public"],
+    },
+    // ----- Ngày 13/12/2026 (05/11 âm): rước dâu -----
     {
       id: "le-vu-quy",
       name: "Lễ Vu Quy",
       date: "2026-12-13", // 13/12/2026 = 05/11 âm lịch
-      time: "08:00", // TODO
-      endTime: "09:30", // TODO (tùy chọn)
-      lunar: "Nhằm ngày 05 tháng 11 năm Bính Ngọ", // tính từ ngày 13/12/2026
+      time: "08:00", // TODO: giờ đón dâu tại nhà gái
+      endTime: "09:30", // TODO
+      lunar: "Nhằm ngày 05 tháng 11 năm Bính Ngọ",
       venue: "Tư gia nhà gái",
-      address: "Thôn Tứ Kỳ, Xã Đại Sơn, Tỉnh Hải Phòng", // lấy theo địa chỉ nhà gái
+      address: "Thôn Tứ Kỳ, Xã Đại Sơn, Tỉnh Hải Phòng",
       mapsUrl: "https://www.google.com/maps/search/?api=1&query=Th%C3%B4n%20T%E1%BB%A9%20K%E1%BB%B3%2C%20X%C3%A3%20%C4%90%E1%BA%A1i%20S%C6%A1n%2C%20H%E1%BA%A3i%20Ph%C3%B2ng", // TODO: thay bằng link ghim đúng cổng nhà
-      audience: ["nha-gai"],
+      audience: ["nha-gai", "public"],
     },
     {
       id: "le-thanh-hon",
       name: "Lễ Thành Hôn",
       date: "2026-12-13", // 13/12/2026 = 05/11 âm lịch
-      time: "10:00", // TODO: giờ làm lễ ở nhà trai (nhà gái ở Hải Phòng, nhà trai ở Lào Cai — tính thời gian đi đường)
-      endTime: "11:00", // TODO
+      time: "15:00", // TODO: giờ làm lễ ở nhà trai (tính thời gian đi đường Hải Phòng → Lào Cai)
+      endTime: "16:00", // TODO
       lunar: "Nhằm ngày 05 tháng 11 năm Bính Ngọ",
       venue: "Tư gia nhà trai",
-      address: "Thôn Phúc Hòa, Xã Thác Bà, Tỉnh Lào Cai", // lấy theo địa chỉ nhà trai
+      address: "Thôn Phúc Hòa, Xã Thác Bà, Tỉnh Lào Cai",
       mapsUrl: "https://www.google.com/maps/search/?api=1&query=Th%C3%B4n%20Ph%C3%BAc%20H%C3%B2a%2C%20X%C3%A3%20Th%C3%A1c%20B%C3%A0%2C%20L%C3%A0o%20Cai", // TODO: thay bằng link ghim đúng cổng nhà
-      audience: ["nha-trai"],
-    },
-    {
-      id: "tiec-cuoi",
-      name: "Tiệc cưới",
-      main: true,
-      date: "2026-12-12", // 12/12/2026 = 04/11 âm lịch (ngày cỗ, hôm trước ngày rước dâu)
-      time: "11:00", // TODO
-      endTime: "14:00", // TODO
-      lunar: "Nhằm ngày 04 tháng 11 năm Bính Ngọ",
-      venue: "Nhà hàng TODO", // TODO: tên nhà hàng / nơi tổ chức
-      address: "TODO: địa chỉ nhà hàng", // TODO
-      mapsUrl: "https://maps.google.com/?q=TODO", // TODO
-      audience: ["all"],
+      audience: ["nha-trai", "public"],
     },
   ],
 

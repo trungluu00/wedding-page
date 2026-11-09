@@ -593,8 +593,8 @@ class DanmakuEngine {
     const real = list
       .map((w) => ({ author: plainText(w && w.author), relation: plainText(w && w.relation), text: plainText(w && w.text) }))
       .filter((w) => w.author && w.text);
-    // Chưa có lời chúc thật thì hiện vài câu chúc chung (không gắn tên người)
-    this.pool = real.length ? real : SAMPLE_WISHES.slice();
+    // Còn ít lời chúc thật thì xen thêm vài câu chúc chung (không gắn tên người)
+    this.pool = real.length >= 3 ? real : [...real, ...SAMPLE_WISHES];
     this.poolIndex = Math.floor(Math.random() * this.pool.length);
   }
 
@@ -631,8 +631,16 @@ class DanmakuEngine {
 
   spawnNext() {
     const pool = this.pool.length ? this.pool : SAMPLE_WISHES;
-    this.poolIndex = (this.poolIndex + 1) % pool.length;
-    this.spawnBubble(pool[this.poolIndex], false);
+    // Bỏ qua lời chúc đang hiện trên màn hình (không lặp lại liền nhau)
+    const showing = new Set(this.items.map((it) => it.key));
+    for (let tries = 0; tries < pool.length; tries++) {
+      this.poolIndex = (this.poolIndex + 1) % pool.length;
+      const w = pool[this.poolIndex];
+      if (!showing.has(`${plainText(w.author)}|${plainText(w.text)}`)) {
+        this.spawnBubble(w, false);
+        return;
+      }
+    }
   }
 
   spawnBubble(wish, isUser = false) {
@@ -660,10 +668,23 @@ class DanmakuEngine {
     msg.className = 'danmaku-text';
     msg.textContent = text;
     body.append(name, msg);
-    bubble.append(avatar, body);
+    const shine = document.createElement('span');
+    shine.className = 'danmaku-shine';
+    bubble.append(shine, avatar, body);
+    // Vài tim nhỏ bay lên từ ảnh đại diện (nhiều hơn với lời chúc vừa gửi)
+    const sparks = isUser ? ['💖', '✨', '💕', '🌸'] : ['💗', '✨'];
+    sparks.forEach((icon, i) => {
+      const sp = document.createElement('span');
+      sp.className = 'danmaku-spark';
+      sp.setAttribute('aria-hidden', 'true');
+      sp.textContent = icon;
+      sp.style.setProperty('--spark-delay', `${0.45 + i * 0.25}s`);
+      sp.style.setProperty('--spark-x', `${Math.round((Math.random() - 0.3) * 40)}px`);
+      bubble.append(sp);
+    });
     this.container.appendChild(bubble);
 
-    const entry = { el: bubble, height: bubble.offsetHeight, timer: null };
+    const entry = { el: bubble, height: bubble.offsetHeight, timer: null, key: `${author}|${text}` };
     this.items.push(entry);
     entry.timer = setTimeout(() => this.removeItem(entry), this.lifetime);
 
@@ -697,11 +718,11 @@ class DanmakuEngine {
 
   addWish(author, text, relation = '') {
     const wish = { author: plainText(author), relation: plainText(relation), text: plainText(text) };
-    if (this.pool.every((w) => !w.author)) this.pool = [];
     this.pool.push(wish);
-    // Lần hiện kế tiếp chuyển sang lời chúc khác, không lặp lại lời vừa gửi
     this.poolIndex = this.pool.length - 1;
     this.spawnBubble(wish, true);
+    // Cho thẻ của khách đứng đủ lâu: thẻ kế tiếp chỉ hiện sau một nhịp đầy đủ
+    if (this.enabled) this.startLoop(this.interval + 1500);
   }
 }
 

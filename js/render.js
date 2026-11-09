@@ -106,9 +106,13 @@ export function guestTitle(guest) {
   return [guest.xungHo, guest.name].filter(Boolean).join(' ').trim();
 }
 
-/** Sự kiện khách được thấy: audience có "all", hoặc khớp side / groups của khách. */
+/**
+ * Sự kiện khách được thấy: audience có "all", hoặc khớp side / groups của khách.
+ * Người mở link không có mã khách (hoặc mã không tồn tại) mang nhãn "public".
+ */
 export function visibleEvents(config, guest) {
   const tags = new Set(['all']);
+  if (!guest) tags.add('public');
   if (guest) {
     if (guest.side) tags.add(slugify(guest.side));
     (Array.isArray(guest.groups) ? guest.groups : String(guest.groups || '').split(','))
