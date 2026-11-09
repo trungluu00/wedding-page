@@ -93,8 +93,10 @@ dùng bản 2560. Vẫn có thể ghi đường dẫn file trực tiếp (vd `ph
 **Sự kiện theo nhóm khách:** `audience: ["all"]` thì ai cũng thấy. `"nha-trai"` / `"nha-gai"` / `"ban-chung"`
 khớp cột `side` của khách trong Sheet; `"public"` là người mở link không có mã khách; tên nhóm khác
 (vd `"gia-dinh"`) khớp cột `groups`. Sự kiện có `main: true` dùng cho ngày lớn, lịch và đếm ngược.
-Hiện thiệp chia: khách nhà gái thấy tiệc + Lễ Vu Quy ở nhà gái, khách nhà trai thấy tiệc + Lễ Thành Hôn ở
-nhà trai, bạn chung thấy hai tiệc, link không có mã thấy cả bốn.
+Hiện thiệp chia: khách nhà gái thấy tiệc nhà gái (chiều 12/12), lễ ăn hỏi và đón dâu (đêm 12–13/12); khách
+nhà trai thấy Lễ Thành Hôn và tiệc nhà trai (sáng 13/12); người trong đoàn đón dâu (ghi `doan-nha-trai` vào
+cột `groups`) thấy thêm ăn hỏi + đón dâu; bạn chung thấy hai tiệc; link không có mã thấy cả năm sự kiện.
+Mỗi sự kiện có thể thêm `note` (một dòng ghi chú in nghiêng), mỗi mốc lịch trình có thể thêm `day`.
 
 **Lời bài hát:** file `.lrc`, mỗi dòng `[phút:giây.xx]Lời`. Có thể tạo bằng các trang/ứng dụng "LRC editor".
 
@@ -203,8 +205,9 @@ sửa tùy ý. Ngày âm lịch tính bằng `npm run lunar -- YYYY-MM-DD` (vd `
 - [ ] `site.domain` — tên miền thật (và ô `CauHinh!B1` trong Sheet)
 - [ ] `couple.*.role` — Trưởng nam/Thứ nam…, Trưởng nữ/Út nữ…
 - [ ] `couple.bride.familyPhone` — đang trùng số cô dâu
-- [x] Ngày: tiệc cưới tại hai nhà 12/12/2026 (04/11 âm); Lễ Vu Quy và Lễ Thành Hôn 13/12/2026 (05/11 âm)
-- [ ] **Giờ** từng sự kiện (giờ khai tiệc mỗi nhà, giờ đón dâu, giờ làm lễ ở nhà trai)
+- [x] Lịch: tiệc nhà gái chiều 12/12 (04/11 âm), ăn hỏi + đón dâu trong đêm, về nhà trai ~05:45 ngày 13/12
+      (05/11 âm), Lễ Thành Hôn 10:00, tiệc nhà trai sau lễ
+- [ ] **Xác nhận giờ** tôi tự cân đối: tiệc nhà gái 16:00, ăn hỏi 22:30, đón dâu 00:30, tiệc nhà trai 11:00
 - [ ] `mapsUrl` hai nhà — đang là link tìm theo địa chỉ; nên thay bằng link ghim đúng cổng nhà
 - [ ] Kiểm tra `audience` từng sự kiện (ai được thấy) cho đúng thực tế
 - [ ] `schedule` — giờ các mốc theo giờ tiệc thật
