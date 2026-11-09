@@ -1,23 +1,15 @@
 {
-  "name": "landing-page-dam-cuoi",
-  "version": "1.0.0",
+  "name": "thiep-cuoi-trung-nhi",
+  "version": "2.0.0",
   "type": "module",
   "private": true,
-  "description": "Mẫu Thiệp Cưới Song Hỷ Xanh - Thiệp Cưới Sang Trọng Tông Xanh Lá Hoàng Gia",
+  "description": "Thiệp cưới online Lưu Viết Trung & Đoàn Phương Nhi — trang tĩnh (Vite), dữ liệu khách mời trên Google Sheet qua Apps Script",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
-    "server": "node server/index.js",
-    "start": "node server/index.js"
+    "preview": "vite preview"
   },
   "devDependencies": {
-    "vite": "^5.4.11",
-    "zingmp3-api-full": "^1.0.14"
-  },
-  "dependencies": {
-    "cors": "^2.8.6",
-    "express": "^5.2.1",
-    "qrcode": "^1.5.4"
+    "vite": "^5.4.11"
   }
 }
