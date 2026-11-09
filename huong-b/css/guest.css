@@ -210,7 +210,10 @@ section.bg-alt {
 .cover-photo {
     width: 12rem;
     height: 15rem;
+    max-height: 32vh;
+    max-width: calc(32vh * 0.8);
     object-fit: cover;
+    object-position: center 40%;
     border-radius: 6rem 6rem 1rem 1rem;
     border: 3px solid var(--c-surface);
     box-shadow: 0 0 0 1px var(--c-accent), 0 1rem 2rem rgba(var(--c-text-rgb), 0.15);

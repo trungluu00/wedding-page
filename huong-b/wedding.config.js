@@ -37,7 +37,7 @@ export default {
     groom: {
       fullName: "Lưu Viết Trung",
       shortName: "Trung",
-      portrait: "p41", // chưa có ảnh chú rể chụp riêng; p41 là chú rể đứng cạnh cô dâu — đổi khi có ảnh riêng
+      portrait: "p38-chu-re", // cắt từ p38 (chưa có ảnh chú rể chụp riêng)
       bio: "Trưởng nam của gia đình.", // TODO
       phone: "0900000001", // TODO: số điện thoại chú rể (để khách gọi hỏi đường)
       father: "Ông Lưu Văn A", // TODO
@@ -47,7 +47,7 @@ export default {
     bride: {
       fullName: "Đoàn Phương Nhi",
       shortName: "Nhi",
-      portrait: "p53", // cô dâu ngồi, nhìn thẳng
+      portrait: "p32", // cô dâu bên bảng tên lễ dạm ngõ
       bio: "Út nữ của gia đình.", // TODO
       phone: "0900000002", // TODO
       father: "Ông Đoàn Văn C", // TODO
@@ -131,53 +131,45 @@ export default {
     ],
   },
 
-  // --- Ảnh ---
-  // Ghi MÃ ẢNH (p01...p55) do `npm run photos` sinh ra: thiệp tự chọn cỡ ảnh vừa màn hình (srcset)
-  // và mở bản 2560px khi chạm vào. Xem toàn bộ mã ảnh trong photos-contact-sheet.html.
+  // --- Ảnh (lễ dạm ngõ 31.10.2026) ---
+  // Ghi MÃ ẢNH pNN (mã cố định theo photos/manifest.json). Chỉ ảnh được dùng ở đây mới được
+  // `npm run photos` xuất ra photos/w/ (đủ cỡ 2560/1600/900/400); ảnh bỏ dùng bị xóa khỏi photos/w/.
+  // Xem ảnh nào đang dùng ở đâu + danh sách ảnh gốc chưa dùng: photos-contact-sheet.html.
   // Vẫn có thể ghi đường dẫn thường, vd "photos/abc.jpg".
   photos: {
     // Thư mục ảnh gốc trên máy (chỉ dùng cho `npm run photos`; ảnh gốc không deploy, không commit).
     // Có thể thay bằng biến môi trường PHOTO_SOURCE.
     source: "C:/Users/Trung lv/Pictures/me/dam-ngo",
-    shareFrom: "p11", // ảnh cắt ra ảnh chia sẻ Zalo/Facebook 1200x630 (photos/share-1200x630.jpg); chạy lại npm run photos sau khi đổi
-    hero: "p30", // ảnh lớn đầu thiệp (dọc): hai bạn đứng cạnh bảng tên
-    statement: "p16", // ảnh nền mờ phía sau lời mời: hai bạn đi cạnh nhau
-    middle: ["p12", "p27"], // ảnh ngang chèn giữa các phần
-    ending: "p26", // ảnh cuối thiệp (dọc)
+    shareFrom: "p27", // ảnh chia sẻ Zalo/Facebook 1200x630 (photos/share-1200x630.jpg)
+    sharePosition: "center", // "center" = cắt giữa | "attention" = tự tìm vùng nổi bật
+    cover: "p29", // ảnh trong khung vòm ở bìa thư: hai bạn tựa vào nhau
+    hero: "p25", // ảnh lớn đầu thiệp sau khi mở
+    statement: "p16", // ảnh nền mờ phía sau lời mời: nắm tay đi tới
+    middle: ["p11", "p34"], // ảnh chèn giữa các phần: ở cổng nhà, cầu thang (đen trắng)
+    ending: "p26", // ảnh cuối thiệp
+    // Ảnh cắt từ một vùng của ảnh gốc (left/top/width/height theo tỉ lệ 0..1 của ảnh gốc đã xoay đúng chiều).
+    crops: {
+      "p38-chu-re": { from: "p38", left: 0.2, top: 0.205, width: 0.27, height: 0.506 }, // chú rể bên trái p38, khung dọc 4:5
+    },
   },
 
-  // --- Album (hướng B hiển thị thành lưới ảnh: front rồi back của từng "lá") ---
-  // Đang gồm cả 55 ảnh theo thứ tự chụp; xóa dòng nào để bỏ ảnh đó.
+  // --- Album (hướng B hiển thị thành lưới ảnh theo thứ tự front rồi back của từng "lá") ---
   album: {
+    kicker: "Khoảnh khắc", // dòng chữ nhỏ trên tiêu đề album
+    title: "Ngày dạm ngõ · 31.10.2026",
     leaves: [
-      { front: "p01", back: "p02", frontAlt: "Ảnh dạm ngõ 1", backAlt: "Ảnh dạm ngõ 2" },
-      { front: "p03", back: "p04", frontAlt: "Ảnh dạm ngõ 3", backAlt: "Ảnh dạm ngõ 4" },
-      { front: "p05", back: "p06", frontAlt: "Ảnh dạm ngõ 5", backAlt: "Ảnh dạm ngõ 6" },
-      { front: "p07", back: "p08", frontAlt: "Ảnh dạm ngõ 7", backAlt: "Ảnh dạm ngõ 8" },
-      { front: "p09", back: "p10", frontAlt: "Ảnh dạm ngõ 9", backAlt: "Ảnh dạm ngõ 10" },
-      { front: "p11", back: "p12", frontAlt: "Ảnh dạm ngõ 11", backAlt: "Ảnh dạm ngõ 12" },
-      { front: "p13", back: "p14", frontAlt: "Ảnh dạm ngõ 13", backAlt: "Ảnh dạm ngõ 14" },
-      { front: "p15", back: "p16", frontAlt: "Ảnh dạm ngõ 15", backAlt: "Ảnh dạm ngõ 16" },
-      { front: "p17", back: "p18", frontAlt: "Ảnh dạm ngõ 17", backAlt: "Ảnh dạm ngõ 18" },
-      { front: "p19", back: "p20", frontAlt: "Ảnh dạm ngõ 19", backAlt: "Ảnh dạm ngõ 20" },
-      { front: "p21", back: "p22", frontAlt: "Ảnh dạm ngõ 21", backAlt: "Ảnh dạm ngõ 22" },
-      { front: "p23", back: "p24", frontAlt: "Ảnh dạm ngõ 23", backAlt: "Ảnh dạm ngõ 24" },
-      { front: "p25", back: "p26", frontAlt: "Ảnh dạm ngõ 25", backAlt: "Ảnh dạm ngõ 26" },
-      { front: "p27", back: "p28", frontAlt: "Ảnh dạm ngõ 27", backAlt: "Ảnh dạm ngõ 28" },
-      { front: "p29", back: "p30", frontAlt: "Ảnh dạm ngõ 29", backAlt: "Ảnh dạm ngõ 30" },
-      { front: "p31", back: "p32", frontAlt: "Ảnh dạm ngõ 31", backAlt: "Ảnh dạm ngõ 32" },
-      { front: "p33", back: "p34", frontAlt: "Ảnh dạm ngõ 33", backAlt: "Ảnh dạm ngõ 34" },
-      { front: "p35", back: "p36", frontAlt: "Ảnh dạm ngõ 35", backAlt: "Ảnh dạm ngõ 36" },
-      { front: "p37", back: "p38", frontAlt: "Ảnh dạm ngõ 37", backAlt: "Ảnh dạm ngõ 38" },
-      { front: "p39", back: "p40", frontAlt: "Ảnh dạm ngõ 39", backAlt: "Ảnh dạm ngõ 40" },
-      { front: "p41", back: "p42", frontAlt: "Ảnh dạm ngõ 41", backAlt: "Ảnh dạm ngõ 42" },
-      { front: "p43", back: "p44", frontAlt: "Ảnh dạm ngõ 43", backAlt: "Ảnh dạm ngõ 44" },
-      { front: "p45", back: "p46", frontAlt: "Ảnh dạm ngõ 45", backAlt: "Ảnh dạm ngõ 46" },
-      { front: "p47", back: "p48", frontAlt: "Ảnh dạm ngõ 47", backAlt: "Ảnh dạm ngõ 48" },
-      { front: "p49", back: "p50", frontAlt: "Ảnh dạm ngõ 49", backAlt: "Ảnh dạm ngõ 50" },
-      { front: "p51", back: "p52", frontAlt: "Ảnh dạm ngõ 51", backAlt: "Ảnh dạm ngõ 52" },
-      { front: "p53", back: "p54", frontAlt: "Ảnh dạm ngõ 53", backAlt: "Ảnh dạm ngõ 54" },
-      { front: "p55", back: null, frontAlt: "Ảnh dạm ngõ 55", backAlt: null },
+      { front: "p03", back: "p01", frontAlt: "Đoàn nhà trai sang nhà gái", backAlt: "Trao lễ dạm ngõ" },
+      { front: "p11", back: "p14", frontAlt: "Hai bạn ở cổng nhà", backAlt: "Hai bạn ở cổng nhà" },
+      { front: "p16", back: "p02", frontAlt: "Nắm tay đi tới", backAlt: "Bên bảng tên lễ dạm ngõ" },
+      { front: "p17", back: "p33", frontAlt: "Trong nhà gái", backAlt: "Thắp hương bàn thờ gia tiên" },
+      { front: "p23", back: "p26", frontAlt: "Hai bạn bên bảng tên", backAlt: "Hai bạn bên bảng tên" },
+      { front: "p27", back: "p29", frontAlt: "Hai bạn bên bảng tên", backAlt: "Hai bạn tựa vào nhau" },
+      { front: "p30", back: "p32", frontAlt: "Hai bạn bên bảng tên", backAlt: "Cô dâu bên bảng tên" },
+      { front: "p36", back: "p37", frontAlt: "Cô dâu cầm hoa", backAlt: "Cô dâu cầm hoa" },
+      { front: "p38", back: "p34", frontAlt: "Chú rể và cô dâu bên bảng tên", backAlt: "Khoảnh khắc trên cầu thang" },
+      { front: "p41", back: "p40", frontAlt: "Chú rể bên cô dâu", backAlt: "Cô dâu" },
+      { front: "p49", back: "p50", frontAlt: "Cô dâu bên bàn trà", backAlt: "Cô dâu soi gương" },
+      { front: "p54", back: "p42", frontAlt: "Cô dâu bên bàn trà", backAlt: "Hai gia đình" },
     ],
   },
 

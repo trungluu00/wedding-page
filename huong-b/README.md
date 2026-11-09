@@ -79,8 +79,9 @@ Mở `wedding.config.js`, sửa giá trị (đừng đổi tên khóa — khung 
   Khách không có mã (`?to=` trống/sai) chỉ thấy sự kiện `"all"`. Đếm ngược và ngày trên bìa lấy sự kiện `"all"` sớm nhất.
 - **Lời văn** (`texts`): `{khach}` được thay bằng cách xưng hô, vd "Bác Hùng"; không có mã khách thì là "Quý khách".
 - **Thứ tự các phần** (`sections`): đổi thứ tự hoặc xóa tên để ẩn phần đó. `cover` là bìa thư "Mở thiệp" (chạm vào mới bật nhạc).
-- **Ảnh** (`photos`, `album`, `couple.*.portrait`): ghi **mã ảnh** `p01`…`p55` (xem `photos-contact-sheet.html`). Thiệp tự dùng `srcset` để điện thoại tải cỡ vừa đủ mà vẫn nét trên màn hình retina; chạm ảnh mở bản 2560 px. Vẫn ghi được đường dẫn thường như `"photos/abc.jpg"`.
-  `photos.shareFrom` là ảnh dùng để cắt ảnh chia sẻ 1200×630 (chạy lại `npm run photos` sau khi đổi).
+- **Ảnh** (`photos`, `album`, `couple.*.portrait`): ghi **mã ảnh** `pNN` hoặc mã ảnh cắt trong `photos.crops` (xem `photos-contact-sheet.html`). `photos.cover` là ảnh trong khung vòm ở bìa thư, `photos.hero` là ảnh lớn đầu thiệp sau khi mở. Thiệp tự dùng `srcset` để điện thoại tải cỡ vừa đủ mà vẫn nét trên màn hình retina; chạm ảnh mở bản 2560 px. Vẫn ghi được đường dẫn thường như `"photos/abc.jpg"`.
+  `photos.shareFrom` là ảnh dùng để cắt ảnh chia sẻ 1200×630 (`sharePosition`: `"center"` hoặc `"attention"`); chạy lại `npm run photos` sau khi đổi.
+  `album.kicker` / `album.title`: dòng chữ nhỏ và tiêu đề của album.
   `album.leaves` ở hướng B được trải thành một album trượt (front rồi back của từng lá).
   `photos.middle` được chèn lần lượt sau các phần couple → countdown → gifts → schedule (phần nào có trước thì chèn trước).
 - **Nhạc** (`music.src`): vd `"music/bai-hat.mp3"` (nên < 3 MB). Để trống = không có nút nhạc.
@@ -96,11 +97,12 @@ npm run photos                                   # thư mục lấy từ photos.
 PHOTO_SOURCE="D:/anh-cuoi" npm run photos         # hoặc chỉ định bằng biến môi trường
 ```
 
-- Mỗi ảnh ra 4 cỡ WebP theo cạnh dài: **2560** (xem phóng to), **1600** (hiển thị), **900** (điện thoại), **400** (thumbnail). Chất lượng 88, `smartSubsample`, không phóng to ảnh nhỏ hơn cỡ đích.
+- **Chỉ ảnh đang được config dùng** mới được xuất; đổi/bỏ ảnh trong config rồi chạy lại thì file ảnh không còn dùng bị xóa khỏi `photos/w/`. Mã `pNN` của mọi ảnh gốc vẫn được giữ cố định trong `photos/manifest.json`.
+- Mỗi ảnh ra 4 cỡ WebP theo cạnh dài: **2560** (xem phóng to), **1600** (hiển thị), **900** (điện thoại), **400** (thumbnail). Chất lượng 88, `smartSubsample`, không phóng to: ảnh/vùng cắt nhỏ hơn cỡ đích thì bỏ cỡ đó.
+- `photos.crops`: ảnh cắt từ một vùng của ảnh gốc (tỉ lệ 0..1), vd `"p38-chu-re"` là chú rể cắt từ p38 (1620×2024, nên chỉ có cỡ 1600/900/400).
 - Xoay theo EXIF, chuyển về sRGB, **bỏ toàn bộ EXIF/GPS**.
-- Ảnh chia sẻ `photos/share-1200x630.jpg`: JPEG q90, 4:4:4, cắt tự động theo vùng nổi bật của `photos.shareFrom`.
-- Tên mới `p01`, `p02`… cố định theo `photos/manifest.json`; thêm ảnh mới thì được số tiếp theo, chạy lại chỉ xử lý ảnh mới hoặc đã đổi.
-- Hiện tại: 55 ảnh dạm ngõ, tổng `photos/w` ≈ 47 MB (2560: 28 MB, 1600: 14 MB, 900: 5,4 MB, 400: 1,5 MB). Khách trên điện thoại chỉ tải cỡ 900/1600 và thumbnail 400 cho album; bản 2560 chỉ tải khi chạm xem ảnh.
+- Ảnh chia sẻ `photos/share-1200x630.jpg`: JPEG q90, 4:4:4.
+- Hiện tại: 25 ảnh dạm ngõ chọn lọc + 1 ảnh cắt, `photos/w` 103 file ≈ 21 MB. Khách trên điện thoại chỉ tải cỡ 900/1600 và thumbnail 400 cho album; bản 2560 chỉ tải khi chạm xem ảnh.
 - `.gitignore` chặn các kiểu file ảnh gốc (`IMG_*.jpg`, tên có dấu `+`, RAW, HEIC).
 
 ## Đổi theme
@@ -187,8 +189,8 @@ Tất cả nằm trong `wedding.config.js` (tìm chữ `TODO`):
 - `events`: ngày, giờ, **âm lịch (cần kiểm tra lại)**, nơi tổ chức, địa chỉ, link Google Maps của cả 3 sự kiện; thêm/bớt sự kiện nếu khác
 - `schedule`: giờ và tên các mục
 - `gifts.accounts`: ngân hàng, mã BIN, số tài khoản, tên chủ tài khoản (hiện là số giả)
-- `couple.groom.portrait`: chưa có ảnh chú rể chụp riêng (đang dùng p41, chú rể đứng cạnh cô dâu)
-- Ảnh: đã gán tự động từ bộ ảnh dạm ngõ, nên xem lại `photos-contact-sheet.html` và chọn lại nếu muốn; album đang gồm cả 55 ảnh (có vài cặp gần giống nhau như p03/p04, p05/p06, p08/p09)
+- `couple.groom.portrait`: chưa có ảnh chú rể chụp riêng (đang dùng ảnh cắt `p38-chu-re`, lấy từ đầu tới ngang hông vì ảnh gốc không có tới gối)
+- Ảnh: 24 ảnh album + bìa/trang đầu/chân dung đã chọn theo câu chuyện lễ dạm ngõ; muốn đổi thì sửa mã trong config và chạy `npm run photos`
 - `music`: file nhạc, tên bài, ca sĩ
 - `texts`: câu trích dẫn, lời mời, lời cảm ơn
 - `backend.appsScriptUrl` (lấy từ hướng A), `backend.rsvpDeadline`

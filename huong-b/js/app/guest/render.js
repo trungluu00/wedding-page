@@ -108,10 +108,13 @@ export const renderCover = (cfg, ctx) => {
     // Bìa thư theo trang xem thử (preset Lục bảo): nền màu chính, 囍 vàng đồng, nút "Mở thiệp" nền vàng đồng.
     return h('div', { class: 'cover d-flex justify-content-center align-items-center overflow-y-auto px-3' },
         h('div', { class: 'd-flex flex-column text-center align-items-center py-4' },
-            ornament(cfg, false, true),
-            h('p', { class: 'cover-small mt-4 mb-2' }, 'Thiệp mời cưới'),
+            cfg.photos?.cover ? ornament(cfg) : ornament(cfg, false, true),
+            h('p', { class: 'cover-small mt-3 mb-3' }, 'Thiệp mời cưới'),
+            cfg.photos?.cover
+                ? img(cfg.photos.cover, `Ảnh ${coupleNames(cfg)}`, 'cover-photo mb-3', { eager: true, zoom: false, sizes: fixedSizes(12) })
+                : null,
             h('h1', { class: 'font-esthetic cover-names mb-1' }, coupleNames(cfg)),
-            d ? h('p', { class: 'cover-date mb-4' }, shortDate(d)) : null,
+            d ? h('p', { class: 'cover-date mb-3' }, shortDate(d)) : null,
             h('p', { class: 'cover-small mb-1' }, 'Kính mời'),
             h('p', { class: 'cover-guest mb-1', id: 'cover-guest' }, ctx.khach),
             h('p', { class: 'cover-small mb-4' }, 'đến dự lễ cưới của chúng mình'),
@@ -252,7 +255,7 @@ const renderAlbum = (cfg) => {
         ? h('button', { type: 'button', class: 'btn btn-outline-auto rounded-pill px-4 mt-3', id: 'album-more' },
             icon('fa-images', 'me-2'), `Xem thêm ${list.length - ALBUM_FIRST} ảnh`)
         : null;
-    return sectionShell('album', { kicker: 'Khoảnh khắc', title: 'Album ảnh cưới' },
+    return sectionShell('album', { kicker: cfg.album?.kicker || 'Khoảnh khắc', title: cfg.album?.title || 'Album ảnh cưới' },
         h('div', { class: 'album-grid', id: 'album-grid' }, list.map(cell)),
         more,
         h('p', { class: 'small text-muted-c mt-2 mb-0' }, 'Chạm vào ảnh để xem lớn, vuốt để xem ảnh khác'),
