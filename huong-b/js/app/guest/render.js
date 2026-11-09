@@ -24,14 +24,17 @@ export const guestDisplay = (guest) => {
     return `${xh} ${name}`.trim();
 };
 
-/** Sự kiện khách được thấy: audience có "all", hoặc trùng side/groups của khách. */
+/**
+ * Sự kiện khách được thấy: audience có "all", hoặc trùng side/groups của khách.
+ * Người mở link không có mã khách (hoặc mã không có trong Sheet) mang nhãn "public".
+ */
 export const visibleEvents = (events, guest) => (events ?? []).filter((ev) => {
     const aud = Array.isArray(ev.audience) && ev.audience.length ? ev.audience : ['all'];
     if (aud.includes('all')) {
         return true;
     }
     if (!guest) {
-        return false;
+        return aud.includes('public');
     }
     const tags = [guest.side, ...(Array.isArray(guest.groups) ? guest.groups : [])].filter(Boolean);
     return aud.some((a) => tags.includes(a));

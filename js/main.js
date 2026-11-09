@@ -1631,6 +1631,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- ĐỔ NỘI DUNG TỪ wedding.config.js ---
   const params = new URLSearchParams(window.location.search);
   const guestCode = api.normalizeCode(params.get('to') || params.get('code') || params.get('guest'));
+  // Tên có dấu kèm trong link (&n=Bác%20Hùng, do Google Sheet tự sinh): hiện ngay, đúng dấu,
+  // kể cả khi chưa nối backend. Nếu tra được khách trong Sheet thì dùng dữ liệu Sheet.
+  const nameFromLink = String(params.get('n') || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim().slice(0, 60);
   let currentGuest = null;
 
   applySections(config);
@@ -1658,6 +1661,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const danmaku = new DanmakuEngine('blessing-box', { enabled: (config.sections || []).includes('wishes') });
 
   // --- KHÁCH MỜI RIÊNG (?to=ma-khach) ---
+  // Chỉ có tên trong link: chào đúng tên, vẫn hiện các sự kiện chung ("public")
+  if (nameFromLink) renderGuest(config, { name: nameFromLink, xungHo: '', side: '', groups: [] });
+
   async function applyGuest() {
     if (!guestCode) return;
     const guest = await api.lookupGuest(guestCode);

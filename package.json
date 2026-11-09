@@ -3,12 +3,17 @@
   "version": "2.0.0",
   "type": "module",
   "private": true,
-  "description": "Thiệp cưới online Lưu Viết Trung & Đoàn Phương Nhi — trang tĩnh (Vite), dữ liệu khách mời trên Google Sheet qua Apps Script",
+  "description": "Thiệp cưới online Lưu Viết Trung & Đoàn Phương Nhi — 2 phương án giao diện (A: thư mục gốc, B: huong-b/), dữ liệu khách mời trên Google Sheet qua Apps Script",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "node scripts/phuong-an.mjs dev",
+    "build": "node scripts/phuong-an.mjs build",
+    "dev:a": "node scripts/phuong-an.mjs dev a",
+    "dev:b": "node scripts/phuong-an.mjs dev b",
+    "build:a": "node scripts/phuong-an.mjs build a",
+    "build:b": "node scripts/phuong-an.mjs build b",
     "preview": "vite preview",
     "photos": "node scripts/photos.mjs",
+    "photos:b": "npm --prefix huong-b run photos",
     "lunar": "node scripts/lunar.cjs"
   },
   "devDependencies": {

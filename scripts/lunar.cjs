@@ -1,6 +1,6 @@
 /**
  * Đổi ngày dương sang âm lịch Việt Nam (múi giờ +7) để ghi vào `lunar` trong wedding.config.js.
- *   npm run lunar -- 2027-01-16 2026-12-13
+ *   npm run lunar -- 2026-12-12 2026-12-13
  * Thuật toán của Hồ Ngọc Đức (đã thử: 31/10/2026 → 22/9 Bính Ngọ, Tết 2026 = 17/02, Tết 2027 = 06/02).
  */
 const PI=Math.PI, INT=Math.floor;

@@ -16,6 +16,14 @@
  */
 export default {
   // ---------------------------------------------------------------------------
+  // 0. CHỌN PHƯƠNG ÁN GIAO DIỆN (cho `npm run dev` và `npm run build`)
+  //   "a": Song Hỷ Xanh — album lật trang 3D, lời chúc bay, nhạc chạy lời (file này)
+  //   "b": dựa trên dewanakl/undangan — cấu hình ở huong-b/wedding.config.js
+  //   Cũng chọn được khi chạy: npm run build -- b   hoặc   npm run dev:b
+  // ---------------------------------------------------------------------------
+  phuongAn: "a",
+
+  // ---------------------------------------------------------------------------
   // 1. THÔNG TIN TRANG (dùng cho <title> và ảnh xem trước khi gửi qua Zalo/Facebook)
   // ---------------------------------------------------------------------------
   site: {

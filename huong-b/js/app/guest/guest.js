@@ -32,9 +32,12 @@ export const guest = (() => {
 
     /** Đọc ?to= và tra khách. Không tìm thấy mà trông giống tên người → dùng làm tên hiển thị. */
     const resolveGuest = async () => {
-        const raw = (new URLSearchParams(window.location.search).get('to') ?? '').trim().slice(0, 80);
+        const params = new URLSearchParams(window.location.search);
+        const raw = (params.get('to') ?? '').trim().slice(0, 80);
+        // Tên có dấu kèm trong link (&n=Bác%20Hùng, do Google Sheet tự sinh) — dùng khi không tra được khách
+        const nameFromLink = (params.get('n') ?? '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim().slice(0, 60);
         if (!raw) {
-            return { guest: null, khach: 'Quý khách', plain: '' };
+            return nameFromLink ? { guest: null, khach: nameFromLink, plain: nameFromLink } : { guest: null, khach: 'Quý khách', plain: '' };
         }
 
         let found = null;
@@ -53,6 +56,9 @@ export const guest = (() => {
         if (found) {
             const khach = guestDisplay(found);
             return { guest: found, khach, plain: khach };
+        }
+        if (nameFromLink) {
+            return { guest: null, khach: nameFromLink, plain: nameFromLink };
         }
         const looksLikeName = /\s/.test(raw) || /[^a-z0-9_-]/i.test(raw);
         return looksLikeName ? { guest: null, khach: raw, plain: raw } : { guest: null, khach: 'Quý khách', plain: '' };

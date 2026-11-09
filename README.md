@@ -1,7 +1,18 @@
 # Thiệp cưới online — Lưu Viết Trung & Đoàn Phương Nhi
 
-Trang thiệp cưới tĩnh (Vite), giữ toàn bộ hiệu ứng: bìa thư mở thiệp, nhạc chạy lời, album lật trang 3D,
-lời chúc bay, bắn tim, confetti, đếm ngược, lịch tháng, hiện dần khi cuộn.
+Trang thiệp cưới tĩnh, có **2 phương án giao diện** dùng chung một Google Sheet:
+
+| Phương án | Giao diện | Thư mục / cấu hình |
+|---|---|---|
+| **A** (mặc định) | "Song Hỷ Xanh": bìa thư, album lật trang 3D, lời chúc bay, nhạc chạy lời, bắn tim | thư mục gốc · [`wedding.config.js`](wedding.config.js) |
+| **B** | dựa trên dewanakl/undangan (MIT): cuộn dọc, lưới ảnh, chế độ sáng/tối | [`huong-b/`](huong-b/) · [`huong-b/wedding.config.js`](huong-b/wedding.config.js) |
+
+**Chọn phương án:** sửa `phuongAn: "a"` hoặc `"b"` ở đầu `wedding.config.js`, rồi `npm run dev` / `npm run build`.
+Hoặc chọn khi chạy: `npm run dev:a`, `npm run dev:b`, `npm run build:a`, `npm run build:b`
+(hay `PHUONG_AN=b npm run build`). Cả hai đều build ra `dist/` nên cách deploy giống nhau.
+Thông tin thật (tên, bố mẹ, địa chỉ, SĐT, ngày cưới, sự kiện) đang giống nhau ở hai file cấu hình —
+**sửa một bên thì nhớ sửa bên kia.** Phần dưới đây hướng dẫn phương án A; phương án B xem
+[`huong-b/README.md`](huong-b/README.md) (ảnh của B xử lý bằng `npm run photos:b`).
 
 - **Không có server riêng.** Build ra thư mục `dist/` rồi đưa lên Cloudflare Pages (hoặc Vercel, Netlify…).
 - **Mọi nội dung và màu sắc nằm trong một file:** [`wedding.config.js`](wedding.config.js).
@@ -29,7 +40,7 @@ npm install
 npm run dev
 ```
 
-Mở http://localhost:5173. Thử link mời mẫu: http://localhost:5173/?to=bac-hung (khách nhà trai) và
+Phương án A mở ở http://localhost:5173 (phương án B: http://localhost:8080). Thử link mời mẫu: http://localhost:5173/?to=bac-hung (khách nhà trai) và
 http://localhost:5173/?to=ban-lan (khách nhà gái).
 
 Khi `backend.appsScriptUrl` còn trống, trang chạy **chế độ demo**: không gọi mạng, RSVP và lời chúc chỉ lưu
@@ -143,7 +154,11 @@ cho thiệp cưới. Muốn ẩn lời chúc không phù hợp: bỏ tick cột 
    - `groups`: nhóm, cách nhau dấu phẩy (vd `gia-dinh`), dùng để hiện các sự kiện riêng.
    - `code`: để trống, script tự sinh từ xưng hô + tên (vd `bac-hung`), tự thêm số nếu trùng.
      Hoặc dùng menu **💌 Thiệp cưới → Sinh code cho khách còn trống**.
-2. Cột `link` tự ghép thành `https://tên-miền/?to=bac-hung` — sao chép gửi qua Zalo/Messenger.
+2. Cột `link` tự ghép thành `https://tên-miền/?to=bac-hung&n=B%C3%A1c%20H%C3%B9ng` — sao chép gửi qua
+   Zalo/Messenger. Phần `n=` là **tên có dấu** (xưng hô + tên, lấy nguyên văn từ Sheet): thiệp hiện
+   "Kính mời Bác Hùng" đúng dấu ngay khi mở, kể cả khi chưa nối được Sheet. Khi tra được mã `to` trong
+   Sheet thì thiệp dùng dữ liệu Sheet (nhà trai/nhà gái, nhóm) để chọn sự kiện hiển thị.
+   Tên hiển thị không bao giờ bị "đoán" từ mã không dấu.
 3. Khi khách xác nhận tham dự, cột `rsvpStatus` / `guestCount` tự cập nhật; chi tiết ở sheet `RSVP`.
 
 Link không có `?to=` vẫn xem được thiệp, thấy các sự kiện có `"public"` hoặc `"all"` trong `audience`.
