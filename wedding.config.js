@@ -22,7 +22,7 @@ export default {
     title: "Thiệp cưới Trung & Nhi",
     description:
       "Trân trọng kính mời bạn đến chung vui trong ngày cưới của Trung & Nhi.", // TODO: chỉnh câu mô tả nếu muốn
-    ogImage: "photos/share-1200x630.jpg", // TODO: ảnh 1200x630 đặt tại public/photos/share-1200x630.jpg
+    ogImage: "photos/share-1200x630.jpg", // tạo bởi `npm run photos` từ photos.share
   },
 
   // ---------------------------------------------------------------------------
@@ -57,7 +57,7 @@ export default {
       fullName: "Lưu Viết Trung",
       shortName: "Trung",
       role: "Trưởng nam", // TODO: Trưởng nam / Thứ nam / Út nam...
-      portrait: "photos/placeholder/groom.svg", // TODO: ảnh vuông, ~900x900
+      portrait: "groom", // ảnh cắt từ p38 (xem photos.crops)
       bio: "Chú rể — TODO: vài dòng giới thiệu ngắn.", // TODO
       phone: "0900 000 001", // TODO
       father: "Ông Lưu Viết TODO", // TODO
@@ -69,7 +69,7 @@ export default {
       fullName: "Đoàn Phương Nhi",
       shortName: "Nhi",
       role: "Trưởng nữ", // TODO: Trưởng nữ / Thứ nữ / Út nữ...
-      portrait: "photos/placeholder/bride.svg", // TODO: ảnh vuông, ~900x900
+      portrait: "bride", // ảnh cắt từ p53 (xem photos.crops)
       bio: "Cô dâu — TODO: vài dòng giới thiệu ngắn.", // TODO
       phone: "0900 000 002", // TODO
       father: "Ông Đoàn Văn TODO", // TODO
@@ -175,14 +175,25 @@ export default {
   // 7. ẢNH (ảnh thật đặt trong public/photos/)
   // ---------------------------------------------------------------------------
   photos: {
-    hero: "photos/placeholder/hero.svg", // TODO: ảnh dọc ~1200x1500
-    statement: "photos/placeholder/statement.svg", // TODO: ảnh ngang ~1440x900
+    // Thư mục ảnh gốc trên máy (chỉ dùng khi chạy `npm run photos`, KHÔNG đưa lên git/web).
+    // Có thể thay bằng biến môi trường PHOTO_SOURCE.
+    source: "C:/Users/Trung lv/Pictures/me/dam-ngo",
+    // Ảnh ghi bằng id (p01…p55) do `npm run photos` tạo — xem photos-contact-sheet.html để chọn.
+    share: "p38", // ảnh xem trước 1200x630 khi gửi link (tự cắt vùng nổi bật)
+    hero: "p24", // ảnh bìa (khung dọc 4:5)
+    statement: "p27", // ảnh dưới lời mời (khung ngang 16:10)
     middle: [
-      "photos/placeholder/middle-1.svg", // TODO: ảnh dọc ~1200x1500 (sau phần sự kiện)
-      "photos/placeholder/middle-2.svg", // TODO: ảnh dọc ~1200x1500 (sau phần đếm ngược)
+      "p14", // sau phần sự kiện (khung dọc)
+      "p41", // sau phần đếm ngược (khung dọc)
     ],
-    ending: "photos/placeholder/ending.svg", // TODO: ảnh dọc ~1200x1600
+    ending: "p29", // ảnh kết, chữ cảm ơn nằm giữa ảnh (khung dọc 3:4)
+    // Ảnh cắt vuông từ ảnh chụp chung (x, y, size: tỉ lệ 0–1 theo chiều rộng/cao ảnh gốc)
+    crops: [
+      { id: "groom", from: "p38", x: 0.21, y: 0.1, size: 0.36 },
+      { id: "bride", from: "p53", x: 0.08, y: 0.14, size: 0.8 },
+    ],
   },
+
 
   // ---------------------------------------------------------------------------
   // 8. ALBUM LẬT TRANG 3D
@@ -192,14 +203,22 @@ export default {
   // ---------------------------------------------------------------------------
   album: {
     leaves: [
-      { front: "photos/placeholder/album-cover.svg", back: "photos/placeholder/album-01.svg", frontAlt: "Our Wedding Book", backAlt: "Trang 01", frontHardcover: true }, // TODO
-      { front: "photos/placeholder/album-02.svg", back: "photos/placeholder/album-03.svg", frontAlt: "Trang 02", backAlt: "Trang 03" }, // TODO
-      { front: "photos/placeholder/album-04.svg", back: "photos/placeholder/album-05.svg", frontAlt: "Trang 04", backAlt: "Trang 05" }, // TODO
-      { front: "photos/placeholder/album-06.svg", back: "photos/placeholder/album-07.svg", frontAlt: "Trang 06", backAlt: "Trang 07" }, // TODO
-      { front: "photos/placeholder/album-08.svg", back: "photos/placeholder/album-09.svg", frontAlt: "Trang 08", backAlt: "Trang 09" }, // TODO
-      { front: "photos/placeholder/album-10.svg", back: "photos/placeholder/album-back.svg", frontAlt: "Trang 10", backAlt: "Trọn vẹn yêu thương", backHardcover: true }, // TODO
+      { front: "p25", back: "p11", frontAlt: "Lễ Dạm Ngõ", backAlt: "Trước cổng nhà", frontHardcover: true },
+      { front: "p12", back: "p13", frontAlt: "Trước cổng nhà", backAlt: "Trước cổng nhà" },
+      { front: "p14", back: "p20", frontAlt: "Tay trong tay", backAlt: "Bên hiên nhà" },
+      { front: "p21", back: "p22", frontAlt: "Bên hiên nhà", backAlt: "Bên hiên nhà" },
+      { front: "p23", back: "p24", frontAlt: "Lễ Dạm Ngõ", backAlt: "Lễ Dạm Ngõ" },
+      { front: "p26", back: "p28", frontAlt: "Lễ Dạm Ngõ", backAlt: "Lễ Dạm Ngõ" },
+      { front: "p29", back: "p30", frontAlt: "Nhìn nhau", backAlt: "Nhìn nhau" },
+      { front: "p31", back: "p32", frontAlt: "Lễ Dạm Ngõ", backAlt: "Nàng" },
+      { front: "p40", back: "p41", frontAlt: "Nàng", backAlt: "Phút riêng tư" },
+      { front: "p45", back: "p47", frontAlt: "Hai gia đình", backAlt: "Nàng" },
+      { front: "p48", back: "p50", frontAlt: "Nàng", backAlt: "Nàng" },
+      { front: "p51", back: "p53", frontAlt: "Nàng", backAlt: "Nàng" },
+      { front: "p54", back: "p55", frontAlt: "Nàng", backAlt: "Trọn vẹn yêu thương", backHardcover: true },
     ],
   },
+
 
   // ---------------------------------------------------------------------------
   // 9. NHẠC NỀN + LỜI CHẠY

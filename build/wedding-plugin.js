@@ -241,14 +241,17 @@ export default function weddingPlugin({ configFile = 'wedding.config.js' } = {})
       }
       // Cảnh báo những file được nhắc trong config nhưng không có trong public/
       const missing = [];
+      const manifestFile = path.join(root, 'js', 'photo-manifest.json');
+      const photoIds = fs.existsSync(manifestFile) ? JSON.parse(fs.readFileSync(manifestFile, 'utf8')).photos || {} : {};
       const check = (p) => {
-        if (typeof p !== 'string' || !p || /^https?:/.test(p) || PLACEHOLDER_RE.test(p)) return;
+        if (typeof p !== 'string' || !p || /^https?:/.test(p) || PLACEHOLDER_RE.test(p) || photoIds[p]) return;
         if (!fs.existsSync(path.join(publicDir, p))) missing.push(p);
       };
       check(config.site?.ogImage);
       check(config.music?.src);
       check(config.music?.lyrics);
-      Object.values(config.photos || {}).flat().forEach(check);
+      const { source, share, crops, ...shown } = config.photos || {};
+      Object.values(shown).flat().forEach(check);
       (config.album?.leaves || []).forEach((l) => [l.front, l.back].forEach(check));
       Object.values(config.couple || {}).forEach((p) => check(p.portrait));
       (config.gifts?.accounts || []).forEach((a) => check(a.qrImage));

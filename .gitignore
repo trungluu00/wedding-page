@@ -11,3 +11,14 @@ yarn-debug.log*
 yarn-error.log*
 .DS_Store
 Thumbs.db
+
+# Ảnh gốc: không bao giờ đưa lên git (chỉ commit bản đã nén trong public/photos)
+*.CR2
+*.cr2
+*.NEF
+*.ARW
+*.HEIC
+*.heic
+/photos-source/
+/originals/
+.claude/

@@ -53,9 +53,27 @@ File có chú thích tiếng Việt cho từng mục. Các phần chính:
 | `sections` | Các phần hiện trên thiệp **theo đúng thứ tự**; xóa tên khỏi danh sách để ẩn |
 | `backend` | URL Apps Script, hạn xác nhận tham dự, số người tối đa mỗi thiệp |
 
-**Ảnh:** đặt vào `public/photos/` và ghi đường dẫn tính từ `public/`, ví dụ `photos/hero.jpg`.
-Đường dẫn dạng `photos/placeholder/<tên>.svg` là ảnh giữ chỗ tự sinh theo màu theme; thay bằng ảnh thật khi có.
-Kích thước gợi ý được ghi cạnh từng mục. Nên nén ảnh (JPG chất lượng ~80, cạnh dài ≤ 1600px) để thiệp mở nhanh.
+**Ảnh — dùng `npm run photos`:**
+
+1. Để ảnh gốc ở một thư mục trên máy (không nằm trong repo), ghi đường dẫn vào `photos.source`
+   trong `wedding.config.js` (hoặc đặt biến môi trường `PHOTO_SOURCE`).
+2. Chạy:
+
+   ```bash
+   npm run photos
+   ```
+
+   Script (dùng `sharp`) tạo cho mỗi ảnh một **id** gọn (`p01`, `p02`… theo thứ tự chụp) và 4 cỡ WebP
+   chất lượng 88 trong `public/photos/`: cạnh dài 400 (thumbnail), 900 (điện thoại), 1600 (hiển thị),
+   2560 (phóng to). Giữ hướng xoay, chuyển về sRGB, bỏ EXIF/GPS, không phóng to ảnh nhỏ. Tạo thêm
+   `share-1200x630.jpg` (JPEG q90, 4:4:4) từ ảnh `photos.share` để làm ảnh xem trước khi gửi link.
+   Chạy lại chỉ xử lý ảnh mới hoặc đã sửa. Ảnh gốc không bao giờ bị chép vào repo.
+3. Mở `npm run dev` rồi vào http://localhost:5173/photos-contact-sheet.html để xem toàn bộ ảnh kèm id
+   và tên file gốc. Ghi id vào `photos`, `couple.*.portrait`, `album.leaves` trong `wedding.config.js`.
+
+Trang tự dùng `srcset`: điện thoại tải cỡ vừa đủ nhưng vẫn nét trên màn hình retina, phóng to trong album
+dùng bản 2560. Vẫn có thể ghi đường dẫn file trực tiếp (vd `photos/rieng.jpg` trong `public/`).
+Đường dẫn dạng `photos/placeholder/<tên>.svg` là ảnh giữ chỗ tự sinh theo màu theme.
 
 **Sự kiện theo nhóm khách:** `audience: ["all"]` thì ai cũng thấy. `["nha-trai"]` / `["nha-gai"]` khớp cột `side`
 của khách trong Sheet; tên nhóm khác (vd `"gia-dinh"`) khớp cột `groups`. Sự kiện có `main: true` dùng cho

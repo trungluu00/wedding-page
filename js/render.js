@@ -2,6 +2,26 @@
  * Đổ nội dung từ wedding.config.js vào trang.
  * Mọi chuỗi do người dùng/khách nhập đều chèn bằng textContent (không innerHTML).
  */
+// Danh sách ảnh đã xử lý bởi `npm run photos` (có thể chưa tồn tại → {})
+const manifestModules = import.meta.glob('./photo-manifest.json', { eager: true });
+const PHOTO_MANIFEST = (Object.values(manifestModules)[0] || {}).default || { photos: {} };
+
+/**
+ * Ảnh trong config có thể là id (vd "p05", do `npm run photos` tạo) hoặc đường dẫn file.
+ * Trả về { src, srcset, full, thumb } — srcset cho trình duyệt tự chọn cỡ vừa màn hình.
+ */
+export function photo(ref, displaySize = 1600) {
+  const p = PHOTO_MANIFEST.photos?.[ref];
+  if (!p) return { src: ref || '', srcset: '', full: ref || '', thumb: ref || '' };
+  const entries = Object.entries(p.sizes || {}).sort((a, b) => a[0] - b[0]);
+  return {
+    src: `photos/${ref}-${displaySize}.webp`,
+    srcset: entries.map(([s, [w]]) => `photos/${ref}-${s}.webp ${w}w`).join(', '),
+    full: `photos/${ref}-${entries.length ? entries[entries.length - 1][0] : displaySize}.webp`,
+    thumb: `photos/${ref}-${entries.length ? entries[0][0] : displaySize}.webp`,
+  };
+}
+
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
@@ -9,10 +29,16 @@ function setText(sel, value) {
   const el = typeof sel === 'string' ? $(sel) : sel;
   if (el) el.textContent = value ?? '';
 }
-function setImg(sel, src, alt = '') {
+const SIZES_FULL = '(max-width: 500px) 100vw, 500px';
+function setImg(sel, ref, alt = '', sizes = SIZES_FULL) {
   const el = typeof sel === 'string' ? $(sel) : sel;
   if (!el) return;
-  if (src) el.src = src;
+  const ph = photo(ref);
+  if (ph.srcset) {
+    el.sizes = sizes;
+    el.srcset = ph.srcset;
+  }
+  if (ph.src) el.src = ph.src;
   el.alt = alt;
 }
 function el(tag, className, text) {
@@ -181,8 +207,8 @@ export function renderStatic(config) {
   // Tên
   setText('#introGroomName', groom.shortName);
   setText('#introBrideName', bride.shortName);
-  setText('#heroGroomName', groom.shortName.toUpperCase());
-  setText('#heroBrideName', bride.shortName.toUpperCase());
+  setText('#heroGroomName', groom.shortName);
+  setText('#heroBrideName', bride.shortName);
   setText('#profileGroomName', groom.fullName);
   setText('#profileBrideName', bride.fullName);
   setText('#groomRole', (groom.role || '').toUpperCase());
@@ -208,8 +234,8 @@ export function renderStatic(config) {
   setImg('#heroImg', p.hero, names);
   setImg('#statementImg', p.statement, names);
   setImg('#endingImg', p.ending, names);
-  setImg('#groomPortrait', groom.portrait, `Chú rể ${groom.fullName}`);
-  setImg('#bridePortrait', bride.portrait, `Cô dâu ${bride.fullName}`);
+  setImg('#groomPortrait', groom.portrait, `Chú rể ${groom.fullName}`, '(max-width: 500px) 46vw, 230px');
+  setImg('#bridePortrait', bride.portrait, `Cô dâu ${bride.fullName}`, '(max-width: 500px) 46vw, 230px');
 
   // Câu chữ
   const t = config.texts || {};
@@ -451,7 +477,14 @@ export function startCountdown(ev) {
 // Album: dựng danh sách trang đôi và trang đơn từ config.album.leaves
 // ---------------------------------------------------------------------------
 export function buildAlbum(leavesCfg = []) {
-  const leaves = leavesCfg.filter((l) => l && l.front && l.back);
+  // Mỗi mặt trang: src (hiển thị), srcset (theo màn hình), full (bản 2560 cho phóng to), thumb
+  const leaves = leavesCfg
+    .filter((l) => l && l.front && l.back)
+    .map((l) => {
+      const f = photo(l.front);
+      const b = photo(l.back);
+      return { ...l, front: f.src, frontSrcset: f.srcset, frontFull: f.full, frontThumb: f.thumb, back: b.src, backSrcset: b.srcset, backFull: b.full, backThumb: b.thumb };
+    });
   const n = leaves.length;
   const inner = Math.max(0, 2 * n - 2);
   const spreads = [];
@@ -468,14 +501,14 @@ export function buildAlbum(leavesCfg = []) {
       label: i === 0 ? 'Bìa' : i === n ? 'Kết' : pad(i),
       title,
       counter,
-      leftThumb: left ? left.back : null,
-      rightThumb: right ? right.front : null,
+      leftThumb: left ? left.backThumb : null,
+      rightThumb: right ? right.frontThumb : null,
       zoomIdx: i === 0 ? 0 : 2 * i - 1,
     });
   }
   const pages = leaves.flatMap((l) => [
-    { src: l.front, caption: l.frontAlt || '' },
-    { src: l.back, caption: l.backAlt || '' },
+    { src: l.frontFull, caption: l.frontAlt || '' },
+    { src: l.backFull, caption: l.backAlt || '' },
   ]);
   return { leaves, spreads, pages };
 }
