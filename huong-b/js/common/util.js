@@ -52,18 +52,46 @@ export const util = (() => {
      * @param {'success'|'error'|'info'} [type]
      * @returns {void}
      */
+    // Chỉ một thông báo trên màn hình: thông báo mới thay chữ của thông báo đang hiện và hủy
+    // timer cũ (không xếp chồng). Vị trí ở trên thanh điều hướng dưới (xem .toast-zone trong CSS).
+    /** @type {HTMLElement|null} */
+    let toastEl = null;
+    let toastTimer = null;
+    let toastRemoveTimer = null;
+
     const toast = (message, type = 'info') => {
         const zone = document.getElementById('toast-zone');
         if (!zone) {
             window.alert(message);
             return;
         }
-        const el = h('div', { class: `toast-c ${type === 'error' ? 'toast-error' : ''}`, role: 'status' }, message);
-        zone.appendChild(el);
-        setTimeout(() => {
-            el.style.opacity = '0';
-            setTimeout(() => el.remove(), 350);
-        }, type === 'error' ? 4500 : 2800);
+        clearTimeout(toastTimer);
+        clearTimeout(toastRemoveTimer);
+
+        if (!toastEl) {
+            toastEl = h('div', { class: 'toast-c', role: 'status' });
+            zone.replaceChildren(toastEl);
+            // Khung hình sau mới thêm lớp hiện để transition chạy.
+            requestAnimationFrame(() => requestAnimationFrame(() => toastEl?.classList.add('toast-show')));
+        } else {
+            toastEl.classList.add('toast-show');
+        }
+        toastEl.classList.toggle('toast-error', type === 'error');
+        toastEl.textContent = message;
+
+        toastTimer = setTimeout(() => {
+            const el = toastEl;
+            if (!el) {
+                return;
+            }
+            el.classList.remove('toast-show');
+            toastRemoveTimer = setTimeout(() => {
+                el.remove();
+                if (toastEl === el) {
+                    toastEl = null;
+                }
+            }, 300);
+        }, type === 'error' ? 4500 : 2600);
     };
 
     const notify = (message) => ({
@@ -82,38 +110,24 @@ export const util = (() => {
      * @returns {Promise<HTMLElement>}
      */
     const changeOpacity = (el, isUp, duration = 400) => new Promise((res) => {
-        let from = parseFloat(el.style.opacity);
-        if (Number.isNaN(from)) {
-            from = isUp ? 0 : 1;
-        }
-        const target = isUp ? 1 : 0;
-        const start = Date.now();
+        // Dùng CSS transition trên opacity (chạy ở compositor, không chiếm luồng chính),
+        // setTimeout bảo đảm xong đúng hạn kể cả khi webview bỏ qua transitionend.
+        const target = isUp ? '1' : '0';
         let done = false;
-
         const finish = () => {
             if (done) {
                 return;
             }
             done = true;
-            el.style.opacity = target.toString();
+            el.style.transition = '';
             res(el);
         };
-
-        const animate = () => {
-            if (done) {
-                return;
-            }
-            const t = Math.min(1, (Date.now() - start) / duration);
-            el.style.opacity = (from + (target - from) * t).toFixed(2);
-            if (t >= 1) {
-                finish();
-            } else {
-                requestAnimationFrame(animate);
-            }
-        };
-
-        requestAnimationFrame(animate);
-        setTimeout(finish, duration + 250);
+        el.style.transition = `opacity ${duration}ms ease`;
+        // Đọc layout một lần để trình duyệt ghi nhận giá trị bắt đầu trước khi đổi.
+        void el.offsetWidth;
+        el.style.opacity = target;
+        el.addEventListener('transitionend', finish, { once: true });
+        setTimeout(finish, duration + 100);
     });
 
     /**

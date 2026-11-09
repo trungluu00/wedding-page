@@ -5,6 +5,7 @@ import { util } from '../../common/util.js';
 import {
     eventDate, longDate, shortDate, timeText, weekday, dayNum, monthYear, calendarUrl, vietQrUrl, plainDate,
 } from '../../common/format.js';
+import { photoAttrs, COLUMN_SIZES } from '../../common/photo.js';
 
 const { h, icon } = util;
 
@@ -45,12 +46,12 @@ export const mainEvent = (events, visible) => {
 
 const fill = (text, khach) => String(text ?? '').split('{khach}').join(khach);
 
-export const ornament = (cfg, small = false) => {
+export const ornament = (cfg, small = false, large = false) => {
     const type = cfg.theme?.ornament ?? 'song-hy';
     if (type === 'none') {
         return null;
     }
-    const cls = `ornament ${small ? 'ornament-sm' : ''}`;
+    const cls = `ornament ${small ? 'ornament-sm' : ''} ${large ? 'ornament-lg' : ''}`;
     if (type === 'monogram') {
         const g = (cfg.couple.groom.shortName || cfg.couple.groom.fullName).trim()[0] ?? '';
         const b = (cfg.couple.bride.shortName || cfg.couple.bride.fullName).trim()[0] ?? '';
@@ -59,22 +60,36 @@ export const ornament = (cfg, small = false) => {
     return h('div', { class: `${cls} ornament-song-hy`, 'aria-hidden': 'true' }, '囍');
 };
 
-const img = (src, alt, cls, eager = false) => {
-    if (!src) {
+/**
+ * Ảnh có srcset (mã ảnh pNN) hoặc src thường. Chạm để xem bản 2560px.
+ * @param {string} ref
+ * @param {string} alt
+ * @param {string} cls
+ * @param {{eager?: boolean, sizes?: string, zoom?: boolean, group?: string}} [opt]
+ */
+const img = (ref, alt, cls, opt = {}) => {
+    if (!ref) {
         return null;
     }
+    const zoom = opt.zoom !== false;
     return h('img', {
-        src,
+        ...photoAttrs(ref, opt.sizes ?? COLUMN_SIZES),
         alt: alt || 'Ảnh cưới',
-        class: `${cls} js-zoom cursor-pointer`,
-        loading: eager ? 'eager' : 'lazy',
+        class: `${cls} ${zoom ? 'js-zoom cursor-pointer' : ''}`.trim(),
+        loading: opt.eager ? 'eager' : 'lazy',
+        fetchpriority: opt.eager ? 'high' : null,
         decoding: 'async',
+        'data-group': opt.group ?? null,
     });
 };
 
+/** sizes cho ảnh cố định bề ngang theo rem. */
+const fixedSizes = (rem) => `${Math.round(rem * 16)}px`;
+
 const divider = () => h('div', { class: 'divider-ornament', 'aria-hidden': 'true' }, icon('fa-heart', 'fa-xs'));
 
-const sectionShell = (id, { kicker, title, alt = false }, ...children) => h('section', { id, class: `text-center ${alt ? 'bg-alt' : 'bg-page'}` },
+// Như trang xem thử: mọi phần cùng nền kem, thẻ nền trắng (surface). `alt` giữ lại để tương thích, không đổi nền.
+const sectionShell = (id, { kicker, title }, ...children) => h('section', { id, class: 'text-center bg-page' },
     kicker ? h('p', { class: 'section-kicker mb-1' }, kicker) : null,
     title ? h('h2', { class: 'section-title mb-0' }, title) : null,
     title ? divider() : null,
@@ -90,19 +105,18 @@ const coupleNames = (cfg) => `${cfg.couple.groom.shortName} & ${cfg.couple.bride
 export const renderCover = (cfg, ctx) => {
     const main = ctx.main;
     const d = main ? eventDate(main) : null;
-    return h('div', { class: 'd-flex justify-content-center align-items-center vh-100 overflow-y-auto px-3' },
+    // Bìa thư theo trang xem thử (preset Lục bảo): nền màu chính, 囍 vàng đồng, nút "Mở thiệp" nền vàng đồng.
+    return h('div', { class: 'cover d-flex justify-content-center align-items-center overflow-y-auto px-3' },
         h('div', { class: 'd-flex flex-column text-center align-items-center py-4' },
-            ornament(cfg),
-            h('p', { class: 'section-kicker mt-3 mb-3' }, 'Thiệp mời cưới'),
-            img(cfg.photos?.hero, `Ảnh cưới ${coupleNames(cfg)}`, 'cover-photo mb-3', true),
+            ornament(cfg, false, true),
+            h('p', { class: 'cover-small mt-4 mb-2' }, 'Thiệp mời cưới'),
             h('h1', { class: 'font-esthetic cover-names mb-1' }, coupleNames(cfg)),
-            d ? h('p', { class: 'mb-3 text-muted-c', style: { letterSpacing: '0.15em' } }, shortDate(d)) : null,
-            h('div', { class: 'mb-3' },
-                h('small', { class: 'd-block text-muted-c' }, 'Kính mời'),
-                h('p', { class: 'cover-guest m-0', id: 'cover-guest' }, ctx.khach),
-            ),
-            h('button', { type: 'button', class: 'btn btn-primary rounded-pill px-4 py-2 shadow', id: 'button-open' },
-                icon('fa-envelope-open', 'fa-bounce me-2'), 'Mở thiệp'),
+            d ? h('p', { class: 'cover-date mb-4' }, shortDate(d)) : null,
+            h('p', { class: 'cover-small mb-1' }, 'Kính mời'),
+            h('p', { class: 'cover-guest mb-1', id: 'cover-guest' }, ctx.khach),
+            h('p', { class: 'cover-small mb-4' }, 'đến dự lễ cưới của chúng mình'),
+            h('button', { type: 'button', class: 'btn btn-cover rounded-pill px-4 py-2', id: 'button-open' },
+                icon('fa-envelope-open', 'me-2'), 'Mở thiệp'),
         ),
     );
 };
@@ -112,7 +126,7 @@ const renderHero = (cfg, ctx) => {
     return h('section', { id: 'home', class: 'bg-page text-center pt-5' },
         h('p', { class: 'section-kicker mb-2' }, 'Chúng mình cưới'),
         h('h1', { class: 'font-esthetic mb-4', style: { fontSize: '3.25rem', color: 'var(--c-strong)' } }, coupleNames(cfg)),
-        h('div', { class: 'px-4' }, img(cfg.photos?.hero, `Ảnh cưới ${coupleNames(cfg)}`, 'hero-photo', true)),
+        h('div', { class: 'px-4' }, img(cfg.photos?.hero, `Ảnh cưới ${coupleNames(cfg)}`, 'hero-photo', { eager: true })),
         d ? h('p', { class: 'mt-4 mb-1 font-display', style: { fontSize: '1.15rem' } }, longDate(d)) : null,
         ctx.main?.lunar ? h('p', { class: 'text-muted-c small mb-3' }, `(${ctx.main.lunar})`) : null,
         ctx.main ? h('a', {
@@ -128,8 +142,8 @@ const renderHero = (cfg, ctx) => {
     );
 };
 
-const renderInvitation = (cfg, ctx) => h('section', { id: 'invitation', class: 'bg-alt text-center statement' },
-    cfg.photos?.statement ? h('img', { src: cfg.photos.statement, alt: '', class: 'statement-bg', loading: 'lazy', 'aria-hidden': 'true' }) : null,
+const renderInvitation = (cfg, ctx) => h('section', { id: 'invitation', class: 'bg-page text-center statement' },
+    cfg.photos?.statement ? h('img', { ...photoAttrs(cfg.photos.statement), alt: '', class: 'statement-bg', loading: 'lazy', decoding: 'async', 'aria-hidden': 'true' }) : null,
     h('div', { class: 'position-relative' },
         h('div', { class: 'd-flex justify-content-center mb-3' }, ornament(cfg, true)),
         cfg.texts?.quote ? h('p', { class: 'quote px-2 mb-0', 'data-aos': 'fade-up' }, `“${cfg.texts.quote}”`) : null,
@@ -139,7 +153,7 @@ const renderInvitation = (cfg, ctx) => h('section', { id: 'invitation', class: '
 );
 
 const personCard = (p, role, side, aos) => h('div', { class: 'py-2', 'data-aos': aos },
-    img(p.portrait, `${role} ${p.fullName}`, 'portrait mb-3 mx-auto d-block'),
+    img(p.portrait, `${role} ${p.fullName}`, 'portrait mb-3 mx-auto d-block', { sizes: fixedSizes(11) }),
     h('p', { class: 'section-kicker mb-1' }, role),
     h('h3', { class: 'font-esthetic mb-2', style: { fontSize: '2.4rem', color: 'var(--c-strong)' } }, p.fullName),
     (p.father || p.mother) ? h('p', { class: 'mb-1 small' },
@@ -218,6 +232,11 @@ const renderCountdown = (cfg, ctx) => {
     );
 };
 
+const ALBUM_FIRST = 12;
+// sizes cho ô lưới 3 cột trong cột thiệp.
+const GRID_SIZES = '(min-width: 1400px) 9vw, (min-width: 1200px) 11vw, (min-width: 992px) 14vw, (min-width: 768px) 17vw, (min-width: 576px) 20vw, 34vw';
+
+/** Album: lưới 3 cột, hiện 12 ảnh đầu, nút "Xem thêm"; chạm ảnh mở lightbox có nút trước/sau. */
 const renderAlbum = (cfg) => {
     const list = [];
     for (const l of cfg.album?.leaves ?? []) {
@@ -227,22 +246,16 @@ const renderAlbum = (cfg) => {
     if (!list.length) {
         return null;
     }
-    const id = 'carousel-album';
-    return sectionShell('album', { kicker: 'Khoảnh khắc', title: 'Album ảnh cưới', alt: true },
-        h('div', { id, class: 'carousel slide rounded-4 overflow-hidden shadow', 'data-bs-ride': 'carousel', 'data-bs-interval': '4500', 'data-aos': 'fade-up' },
-            h('div', { class: 'carousel-indicators' },
-                list.map((_, i) => h('button', {
-                    type: 'button', 'data-bs-target': `#${id}`, 'data-bs-slide-to': String(i), class: i === 0 ? 'active' : null,
-                    'aria-current': i === 0 ? 'true' : null, 'aria-label': `Ảnh ${i + 1}`,
-                }))),
-            h('div', { class: 'carousel-inner' },
-                list.map((p, i) => h('div', { class: `carousel-item ${i === 0 ? 'active' : ''}` }, img(p.src, p.alt, 'd-block album-img')))),
-            h('button', { class: 'carousel-control-prev', type: 'button', 'data-bs-target': `#${id}`, 'data-bs-slide': 'prev' },
-                h('span', { class: 'carousel-control-prev-icon', 'aria-hidden': 'true' }), h('span', { class: 'visually-hidden' }, 'Ảnh trước')),
-            h('button', { class: 'carousel-control-next', type: 'button', 'data-bs-target': `#${id}`, 'data-bs-slide': 'next' },
-                h('span', { class: 'carousel-control-next-icon', 'aria-hidden': 'true' }), h('span', { class: 'visually-hidden' }, 'Ảnh sau')),
-        ),
-        h('p', { class: 'small text-muted-c mt-2 mb-0' }, 'Chạm vào ảnh để xem lớn'),
+    const cell = (p, i) => h('div', { class: `album-cell ${i >= ALBUM_FIRST ? 'd-none js-more' : ''}` },
+        img(p.src, p.alt || `Ảnh cưới ${i + 1}`, 'album-img', { sizes: GRID_SIZES, group: 'album' }));
+    const more = list.length > ALBUM_FIRST
+        ? h('button', { type: 'button', class: 'btn btn-outline-auto rounded-pill px-4 mt-3', id: 'album-more' },
+            icon('fa-images', 'me-2'), `Xem thêm ${list.length - ALBUM_FIRST} ảnh`)
+        : null;
+    return sectionShell('album', { kicker: 'Khoảnh khắc', title: 'Album ảnh cưới' },
+        h('div', { class: 'album-grid', id: 'album-grid' }, list.map(cell)),
+        more,
+        h('p', { class: 'small text-muted-c mt-2 mb-0' }, 'Chạm vào ảnh để xem lớn, vuốt để xem ảnh khác'),
     );
 };
 
@@ -348,7 +361,7 @@ export const renderDesktopSide = (cfg, ctx) => {
     const side = document.getElementById('desktop-side');
     const d = ctx.main ? eventDate(ctx.main) : null;
     side.replaceChildren(
-        cfg.photos?.hero ? h('img', { src: cfg.photos.hero, alt: '', class: 'position-absolute bg-cover-home', style: { opacity: '0.3' }, loading: 'lazy', 'aria-hidden': 'true' }) : null,
+        cfg.photos?.hero ? h('img', { ...photoAttrs(cfg.photos.hero, '75vw'), alt: '', class: 'position-absolute bg-cover-home', style: { opacity: '0.3' }, loading: 'lazy', decoding: 'async', 'aria-hidden': 'true' }) : null,
         h('div', { class: 'position-relative text-center p-4 bg-overlay-auto rounded-5' },
             h('div', { class: 'd-flex justify-content-center mb-2' }, ornament(cfg, true)),
             h('h2', { class: 'font-esthetic mb-3', style: { fontSize: '3rem', color: 'var(--c-strong)' } }, coupleNames(cfg)),

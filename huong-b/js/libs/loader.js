@@ -28,7 +28,7 @@ const loadAOS = () => Promise.all([addCss(urlAosCss), addScript(urlAosJs)]).then
     if (typeof window.AOS === 'undefined') {
         throw new Error('AOS không tải được');
     }
-    window.AOS.init({ once: true, duration: 1200 });
+    window.AOS.init({ once: true, duration: 800, offset: 60, disable: () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches });
 });
 
 const loadConfetti = () => addScript(urlConfetti).then(() => {

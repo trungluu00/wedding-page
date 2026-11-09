@@ -39,7 +39,7 @@
     </div>
 
     <!-- Bìa thư (Mở thiệp) -->
-    <div class="loading-page bg-page" id="welcome" style="opacity: 0;"></div>
+    <div class="loading-page bg-cover-c" id="welcome" style="opacity: 0;"></div>
 
     <!-- Nút nổi: sáng/tối và nhạc -->
     <div class="d-flex position-fixed flex-column" style="bottom: 12vh; right: 1rem; z-index: 1030;">
@@ -52,14 +52,14 @@
     </div>
 
     <!-- Màn hình tải -->
-    <div class="loading-page bg-page" id="loading" style="opacity: 1;">
+    <div class="loading-page bg-cover-c" id="loading" style="opacity: 1;">
         <div class="d-flex justify-content-center align-items-center vh-100 overflow-y-auto">
             <div class="d-flex flex-column width-loading text-center">
                 <div class="loading-mark mb-3 mx-auto" id="loading-mark" aria-hidden="true"></div>
                 <div class="progress" role="progressbar" style="height: 0.4rem;" aria-label="Đang tải">
                     <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
                 </div>
-                <small class="d-none mt-2 text-muted-c" id="progress-info" style="font-size: 0.8rem;">Đang mở thiệp...</small>
+                <small class="d-none mt-2 cover-small" id="progress-info" style="font-size: 0.8rem;">Đang mở thiệp...</small>
                 <noscript>
                     <small class="mt-2 text-danger">Xin lỗi, thiệp cần bật JavaScript để hiển thị.</small>
                 </noscript>
@@ -69,7 +69,7 @@
 
     <!-- Xem ảnh lớn -->
     <div class="modal fade" id="modal-image" tabindex="-1" aria-hidden="true" aria-label="Xem ảnh">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content rounded-4 border border-0">
                 <div class="modal-body p-0">
                     <div class="d-flex position-absolute top-0 end-0">
@@ -84,6 +84,9 @@
                         </button>
                     </div>
                     <img src="data:," class="img-fluid w-100 rounded-4 cursor-pointer" alt="Ảnh cưới" id="show-modal-image">
+                    <button type="button" class="lightbox-nav lightbox-prev d-none" id="lightbox-prev" aria-label="Ảnh trước"><i class="fa-solid fa-chevron-left"></i></button>
+                    <button type="button" class="lightbox-nav lightbox-next d-none" id="lightbox-next" aria-label="Ảnh sau"><i class="fa-solid fa-chevron-right"></i></button>
+                    <small class="lightbox-count d-none" id="lightbox-count"></small>
                 </div>
             </div>
         </div>

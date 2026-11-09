@@ -107,9 +107,7 @@ section.bg-alt {
     box-shadow: 0 0.35rem 1.25rem rgba(var(--c-text-rgb), 0.06);
 }
 
-section.bg-alt .card-c {
-    background-color: var(--c-bg);
-}
+
 
 /* --- Hoạ tiết: chữ Hỷ / monogram --- */
 .ornament {
@@ -145,7 +143,70 @@ section.bg-alt .card-c {
     height: 2.75rem;
 }
 
-/* --- Bìa thư --- */
+/* --- Bìa thư + màn tải (theo trang xem thử: nền màu chính, chữ on-primary, hoạ tiết vàng đồng) --- */
+.bg-cover-c {
+    background-color: var(--c-primary);
+    color: var(--c-on-primary);
+}
+
+.cover {
+    min-height: 100vh;
+    min-height: 100dvh;
+}
+
+.bg-cover-c .ornament {
+    color: var(--c-accent);
+    border-color: var(--c-accent);
+}
+
+.ornament-lg.ornament-song-hy,
+.ornament-lg.ornament-monogram {
+    font-size: 3.4rem;
+    width: 6rem;
+    height: 6rem;
+}
+
+.cover-small {
+    font-size: 0.75rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    opacity: 0.85;
+}
+
+.cover-date {
+    font-family: var(--f-display);
+    font-size: 1.15rem;
+    letter-spacing: 0.15em;
+}
+
+.bg-cover-c .cover-names,
+.bg-cover-c .cover-guest {
+    color: var(--c-on-primary);
+}
+
+.btn-cover {
+    --bs-btn-color: var(--c-text);
+    --bs-btn-bg: var(--c-accent);
+    --bs-btn-border-color: var(--c-accent);
+    --bs-btn-hover-color: var(--c-text);
+    --bs-btn-hover-bg: var(--c-surface);
+    --bs-btn-hover-border-color: var(--c-accent);
+    --bs-btn-active-color: var(--c-text);
+    --bs-btn-active-bg: var(--c-surface);
+    --bs-btn-active-border-color: var(--c-accent);
+    --bs-btn-disabled-color: var(--c-text);
+    --bs-btn-disabled-bg: var(--c-accent);
+    --bs-btn-disabled-border-color: var(--c-accent);
+    font-weight: 600;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.18);
+}
+
+.bg-cover-c .progress {
+    --bs-progress-bg: rgba(255, 255, 255, 0.2);
+    --bs-progress-bar-bg: var(--c-accent);
+}
+
+/* --- Ảnh bìa (không dùng ở bìa xanh, giữ cho ai muốn thêm) --- */
 .cover-photo {
     width: 12rem;
     height: 15rem;
@@ -156,7 +217,7 @@ section.bg-alt .card-c {
 }
 
 .cover-names {
-    font-size: 3rem;
+    font-size: 3.4rem;
     color: var(--c-strong);
 }
 
@@ -174,25 +235,25 @@ section.bg-alt .card-c {
     object-fit: cover;
 }
 
+/* Giữ nguyên tỉ lệ ảnh (width/height trong thẻ img giữ chỗ trước khi ảnh tải). */
 .hero-photo {
     width: 100%;
-    aspect-ratio: 4 / 5;
-    object-fit: cover;
+    height: auto;
     border-radius: 10rem 10rem 1.25rem 1.25rem;
     box-shadow: 0 1rem 2rem rgba(var(--c-text-rgb), 0.15);
 }
 
 .photo-break {
     width: 100%;
+    height: auto;
     display: block;
-    aspect-ratio: 3 / 2;
-    object-fit: cover;
 }
 
 .portrait {
     width: 11rem;
     height: 13.5rem;
     object-fit: cover;
+    object-position: center 35%;
     border-radius: 5.5rem 5.5rem 1rem 1rem;
     border: 3px solid var(--c-surface);
     box-shadow: 0 0 0 1px var(--c-accent), 0 0.75rem 1.5rem rgba(var(--c-text-rgb), 0.12);
@@ -290,17 +351,17 @@ section.bg-alt .card-c {
 
 /* --- Đếm ngược --- */
 .countdown-box {
-    background-color: var(--c-surface);
-    border: 1px solid var(--c-line);
-    border-radius: 1rem;
+    background-color: var(--c-soft);
+    border-radius: 0.75rem;
     padding: 0.75rem 0.25rem;
 }
 
 .countdown-num {
     font-family: var(--f-display);
     font-size: 1.85rem;
-    color: var(--c-primary);
+    color: var(--c-strong);
     line-height: 1.1;
+    font-variant-numeric: tabular-nums;
 }
 
 .countdown-label {
@@ -308,15 +369,70 @@ section.bg-alt .card-c {
     color: var(--c-muted);
 }
 
-/* --- Album --- */
+/* --- Album: lưới 3 cột --- */
+.album-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.35rem;
+}
+
+.album-cell {
+    overflow: hidden;
+    border-radius: 0.5rem;
+    background-color: var(--c-soft);
+}
+
 .album-img {
+    display: block;
     width: 100%;
-    aspect-ratio: 4 / 5;
+    height: auto;
+    aspect-ratio: 1 / 1;
     object-fit: cover;
 }
 
-.carousel-indicators [data-bs-target] {
-    background-color: var(--c-surface);
+/* --- Lightbox --- */
+#modal-image .modal-body {
+    position: relative;
+}
+
+#show-modal-image {
+    height: auto;
+    max-height: 88vh;
+    object-fit: contain;
+    background-color: #000;
+}
+
+.lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 0;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.45);
+    color: #fff;
+    z-index: 2;
+}
+
+.lightbox-prev {
+    left: 0.5rem;
+}
+
+.lightbox-next {
+    right: 0.5rem;
+}
+
+.lightbox-count {
+    position: absolute;
+    bottom: 0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    padding: 0.1rem 0.6rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
 }
 
 /* --- Nhạc --- */
@@ -363,8 +479,13 @@ section.bg-alt .card-c {
     word-break: break-word;
 }
 
-section.bg-alt .wish-item {
-    background-color: var(--c-bg);
+.wish-item {
+    transition: transform 300ms ease, opacity 300ms ease;
+}
+
+.wish-item.wish-enter {
+    opacity: 0;
+    transform: translateY(-0.5rem);
 }
 
 .wish-author {
@@ -391,7 +512,11 @@ section.bg-alt .wish-item {
 
     .spin-button,
     .animate-love,
-    .slide-desktop {
+    .slide-desktop,
+    .scroll-animation,
+    .fa-bounce,
+    .toast-c,
+    .wish-item {
         animation: none !important;
         transition: none !important;
     }

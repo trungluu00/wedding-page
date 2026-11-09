@@ -158,10 +158,33 @@ export const forms = (client) => {
         countEl.textContent = sorted.length ? `${sorted.length} lời chúc` : '';
         listEl.replaceChildren(...(sorted.length
             ? sorted.map(wishItem)
-            : [h('p', { class: 'text-muted-c small m-0' }, 'Chưa có lời chúc nào. Bạn hãy là người đầu tiên nhé!')]));
+            : [h('p', { class: 'text-muted-c small m-0 wish-empty' }, 'Chưa có lời chúc nào. Bạn hãy là người đầu tiên nhé!')]));
     };
 
     let cache = [];
+
+    /**
+     * Thêm một lời chúc lên đầu danh sách mà không dựng lại cả danh sách (trang không nhảy):
+     * phần tử mới hiện dần bằng opacity/transform; danh sách có chiều cao giới hạn và cuộn riêng,
+     * nên nếu khách đang cuộn giữa danh sách thì giữ nguyên vị trí đang đọc.
+     */
+    const prependWish = (w) => {
+        cache = [w, ...cache];
+        if (!listEl) {
+            return;
+        }
+        listEl.querySelector('.wish-empty')?.remove();
+        const prevTop = listEl.scrollTop;
+        const prevHeight = listEl.scrollHeight;
+        const el = wishItem(w);
+        el.classList.add('wish-enter');
+        listEl.prepend(el);
+        if (prevTop > 0) {
+            listEl.scrollTop = prevTop + (listEl.scrollHeight - prevHeight);
+        }
+        requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove('wish-enter')));
+        countEl.textContent = `${cache.length} lời chúc`;
+    };
 
     const loadWishes = async () => {
         if (!listEl) {
@@ -226,12 +249,7 @@ export const forms = (client) => {
                 }
                 wishState.set('lastAt', Date.now());
                 text.value = '';
-                if (!client.isDemo) {
-                    cache = [{ author: data.author, relation: data.relation, text: data.text, createdAt: new Date().toISOString() }, ...cache];
-                    setList(cache);
-                } else {
-                    await loadWishes();
-                }
+                prependWish({ author: data.author, relation: data.relation, text: data.text, createdAt: new Date().toISOString() });
                 util.notify('Cảm ơn lời chúc của bạn!').success();
             } catch (err) {
                 util.notify(`Chưa gửi được: ${err.message}. Bạn thử lại nhé.`).error();

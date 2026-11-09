@@ -8,9 +8,12 @@
     "scripts": {
         "dev": "node scripts/dev.mjs",
         "build": "node scripts/build.mjs",
-        "photos": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-placeholders.ps1"
+        "photos": "node scripts/photos.mjs"
     },
     "dependencies": {
         "esbuild": "^0.25.12"
+    },
+    "devDependencies": {
+        "sharp": "^0.35.5"
     }
 }

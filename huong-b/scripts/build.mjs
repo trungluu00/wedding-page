@@ -75,7 +75,7 @@ export const renderHead = (cfg) => {
     `<meta property="og:image:height" content="630">`,
     `<meta property="og:image:alt" content="${esc(title)}">`,
     `<meta name="twitter:card" content="summary_large_image">`,
-    `<meta name="theme-color" content="${theme.light.bg}">`,
+    `<meta name="theme-color" content="${theme.light.primary}">`,
     `<meta name="color-scheme" content="light dark">`,
     `<meta name="format-detection" content="telephone=no">`,
     `<link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">`,
@@ -102,7 +102,9 @@ export const copyStatic = async () => {
     } catch {
       continue;
     }
-    await fs.cp(src, path.join(OUT, dir), { recursive: true, force: true });
+    // manifest.json/sizes.json chỉ dùng lúc build (sizes.json đã gói vào JS); manifest có tên file gốc nên không deploy.
+    const skip = new Set(['manifest.json', 'sizes.json']);
+    await fs.cp(src, path.join(OUT, dir), { recursive: true, force: true, filter: (f) => !skip.has(path.basename(f)) });
   }
   // Header bảo mật cơ bản cho Cloudflare Pages (Vercel đọc vercel.json).
   await fs.copyFile(path.join(ROOT, 'src', '_headers'), path.join(OUT, '_headers'));

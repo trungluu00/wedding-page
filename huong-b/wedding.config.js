@@ -12,7 +12,7 @@ export default {
     domain: "https://TODO", // TODO: địa chỉ thật sau khi deploy, vd "https://trung-nhi.pages.dev" (không có "/" cuối)
     title: "Thiệp cưới Trung & Nhi",
     description: "Trân trọng kính mời bạn tới chung vui trong ngày cưới của Trung & Nhi.", // TODO: viết lại nếu muốn
-    ogImage: "photos/share-1200x630.jpg", // TODO: ảnh JPG 1200x630 khi chia sẻ link (Zalo/Facebook không nhận SVG/WebP)
+    ogImage: "photos/share-1200x630.jpg", // ảnh JPG 1200x630 khi chia sẻ link; sinh từ photos.shareFrom bởi `npm run photos`
   },
 
   // --- Giao diện ---
@@ -37,7 +37,7 @@ export default {
     groom: {
       fullName: "Lưu Viết Trung",
       shortName: "Trung",
-      portrait: "photos/groom.jpg", // TODO: ảnh chân dung chú rể (dọc, khoảng 800x1000)
+      portrait: "p41", // chưa có ảnh chú rể chụp riêng; p41 là chú rể đứng cạnh cô dâu — đổi khi có ảnh riêng
       bio: "Trưởng nam của gia đình.", // TODO
       phone: "0900000001", // TODO: số điện thoại chú rể (để khách gọi hỏi đường)
       father: "Ông Lưu Văn A", // TODO
@@ -47,7 +47,7 @@ export default {
     bride: {
       fullName: "Đoàn Phương Nhi",
       shortName: "Nhi",
-      portrait: "photos/bride.jpg", // TODO: ảnh chân dung cô dâu
+      portrait: "p53", // cô dâu ngồi, nhìn thẳng
       bio: "Út nữ của gia đình.", // TODO
       phone: "0900000002", // TODO
       father: "Ông Đoàn Văn C", // TODO
@@ -132,19 +132,52 @@ export default {
   },
 
   // --- Ảnh ---
+  // Ghi MÃ ẢNH (p01...p55) do `npm run photos` sinh ra: thiệp tự chọn cỡ ảnh vừa màn hình (srcset)
+  // và mở bản 2560px khi chạm vào. Xem toàn bộ mã ảnh trong photos-contact-sheet.html.
+  // Vẫn có thể ghi đường dẫn thường, vd "photos/abc.jpg".
   photos: {
-    hero: "photos/hero.jpg", // TODO: ảnh bìa (dọc, khoảng 1080x1350)
-    statement: "photos/statement.jpg", // TODO: ảnh nền phần lời mời
-    middle: ["photos/middle-1.jpg", "photos/middle-2.jpg"], // TODO: ảnh chèn giữa các phần
-    ending: "photos/ending.jpg", // TODO: ảnh cuối thiệp
+    // Thư mục ảnh gốc trên máy (chỉ dùng cho `npm run photos`; ảnh gốc không deploy, không commit).
+    // Có thể thay bằng biến môi trường PHOTO_SOURCE.
+    source: "C:/Users/Trung lv/Pictures/me/dam-ngo",
+    shareFrom: "p11", // ảnh cắt ra ảnh chia sẻ Zalo/Facebook 1200x630 (photos/share-1200x630.jpg); chạy lại npm run photos sau khi đổi
+    hero: "p30", // ảnh lớn đầu thiệp (dọc): hai bạn đứng cạnh bảng tên
+    statement: "p16", // ảnh nền mờ phía sau lời mời: hai bạn đi cạnh nhau
+    middle: ["p12", "p27"], // ảnh ngang chèn giữa các phần
+    ending: "p26", // ảnh cuối thiệp (dọc)
   },
 
-  // --- Album (hướng B hiển thị thành một album ảnh trượt: front rồi back của từng "lá") ---
+  // --- Album (hướng B hiển thị thành lưới ảnh: front rồi back của từng "lá") ---
+  // Đang gồm cả 55 ảnh theo thứ tự chụp; xóa dòng nào để bỏ ảnh đó.
   album: {
     leaves: [
-      { front: "photos/album-1.jpg", back: "photos/album-2.jpg", frontAlt: "Ảnh cưới 1", backAlt: "Ảnh cưới 2" }, // TODO
-      { front: "photos/album-3.jpg", back: "photos/album-4.jpg", frontAlt: "Ảnh cưới 3", backAlt: "Ảnh cưới 4" }, // TODO
-      { front: "photos/album-5.jpg", back: "photos/album-6.jpg", frontAlt: "Ảnh cưới 5", backAlt: "Ảnh cưới 6" }, // TODO
+      { front: "p01", back: "p02", frontAlt: "Ảnh dạm ngõ 1", backAlt: "Ảnh dạm ngõ 2" },
+      { front: "p03", back: "p04", frontAlt: "Ảnh dạm ngõ 3", backAlt: "Ảnh dạm ngõ 4" },
+      { front: "p05", back: "p06", frontAlt: "Ảnh dạm ngõ 5", backAlt: "Ảnh dạm ngõ 6" },
+      { front: "p07", back: "p08", frontAlt: "Ảnh dạm ngõ 7", backAlt: "Ảnh dạm ngõ 8" },
+      { front: "p09", back: "p10", frontAlt: "Ảnh dạm ngõ 9", backAlt: "Ảnh dạm ngõ 10" },
+      { front: "p11", back: "p12", frontAlt: "Ảnh dạm ngõ 11", backAlt: "Ảnh dạm ngõ 12" },
+      { front: "p13", back: "p14", frontAlt: "Ảnh dạm ngõ 13", backAlt: "Ảnh dạm ngõ 14" },
+      { front: "p15", back: "p16", frontAlt: "Ảnh dạm ngõ 15", backAlt: "Ảnh dạm ngõ 16" },
+      { front: "p17", back: "p18", frontAlt: "Ảnh dạm ngõ 17", backAlt: "Ảnh dạm ngõ 18" },
+      { front: "p19", back: "p20", frontAlt: "Ảnh dạm ngõ 19", backAlt: "Ảnh dạm ngõ 20" },
+      { front: "p21", back: "p22", frontAlt: "Ảnh dạm ngõ 21", backAlt: "Ảnh dạm ngõ 22" },
+      { front: "p23", back: "p24", frontAlt: "Ảnh dạm ngõ 23", backAlt: "Ảnh dạm ngõ 24" },
+      { front: "p25", back: "p26", frontAlt: "Ảnh dạm ngõ 25", backAlt: "Ảnh dạm ngõ 26" },
+      { front: "p27", back: "p28", frontAlt: "Ảnh dạm ngõ 27", backAlt: "Ảnh dạm ngõ 28" },
+      { front: "p29", back: "p30", frontAlt: "Ảnh dạm ngõ 29", backAlt: "Ảnh dạm ngõ 30" },
+      { front: "p31", back: "p32", frontAlt: "Ảnh dạm ngõ 31", backAlt: "Ảnh dạm ngõ 32" },
+      { front: "p33", back: "p34", frontAlt: "Ảnh dạm ngõ 33", backAlt: "Ảnh dạm ngõ 34" },
+      { front: "p35", back: "p36", frontAlt: "Ảnh dạm ngõ 35", backAlt: "Ảnh dạm ngõ 36" },
+      { front: "p37", back: "p38", frontAlt: "Ảnh dạm ngõ 37", backAlt: "Ảnh dạm ngõ 38" },
+      { front: "p39", back: "p40", frontAlt: "Ảnh dạm ngõ 39", backAlt: "Ảnh dạm ngõ 40" },
+      { front: "p41", back: "p42", frontAlt: "Ảnh dạm ngõ 41", backAlt: "Ảnh dạm ngõ 42" },
+      { front: "p43", back: "p44", frontAlt: "Ảnh dạm ngõ 43", backAlt: "Ảnh dạm ngõ 44" },
+      { front: "p45", back: "p46", frontAlt: "Ảnh dạm ngõ 45", backAlt: "Ảnh dạm ngõ 46" },
+      { front: "p47", back: "p48", frontAlt: "Ảnh dạm ngõ 47", backAlt: "Ảnh dạm ngõ 48" },
+      { front: "p49", back: "p50", frontAlt: "Ảnh dạm ngõ 49", backAlt: "Ảnh dạm ngõ 50" },
+      { front: "p51", back: "p52", frontAlt: "Ảnh dạm ngõ 51", backAlt: "Ảnh dạm ngõ 52" },
+      { front: "p53", back: "p54", frontAlt: "Ảnh dạm ngõ 53", backAlt: "Ảnh dạm ngõ 54" },
+      { front: "p55", back: null, frontAlt: "Ảnh dạm ngõ 55", backAlt: null },
     ],
   },
 

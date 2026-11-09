@@ -30,6 +30,12 @@ html {
     -webkit-text-size-adjust: 100%;
 }
 
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+}
+
 body {
     font-family: var(--f-body);
     background-color: var(--c-bg);
@@ -38,12 +44,6 @@ body {
     width: 100%;
     overflow-x: hidden;
     line-height: 1.6;
-}
-
-body,
-section,
-nav {
-    transition: background-color 350ms ease, color 350ms ease;
 }
 
 /* --- Nền và chữ --- */
@@ -116,12 +116,11 @@ nav {
     --bs-btn-focus-shadow-rgb: var(--c-primary-rgb);
 }
 
+/* Nút nổi cố định: nền đặc, KHÔNG backdrop-filter (làm mờ nền phía sau phải vẽ lại mỗi khung hình khi cuộn). */
 .btn-float {
     color: var(--c-primary);
-    background-color: rgba(var(--c-surface-rgb), 0.7) !important;
+    background-color: var(--c-surface) !important;
     border-color: var(--c-line) !important;
-    -webkit-backdrop-filter: blur(0.5rem);
-    backdrop-filter: blur(0.5rem);
     width: 2.5rem;
     height: 2.5rem;
 }
@@ -167,10 +166,9 @@ nav {
 }
 
 /* --- Thanh điều hướng dưới --- */
+/* Thanh điều hướng dính đáy: nền gần đặc, không backdrop-filter (đỡ khựng khi cuộn trên máy yếu). */
 .navbar {
-    background-color: rgba(var(--c-surface-rgb), 0.85) !important;
-    -webkit-backdrop-filter: blur(0.5rem);
-    backdrop-filter: blur(0.5rem);
+    background-color: rgba(var(--c-surface-rgb), 0.97) !important;
     border-color: var(--c-line) !important;
     padding-bottom: env(safe-area-inset-bottom) !important;
 }
@@ -185,11 +183,13 @@ nav {
     color: var(--c-primary) !important;
 }
 
-/* --- Thông báo nhỏ (thay cho alert()) --- */
+/* --- Thông báo nhỏ (thay cho alert()) ---
+ * Một thông báo duy nhất, nằm trên thanh điều hướng dưới (tính cả vùng an toàn của iPhone),
+ * hẹp hơn màn hình để không đè các nút nổi bên phải. Chỉ chuyển động transform/opacity. */
 .toast-zone {
-    top: 1rem;
+    bottom: calc(3.6rem + env(safe-area-inset-bottom) + 0.75rem);
     z-index: 1080;
-    width: min(92vw, 24rem);
+    width: min(calc(100vw - 7.5rem), 22rem);
     pointer-events: none;
 }
 
@@ -198,11 +198,18 @@ nav {
     color: var(--c-on-primary);
     border-radius: 1rem;
     padding: 0.6rem 1rem;
-    margin-bottom: 0.5rem;
     font-size: 0.9rem;
+    line-height: 1.4;
     text-align: center;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-    transition: opacity 300ms ease;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.18);
+    opacity: 0;
+    transform: translateY(0.75rem);
+    transition: transform 250ms ease, opacity 250ms ease;
+}
+
+.toast-c.toast-show {
+    opacity: 1;
+    transform: none;
 }
 
 .toast-c.toast-error {

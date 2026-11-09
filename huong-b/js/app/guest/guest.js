@@ -89,14 +89,49 @@ export const guest = (() => {
         }
     });
 
-    const modal = (img) => {
-        const src = img.currentSrc || img.src;
-        document.getElementById('button-modal-click').setAttribute('href', src);
-        document.getElementById('button-modal-download').setAttribute('href', src);
+    // --- Lightbox: hiện ngay bản đang có trên trang, rồi đổi sang bản 2560px khi tải xong. ---
+    /** @type {HTMLImageElement[]} */
+    let group = [];
+    let groupIndex = 0;
+    let fullToken = 0;
+
+    const showInModal = (img) => {
+        const full = img.getAttribute('data-full') || img.currentSrc || img.src;
         const i = document.getElementById('show-modal-image');
-        i.src = src;
+        document.getElementById('button-modal-click').setAttribute('href', full);
+        document.getElementById('button-modal-download').setAttribute('href', full);
+        i.src = img.currentSrc || img.src;
         i.alt = img.alt;
+        const token = ++fullToken;
+        if (full !== i.src) {
+            const pre = new Image();
+            pre.decoding = 'async';
+            pre.onload = () => {
+                if (token === fullToken) {
+                    i.src = full;
+                }
+            };
+            pre.src = full;
+        }
+        const many = group.length > 1;
+        ['lightbox-prev', 'lightbox-next', 'lightbox-count'].forEach((id) => document.getElementById(id).classList.toggle('d-none', !many));
+        document.getElementById('lightbox-count').textContent = many ? `${groupIndex + 1} / ${group.length}` : '';
+    };
+
+    const modal = (img) => {
+        const g = img.getAttribute('data-group');
+        group = g ? Array.from(document.querySelectorAll(`img.js-zoom[data-group="${g}"]`)) : [img];
+        groupIndex = Math.max(0, group.indexOf(img));
+        showInModal(img);
         bs.modal('modal-image').show();
+    };
+
+    const step = (d) => {
+        if (group.length < 2) {
+            return;
+        }
+        groupIndex = (groupIndex + d + group.length) % group.length;
+        showInModal(group[groupIndex]);
     };
 
     const wireEvents = () => {
@@ -113,12 +148,35 @@ export const guest = (() => {
             }
         });
 
-        document.getElementById('show-modal-image').addEventListener('click', (e) => {
+        const shown = document.getElementById('show-modal-image');
+        shown.addEventListener('click', (e) => {
             const bar = e.currentTarget.parentNode.querySelector('.position-absolute');
             bar.classList.toggle('d-none');
             bar.classList.toggle('d-flex');
         });
+        document.getElementById('lightbox-prev').addEventListener('click', () => step(-1));
+        document.getElementById('lightbox-next').addEventListener('click', () => step(1));
+        let touchX = null;
+        shown.addEventListener('touchstart', (e) => {
+            touchX = e.touches[0].clientX;
+        }, { passive: true });
+        shown.addEventListener('touchend', (e) => {
+            if (touchX === null) return;
+            const dx = e.changedTouches[0].clientX - touchX;
+            touchX = null;
+            if (Math.abs(dx) > 40) step(dx < 0 ? 1 : -1);
+        }, { passive: true });
+        document.addEventListener('keydown', (e) => {
+            if (!document.getElementById('modal-image').classList.contains('show')) return;
+            if (e.key === 'ArrowLeft') step(-1);
+            if (e.key === 'ArrowRight') step(1);
+        });
         document.addEventListener('hide.bs.modal', () => document.activeElement?.blur());
+
+        document.getElementById('album-more')?.addEventListener('click', (e) => {
+            document.querySelectorAll('#album-grid .js-more').forEach((el) => el.classList.remove('d-none', 'js-more'));
+            e.currentTarget.remove();
+        });
 
         const giftBody = document.getElementById('gift-body');
         if (giftBody) {
@@ -152,6 +210,7 @@ export const guest = (() => {
         util.timeOut(confetti.openAnimation, 1200);
 
         document.dispatchEvent(new Event('undangan.open'));
+        theme.setStatusBar('--c-bg');
 
         const welcome = document.getElementById('welcome');
         if (welcome) {
@@ -174,7 +233,9 @@ export const guest = (() => {
     const booting = async () => {
         const welcome = document.getElementById('welcome');
         if (welcome && (cfg.sections ?? []).includes('cover')) {
-            await util.changeOpacity(welcome, true);
+            // Bìa nằm ngay dưới màn tải (cùng nền xanh): hiện tức thì rồi chỉ làm mờ màn tải,
+            // tránh lóe nền kem giữa hai màn.
+            welcome.style.opacity = '1';
         } else {
             welcome?.remove();
             open(null);
@@ -195,6 +256,7 @@ export const guest = (() => {
     };
 
     const domLoaded = async () => {
+        theme.setStatusBar('--c-primary');
         offline.init();
         progress.init(10000);
         document.addEventListener('undangan.progress.done', booting, { once: true });

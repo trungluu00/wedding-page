@@ -11,8 +11,9 @@ export const offline = (() => {
     const isOnline = () => online;
 
     const setText = (ok) => {
-        pill.classList.toggle('bg-success', ok);
-        pill.classList.toggle('bg-danger', !ok);
+        // Màu theo bảng màu thiệp thay cho xanh lá/đỏ mặc định của Bootstrap.
+        pill.style.backgroundColor = ok ? 'var(--c-primary)' : '#9b2c2c';
+        pill.style.color = ok ? 'var(--c-on-primary)' : '#ffffff';
         pill.replaceChildren(
             util.icon(ok ? 'fa-cloud' : 'fa-ban', 'me-2'),
             ok ? 'Đã có mạng trở lại' : 'Mất kết nối mạng',
@@ -44,7 +45,7 @@ export const offline = (() => {
         window.addEventListener('online', onOnline);
         window.addEventListener('offline', onOffline);
 
-        pill = util.h('small', { class: 'text-center rounded-pill py-1 px-3 my-2 text-white shadow bg-danger', style: { fontSize: '0.8rem' } });
+        pill = util.h('small', { class: 'text-center rounded-pill py-1 px-3 my-2 shadow', style: { fontSize: '0.8rem' } });
         alert = util.h('div', { class: 'fixed-top pe-none d-flex justify-content-center', style: { opacity: '0', zIndex: '1057' } }, pill);
         document.body.appendChild(alert);
     };
