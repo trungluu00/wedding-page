@@ -172,47 +172,27 @@ Facebook giữ cache ảnh xem trước; dùng [Sharing Debugger](https://develo
 
 ## 7. Danh sách TODO cần điền
 
-Tất cả nằm trong `wedding.config.js` (tìm chữ `TODO`), trừ các mục có ghi chú khác.
+Trong `wedding.config.js`: `// TODO` là thông tin thật cần điền/xác nhận; `// (gợi ý)` là câu chữ đã viết sẵn,
+sửa tùy ý. Ngày âm lịch tính bằng `npm run lunar -- YYYY-MM-DD`.
 
-**Trang & chia sẻ**
+**Đã có (bạn điền hoặc đã soạn sẵn)**
+- [x] Tên, bố mẹ, địa chỉ, số điện thoại hai bên
+- [x] Ảnh: bìa, lời mời, giữa trang, kết, chân dung, album 12 tờ, ảnh chia sẻ (`npm run photos`)
+- [x] (gợi ý) Mô tả khi chia sẻ link, giới thiệu chú rể / cô dâu, câu trích, lời mời, lời cảm ơn,
+      tên các mốc lịch trình, chú thích album, hạn xác nhận (10 ngày trước tiệc)
+- [x] Âm lịch tính đúng theo ngày đang ghi; địa chỉ Lễ Vu Quy / Lễ Thành Hôn lấy theo địa chỉ hai nhà
+
+**Cần bạn điền / xác nhận**
 - [ ] `site.domain` — tên miền thật (và ô `CauHinh!B1` trong Sheet)
-- [ ] `site.description` — câu mô tả khi chia sẻ link (tùy chọn chỉnh)
-- [x] `site.ogImage` — đã tạo từ ảnh `img3782` bởi `npm run photos` (đổi `photos.share` nếu muốn ảnh khác)
-
-**Cô dâu chú rể** (`couple.groom` và `couple.bride`)
-- [ ] `role` — Trưởng nam/Thứ nam…, Trưởng nữ/Út nữ…
-- [x] `portrait` — đã cắt từ ảnh dạm ngõ (`groom` ← img3831, `bride` ← img3799; chỉnh vùng cắt ở `photos.crops`)
-- [ ] `bio` — giới thiệu ngắn
-- [ ] `phone` — số điện thoại
-- [ ] `father`, `mother` — họ tên bố mẹ (đang là "Ông Lưu Viết TODO"…)
-- [ ] `address` — địa chỉ gia đình
-- [ ] `familyPhone` — (tùy chọn) SĐT đại diện gia đình
-
-**Sự kiện** (`events`, cả 3 sự kiện)
-- [ ] `date`, `time`, `endTime`
-- [ ] `lunar` — ngày âm lịch ghi bằng chữ (đang là giá trị tạm, cần tra lại)
-- [ ] `venue`, `address`, `mapsUrl`
-- [ ] Kiểm tra lại danh sách sự kiện và `audience` cho đúng thực tế
-
-**Lịch trình** (`schedule`)
-- [ ] Giờ và tên từng mốc
-
-**Mừng cưới** (`gifts.accounts`, cả 2 tài khoản)
-- [ ] `bankBin`, `bankName`, `accountNo`, `accountName` (hoặc `qrImage` nếu có ảnh QR sẵn)
-
-**Ảnh** (`photos`, `album.leaves`) — đã gán ảnh lễ dạm ngõ; xem lại và đổi tùy ý
-- [ ] Xem lại lựa chọn ảnh: bìa img3788, lời mời img3777, giữa trang img3818 + img3692, kết img3702, 12 tờ album (24 ảnh)
-- [ ] Chú thích trang album (`frontAlt`/`backAlt`) — đang là chú thích tạm
-- [ ] Khi có ảnh cưới chính thức: chép vào thư mục nguồn, chạy `npm run photos`, đổi id trong config
-
-**Nhạc** (`music`)
-- [ ] **Thay bài hát**: `music/le-duong.mp3` ("Lễ Đường" — Kai Đinh) là bài có bản quyền, chỉ dùng tạm để thử.
-      Thay `src`, `title`, `artist` và file lời `lyrics` (.lrc) tương ứng; xóa file mp3/lrc cũ khỏi `public/music/`.
-
-**Câu chữ** (`texts`)
-- [ ] `quote` — câu trích dẫn của hai bạn
-
-**Backend**
-- [ ] `backend.appsScriptUrl` — URL Web App (mục 4)
-- [ ] `backend.rsvpDeadline` — hạn xác nhận tham dự
-- [ ] Xóa 2 khách mẫu (`bac-hung`, `ban-lan`) trong sheet `KhachMoi` khi dùng thật
+- [ ] `couple.*.role` — Trưởng nam/Thứ nam…, Trưởng nữ/Út nữ…
+- [ ] `couple.bride.familyPhone` — đang trùng số cô dâu
+- [ ] **Ngày giờ các sự kiện**: Lễ Vu Quy đang 13/12/2026, còn Lễ Thành Hôn và Tiệc cưới đang là ngày giữ chỗ
+      16/01/2027 — sửa `date`/`time`/`endTime`, rồi chạy `npm run lunar` để cập nhật `lunar`
+- [ ] `mapsUrl` hai lễ tại nhà — đang là link tìm theo địa chỉ; nên thay bằng link ghim đúng cổng nhà
+- [ ] Tiệc cưới: `venue`, `address`, `mapsUrl` (tên và địa chỉ nơi tổ chức)
+- [ ] Kiểm tra `audience` từng sự kiện (ai được thấy) cho đúng thực tế
+- [ ] `schedule` — giờ các mốc theo giờ tiệc thật
+- [ ] `gifts.accounts` — `bankBin`, `bankName`, `accountNo`, `accountName` (hoặc `qrImage`)
+- [ ] **Thay bài hát**: `music/le-duong.mp3` ("Lễ Đường" — Kai Đinh) có bản quyền, chỉ dùng tạm.
+      Thay `src`, `title`, `artist`, `lyrics` (.lrc) và xóa file cũ khỏi `public/music/`
+- [ ] `backend.appsScriptUrl` — URL Web App (mục 4); xóa 2 khách mẫu `bac-hung`, `ban-lan` trong sheet `KhachMoi`

@@ -5,7 +5,8 @@
  *  Đây là file DUY NHẤT cần sửa để thay nội dung, ảnh, nhạc và màu sắc.
  *  Sửa xong chạy `npm run dev` để xem, `npm run build` để xuất bản.
  *
- *  - Mọi chỗ có chú thích `// TODO` là giá trị giữ chỗ, cần điền thật.
+ *  - Chú thích `// TODO` = thông tin thật cần bạn điền/xác nhận (ngày giờ, địa điểm, ngân hàng…).
+ *  - Chú thích `// (gợi ý)` = câu chữ đã viết sẵn cho hợp thiệp, sửa tùy ý.
  *  - Đường dẫn ảnh/nhạc tính từ thư mục `public/`
  *    (vd "photos/hero.jpg" nghĩa là file `public/photos/hero.jpg`).
  *  - Ảnh có dạng "photos/placeholder/<tên>.svg" là ảnh giữ chỗ do Vite tự
@@ -21,7 +22,7 @@ export default {
     domain: "https://TODO.pages.dev", // TODO: tên miền thật, không có dấu "/" ở cuối
     title: "Thiệp cưới Trung & Nhi",
     description:
-      "Trân trọng kính mời bạn đến chung vui trong ngày cưới của Trung & Nhi.", // TODO: chỉnh câu mô tả nếu muốn
+      "Trung & Nhi trân trọng mời bạn đến chung vui trong ngày trọng đại của chúng mình. Mở thiệp để xem thời gian, địa điểm và gửi lời chúc nhé!", // (gợi ý)
     ogImage: "photos/share-1200x630.jpg", // tạo bởi `npm run photos` từ photos.share
   },
 
@@ -56,26 +57,26 @@ export default {
     groom: {
       fullName: "Lưu Viết Trung",
       shortName: "Trung",
-      role: "Trưởng nam", // TODO: Trưởng nam / Thứ nam / Út nam...
+      role: "Trưởng nam", // TODO: xác nhận (Trưởng nam / Thứ nam / Út nam…)
       portrait: "groom", // ảnh cắt từ img3831 (xem photos.crops)
-      bio: "Chú rể — TODO: vài dòng giới thiệu ngắn.", // TODO
-      phone: "0334 395 967", // TODO
-      father: "Ông Lưu Văn Phú", // TODO
-      mother: "Bà Phạm Thị Lục", // TODO
-      address: "Thôn Phúc Hòa, Xã Thác Bà, Tỉnh Lào Cai", // TODO
+      bio: "Chàng trai hiền lành, chân thành, ít nói nhưng luôn chu đáo. Với Trung, Nhi là người khiến những ngày bình thường trở nên đặc biệt.", // (gợi ý)
+      phone: "0334 395 967",
+      father: "Ông Lưu Văn Phú",
+      mother: "Bà Phạm Thị Lục",
+      address: "Thôn Phúc Hòa, Xã Thác Bà, Tỉnh Lào Cai",
       familyPhone: "0346 409 672", // (tùy chọn) SĐT đại diện nhà trai, để trống thì không hiện
     },
     bride: {
       fullName: "Đoàn Phương Nhi",
       shortName: "Nhi",
-      role: "Trưởng nữ", // TODO: Trưởng nữ / Thứ nữ / Út nữ...
+      role: "Trưởng nữ", // TODO: xác nhận (Trưởng nữ / Thứ nữ / Út nữ…)
       portrait: "bride", // ảnh cắt từ img3799 (xem photos.crops)
-      bio: "Cô dâu — TODO: vài dòng giới thiệu ngắn.", // TODO
-      phone: "0345 ", // TODO
-      father: "Ông Đoàn Văn TODO", // TODO
-      mother: "Bà Trần Thị TODO", // TODO
-      address: "TODO: xã/phường, tỉnh", // TODO
-      familyPhone: "", // (tùy chọn) SĐT đại diện nhà gái
+      bio: "Cô gái dịu dàng, hay cười và luôn quan tâm mọi người xung quanh. Với Nhi, Trung là bến bình yên để trở về sau mỗi ngày dài.", // (gợi ý)
+      phone: "0345 512 667",
+      father: "Ông Đoàn Văn Hưng",
+      mother: "Bà Nguyễn Thị Phượng",
+      address: "Thôn Tứ Kỳ, Xã Đại Sơn, Tỉnh Hải Phòng",
+      familyPhone: "0345 512 667", // TODO: đang trùng số cô dâu — điền số bố/mẹ nếu muốn
     },
   },
 
@@ -87,42 +88,42 @@ export default {
   //   - tên nhóm bất kỳ (vd "gia-dinh"): khớp cột "groups" của khách
   //  main: true → sự kiện dùng cho đếm ngược, lịch và ngày lớn trên thiệp
   //  (nếu khách không thấy sự kiện main thì dùng sự kiện đầu tiên họ thấy).
-  //  lunar: ghi sẵn bằng chữ (không tự tính).
+  //  lunar: ghi sẵn bằng chữ. Đổi ngày thì tính lại bằng: npm run lunar -- 2027-01-16
   // ---------------------------------------------------------------------------
   events: [
     {
       id: "le-vu-quy",
       name: "Lễ Vu Quy",
-      date: "2027-01-16", // TODO
+      date: "2026-12-13", // TODO: xác nhận (đang khác ngày Lễ Thành Hôn/Tiệc cưới bên dưới)
       time: "08:00", // TODO
       endTime: "09:30", // TODO (tùy chọn)
-      lunar: "Nhằm ngày 09 tháng 12 năm Bính Ngọ", // TODO: kiểm tra lại âm lịch
-      venue: "Tư gia nhà gái", // TODO
-      address: "TODO: số nhà, thôn/đường, xã/phường, tỉnh", // TODO
-      mapsUrl: "https://maps.google.com/?q=TODO", // TODO: link Google Maps
+      lunar: "Nhằm ngày 05 tháng 11 năm Bính Ngọ", // tính từ ngày 13/12/2026
+      venue: "Tư gia nhà gái",
+      address: "Thôn Tứ Kỳ, Xã Đại Sơn, Tỉnh Hải Phòng", // lấy theo địa chỉ nhà gái
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Th%C3%B4n%20T%E1%BB%A9%20K%E1%BB%B3%2C%20X%C3%A3%20%C4%90%E1%BA%A1i%20S%C6%A1n%2C%20H%E1%BA%A3i%20Ph%C3%B2ng", // TODO: thay bằng link ghim đúng cổng nhà
       audience: ["nha-gai"],
     },
     {
       id: "le-thanh-hon",
       name: "Lễ Thành Hôn",
-      date: "2027-01-16", // TODO
+      date: "2027-01-16", // TODO: ngày giữ chỗ
       time: "10:00", // TODO
       endTime: "11:00", // TODO
-      lunar: "Nhằm ngày 09 tháng 12 năm Bính Ngọ", // TODO
-      venue: "Tư gia nhà trai", // TODO
-      address: "TODO: số nhà, thôn/đường, xã/phường, tỉnh", // TODO
-      mapsUrl: "https://maps.google.com/?q=TODO", // TODO
+      lunar: "Nhằm ngày 09 tháng 12 năm Bính Ngọ", // tính từ ngày 16/01/2027 — đổi ngày thì tính lại
+      venue: "Tư gia nhà trai",
+      address: "Thôn Phúc Hòa, Xã Thác Bà, Tỉnh Lào Cai", // lấy theo địa chỉ nhà trai
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Th%C3%B4n%20Ph%C3%BAc%20H%C3%B2a%2C%20X%C3%A3%20Th%C3%A1c%20B%C3%A0%2C%20L%C3%A0o%20Cai", // TODO: thay bằng link ghim đúng cổng nhà
       audience: ["nha-trai"],
     },
     {
       id: "tiec-cuoi",
       name: "Tiệc cưới",
       main: true,
-      date: "2027-01-16", // TODO
+      date: "2027-01-16", // TODO: ngày giữ chỗ
       time: "11:30", // TODO
       endTime: "14:00", // TODO
-      lunar: "Nhằm ngày 09 tháng 12 năm Bính Ngọ", // TODO
-      venue: "Nhà hàng TODO", // TODO
+      lunar: "Nhằm ngày 09 tháng 12 năm Bính Ngọ", // tính từ ngày 16/01/2027 — đổi ngày thì tính lại
+      venue: "Nhà hàng TODO", // TODO: tên nhà hàng / nơi tổ chức
       address: "TODO: địa chỉ nhà hàng", // TODO
       mapsUrl: "https://maps.google.com/?q=TODO", // TODO
       audience: ["all"],
@@ -133,11 +134,12 @@ export default {
   // 5. LỊCH TRÌNH NGÀY CƯỚI
   //  icon: "heart" | "rings" | "camera" | "cheers" | "car" | "music" | "home"
   // ---------------------------------------------------------------------------
+  // TODO: chỉnh giờ theo giờ tiệc thật (tên các mốc là gợi ý)
   schedule: [
-    { time: "11:00", title: "Đón khách", icon: "heart" }, // TODO
-    { time: "11:30", title: "Làm lễ", icon: "rings" }, // TODO
-    { time: "11:45", title: "Chụp ảnh lưu niệm", icon: "camera" }, // TODO
-    { time: "12:00", title: "Khai tiệc", icon: "cheers" }, // TODO
+    { time: "11:00", title: "Đón khách", icon: "heart" },
+    { time: "11:30", title: "Cử hành hôn lễ", icon: "rings" },
+    { time: "11:45", title: "Chụp ảnh cùng dâu rể", icon: "camera" },
+    { time: "12:00", title: "Khai tiệc", icon: "cheers" },
   ],
 
   // ---------------------------------------------------------------------------
@@ -195,8 +197,6 @@ export default {
     ],
   },
 
-
-
   // ---------------------------------------------------------------------------
   // 8. ALBUM LẬT TRANG 3D
   //  Mỗi "leaf" là một tờ: mặt trước (trang phải) và mặt sau (trang trái khi lật).
@@ -207,23 +207,22 @@ export default {
     title: "Ngày dạm ngõ · 31.10.2026", // dòng tiêu đề khi xem album toàn màn hình
     // Theo thứ tự câu chuyện. Ảnh ngang tự đặt trọn trên nền giấy ("contain");
     // ghi frontFit/backFit: "cover" hoặc "contain" để đổi cho từng trang.
+    // Chú thích (frontAlt/backAlt) là gợi ý, hiện ở thanh tiêu đề khi lật album
     leaves: [
-      { front: "img3667", back: "img3739", frontAlt: "Ngày dạm ngõ · 31.10.2026", backAlt: "Trao lễ", frontHardcover: true },
-      { front: "img3692", back: "img3698", frontAlt: "Trước cổng nhà", backAlt: "Trước cổng nhà" },
+      { front: "img3667", back: "img3739", frontAlt: "Ngày dạm ngõ · 31.10.2026", backAlt: "Hai họ trao lễ", frontHardcover: true },
+      { front: "img3692", back: "img3698", frontAlt: "Đón nhau trước ngõ", backAlt: "Bên cánh cổng nhà" },
       { front: "img3702", back: "img3769", frontAlt: "Tay trong tay", backAlt: "Bên hiên nhà" },
       { front: "img3707", back: "img3808-1", frontAlt: "Bên hiên nhà", backAlt: "Thắp hương gia tiên" },
-      { front: "img3772-1", back: "img3780", frontAlt: "Trong vườn", backAlt: "Trong vườn" },
-      { front: "img3782", back: "img3788", frontAlt: "Lễ dạm ngõ", backAlt: "Bên nhau" },
-      { front: "img3792", back: "img3799", frontAlt: "Bên nhau", backAlt: "Nàng" },
-      { front: "img3823", back: "img3826", frontAlt: "Nàng", backAlt: "Nàng" },
-      { front: "img3831", back: "img3818", frontAlt: "Hai đứa mình", backAlt: "Khoảnh khắc" },
-      { front: "img3854", back: "img3846", frontAlt: "Phút riêng tư", backAlt: "Nàng" },
-      { front: "img3896", back: "img3901", frontAlt: "Nàng", backAlt: "Nàng" },
-      { front: "img3912", back: "img3872", frontAlt: "Nàng", backAlt: "Hai gia đình", backHardcover: true },
+      { front: "img3772-1", back: "img3780", frontAlt: "Giữa vườn xanh", backAlt: "Giữa vườn xanh" },
+      { front: "img3782", back: "img3788", frontAlt: "Phương Nhi ♥ Viết Trung", backAlt: "Tựa vào nhau" },
+      { front: "img3792", back: "img3799", frontAlt: "Ánh mắt trao nhau", backAlt: "Nàng và bó hoa" },
+      { front: "img3823", back: "img3826", frontAlt: "Dịu dàng", backAlt: "Dịu dàng" },
+      { front: "img3831", back: "img3818", frontAlt: "Hai đứa mình", backAlt: "Lối nhỏ về nhà" },
+      { front: "img3854", back: "img3846", frontAlt: "Phút riêng tư", backAlt: "Nàng ngồi đợi" },
+      { front: "img3896", back: "img3901", frontAlt: "Trước gương", backAlt: "Trước gương" },
+      { front: "img3912", back: "img3872", frontAlt: "Bên bàn trà", backAlt: "Hai gia đình", backHardcover: true },
     ],
   },
-
-
 
   // ---------------------------------------------------------------------------
   // 9. NHẠC NỀN + LỜI CHẠY
@@ -231,20 +230,21 @@ export default {
   // ---------------------------------------------------------------------------
   music: {
     src: "music/le-duong.mp3", // TODO: THAY BÀI — "Lễ Đường" là bài có bản quyền, chỉ dùng tạm
-    title: "Lễ Đường", // TODO
-    artist: "Kai Đinh", // TODO
-    lyrics: "music/le-duong.lrc", // TODO
+    title: "Lễ Đường", // TODO: tên bài mới
+    artist: "Kai Đinh", // TODO: ca sĩ
+    lyrics: "music/le-duong.lrc", // TODO: file lời .lrc của bài mới (hoặc "" nếu không có)
   },
 
   // ---------------------------------------------------------------------------
   // 10. CÂU CHỮ
   // ---------------------------------------------------------------------------
   texts: {
-    quote: "Hai trái tim, một lời hứa, trọn một đời.", // TODO
+    // (gợi ý) — sửa tùy ý, xuống dòng bằng \n
+    quote: "Từ một lời hẹn ngày dạm ngõ, thành một đời thương nhau.",
     invitation:
-      "Trân trọng kính mời quý khách đến dự\nlễ thành hôn của hai con\nvà cùng chia sẻ niềm hạnh phúc trọn vẹn nhất.",
+      "Trân trọng kính mời quý khách đến dự\nlễ thành hôn của hai con chúng tôi\nvà cùng chung vui, chia sẻ niềm hạnh phúc trọn vẹn này.",
     thankYou:
-      "Cảm ơn bạn đã ghé thăm tấm thiệp nhỏ này.\nSự hiện diện và lời chúc của bạn\nlà món quà ý nghĩa nhất với chúng mình.",
+      "Cảm ơn bạn đã dành thời gian mở tấm thiệp nhỏ này.\nSự hiện diện và lời chúc của bạn\nlà món quà ý nghĩa nhất với Trung & Nhi.",
   },
 
   // ---------------------------------------------------------------------------
@@ -277,7 +277,7 @@ export default {
   // ---------------------------------------------------------------------------
   backend: {
     appsScriptUrl: "", // TODO: dán URL Web App dạng https://script.google.com/macros/s/.../exec
-    rsvpDeadline: "2027-01-06", // TODO: hạn xác nhận tham dự
+    rsvpDeadline: "2027-01-06", // (gợi ý) 10 ngày trước tiệc cưới — đổi theo ngày thật
     maxGuestsPerInvite: 4, // số người tối đa một thiệp được đăng ký
   },
 };

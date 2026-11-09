@@ -8,7 +8,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "photos": "node scripts/photos.mjs"
+    "photos": "node scripts/photos.mjs",
+    "lunar": "node scripts/lunar.cjs"
   },
   "devDependencies": {
     "sharp": "^0.34.5",
