@@ -833,7 +833,7 @@ class WeddingFlipbook {
 
       // Front face (Right side page when facing up)
       const frontDiv = document.createElement('div');
-      frontDiv.className = `alb-face alb-front${leaf.frontHardcover ? ' is-hardcover' : ''}`;
+      frontDiv.className = `alb-face alb-front${leaf.frontHardcover ? ' is-hardcover' : ''}${leaf.frontFit === 'contain' ? ' is-contain' : ''}`;
       const frontImg = document.createElement('img');
       frontImg.alt = leaf.frontAlt || `Trang album`;
       frontImg.draggable = false;
@@ -855,7 +855,7 @@ class WeddingFlipbook {
 
       // Back face (Left side page when flipped open)
       const backDiv = document.createElement('div');
-      backDiv.className = `alb-face alb-back${leaf.backHardcover ? ' is-hardcover' : ''}`;
+      backDiv.className = `alb-face alb-back${leaf.backHardcover ? ' is-hardcover' : ''}${leaf.backFit === 'contain' ? ' is-contain' : ''}`;
       const backImg = document.createElement('img');
       backImg.alt = leaf.backAlt || `Trang album`;
       backImg.draggable = false;

@@ -57,21 +57,21 @@ export default {
       fullName: "Lưu Viết Trung",
       shortName: "Trung",
       role: "Trưởng nam", // TODO: Trưởng nam / Thứ nam / Út nam...
-      portrait: "groom", // ảnh cắt từ p38 (xem photos.crops)
+      portrait: "groom", // ảnh cắt từ img3831 (xem photos.crops)
       bio: "Chú rể — TODO: vài dòng giới thiệu ngắn.", // TODO
-      phone: "0900 000 001", // TODO
-      father: "Ông Lưu Viết TODO", // TODO
-      mother: "Bà Nguyễn Thị TODO", // TODO
-      address: "TODO: xã/phường, tỉnh", // TODO
-      familyPhone: "", // (tùy chọn) SĐT đại diện nhà trai, để trống thì không hiện
+      phone: "0334 395 967", // TODO
+      father: "Ông Lưu Văn Phú", // TODO
+      mother: "Bà Phạm Thị Lục", // TODO
+      address: "Thôn Phúc Hòa, Xã Thác Bà, Tỉnh Lào Cai", // TODO
+      familyPhone: "0346 409 672", // (tùy chọn) SĐT đại diện nhà trai, để trống thì không hiện
     },
     bride: {
       fullName: "Đoàn Phương Nhi",
       shortName: "Nhi",
       role: "Trưởng nữ", // TODO: Trưởng nữ / Thứ nữ / Út nữ...
-      portrait: "bride", // ảnh cắt từ p53 (xem photos.crops)
+      portrait: "bride", // ảnh cắt từ img3799 (xem photos.crops)
       bio: "Cô dâu — TODO: vài dòng giới thiệu ngắn.", // TODO
-      phone: "0900 000 002", // TODO
+      phone: "0345 ", // TODO
       father: "Ông Đoàn Văn TODO", // TODO
       mother: "Bà Trần Thị TODO", // TODO
       address: "TODO: xã/phường, tỉnh", // TODO
@@ -178,21 +178,23 @@ export default {
     // Thư mục ảnh gốc trên máy (chỉ dùng khi chạy `npm run photos`, KHÔNG đưa lên git/web).
     // Có thể thay bằng biến môi trường PHOTO_SOURCE.
     source: "C:/Users/Trung lv/Pictures/me/dam-ngo",
-    // Ảnh ghi bằng id (p01…p55) do `npm run photos` tạo — xem photos-contact-sheet.html để chọn.
-    share: "p38", // ảnh xem trước 1200x630 khi gửi link (tự cắt vùng nổi bật)
-    hero: "p24", // ảnh bìa (khung dọc 4:5)
-    statement: "p27", // ảnh dưới lời mời (khung ngang 16:10)
+    // Ảnh ghi bằng mã lấy từ tên file: IMG_3788.jpg → "img3788", IMG_3808_1.jpg → "img3808-1".
+    // Chỉ những ảnh ghi trong file này mới được xuất (xem photos-contact-sheet.html khi chạy `npm run dev`).
+    share: "img3782", // ảnh xem trước 1200x630 khi gửi link (có biển tên hai bạn)
+    hero: "img3788", // ảnh bìa (khung dọc 4:5): hai bạn tựa vào nhau
+    statement: "img3777", // ảnh dưới lời mời
     middle: [
-      "p14", // sau phần sự kiện (khung dọc)
-      "p41", // sau phần đếm ngược (khung dọc)
+      "img3818", // sau phần sự kiện: cầu thang, đen trắng
+      "img3692", // sau phần đếm ngược: hai bạn ở cổng
     ],
-    ending: "p29", // ảnh kết, chữ cảm ơn nằm giữa ảnh (khung dọc 3:4)
-    // Ảnh cắt vuông từ ảnh chụp chung (x, y, size: tỉ lệ 0–1 theo chiều rộng/cao ảnh gốc)
+    ending: "img3702", // ảnh kết: nắm tay đi về phía máy (chữ cảm ơn nằm giữa ảnh)
+    // Ảnh cắt khung dọc 4:5 từ ảnh chụp chung (x, y, width: tỉ lệ 0–1 theo chiều rộng/cao ảnh gốc)
     crops: [
-      { id: "groom", from: "p38", x: 0.21, y: 0.1, size: 0.36 },
-      { id: "bride", from: "p53", x: 0.08, y: 0.14, size: 0.8 },
+      { id: "groom", from: "img3831", x: 0.222, y: 0.19, width: 0.258, aspect: 0.8 }, // chú rể, không lấy biển/cô dâu
+      { id: "bride", from: "img3799", x: 0.49, y: 0.26, width: 0.4, aspect: 0.8 }, // cô dâu với bó hoa
     ],
   },
+
 
 
   // ---------------------------------------------------------------------------
@@ -202,22 +204,25 @@ export default {
   //  backHardcover: tờ bìa sau.
   // ---------------------------------------------------------------------------
   album: {
+    title: "Ngày dạm ngõ · 31.10.2026", // dòng tiêu đề khi xem album toàn màn hình
+    // Theo thứ tự câu chuyện. Ảnh ngang tự đặt trọn trên nền giấy ("contain");
+    // ghi frontFit/backFit: "cover" hoặc "contain" để đổi cho từng trang.
     leaves: [
-      { front: "p25", back: "p11", frontAlt: "Lễ Dạm Ngõ", backAlt: "Trước cổng nhà", frontHardcover: true },
-      { front: "p12", back: "p13", frontAlt: "Trước cổng nhà", backAlt: "Trước cổng nhà" },
-      { front: "p14", back: "p20", frontAlt: "Tay trong tay", backAlt: "Bên hiên nhà" },
-      { front: "p21", back: "p22", frontAlt: "Bên hiên nhà", backAlt: "Bên hiên nhà" },
-      { front: "p23", back: "p24", frontAlt: "Lễ Dạm Ngõ", backAlt: "Lễ Dạm Ngõ" },
-      { front: "p26", back: "p28", frontAlt: "Lễ Dạm Ngõ", backAlt: "Lễ Dạm Ngõ" },
-      { front: "p29", back: "p30", frontAlt: "Nhìn nhau", backAlt: "Nhìn nhau" },
-      { front: "p31", back: "p32", frontAlt: "Lễ Dạm Ngõ", backAlt: "Nàng" },
-      { front: "p40", back: "p41", frontAlt: "Nàng", backAlt: "Phút riêng tư" },
-      { front: "p45", back: "p47", frontAlt: "Hai gia đình", backAlt: "Nàng" },
-      { front: "p48", back: "p50", frontAlt: "Nàng", backAlt: "Nàng" },
-      { front: "p51", back: "p53", frontAlt: "Nàng", backAlt: "Nàng" },
-      { front: "p54", back: "p55", frontAlt: "Nàng", backAlt: "Trọn vẹn yêu thương", backHardcover: true },
+      { front: "img3667", back: "img3739", frontAlt: "Ngày dạm ngõ · 31.10.2026", backAlt: "Trao lễ", frontHardcover: true },
+      { front: "img3692", back: "img3698", frontAlt: "Trước cổng nhà", backAlt: "Trước cổng nhà" },
+      { front: "img3702", back: "img3769", frontAlt: "Tay trong tay", backAlt: "Bên hiên nhà" },
+      { front: "img3707", back: "img3808-1", frontAlt: "Bên hiên nhà", backAlt: "Thắp hương gia tiên" },
+      { front: "img3772-1", back: "img3780", frontAlt: "Trong vườn", backAlt: "Trong vườn" },
+      { front: "img3782", back: "img3788", frontAlt: "Lễ dạm ngõ", backAlt: "Bên nhau" },
+      { front: "img3792", back: "img3799", frontAlt: "Bên nhau", backAlt: "Nàng" },
+      { front: "img3823", back: "img3826", frontAlt: "Nàng", backAlt: "Nàng" },
+      { front: "img3831", back: "img3818", frontAlt: "Hai đứa mình", backAlt: "Khoảnh khắc" },
+      { front: "img3854", back: "img3846", frontAlt: "Phút riêng tư", backAlt: "Nàng" },
+      { front: "img3896", back: "img3901", frontAlt: "Nàng", backAlt: "Nàng" },
+      { front: "img3912", back: "img3872", frontAlt: "Nàng", backAlt: "Hai gia đình", backHardcover: true },
     ],
   },
+
 
 
   // ---------------------------------------------------------------------------

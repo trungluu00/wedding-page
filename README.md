@@ -63,14 +63,18 @@ File có chú thích tiếng Việt cho từng mục. Các phần chính:
    npm run photos
    ```
 
-   Script (dùng `sharp`) tạo cho mỗi ảnh một **id** gọn (`p01`, `p02`… theo thứ tự chụp) và 4 cỡ WebP
-   chất lượng 88 trong `public/photos/`: cạnh dài 400 (thumbnail), 900 (điện thoại), 1600 (hiển thị),
-   2560 (phóng to). Giữ hướng xoay, chuyển về sRGB, bỏ EXIF/GPS, không phóng to ảnh nhỏ. Tạo thêm
-   `share-1200x630.jpg` (JPEG q90, 4:4:4) từ ảnh `photos.share` để làm ảnh xem trước khi gửi link.
-   Chạy lại chỉ xử lý ảnh mới hoặc đã sửa. Ảnh gốc không bao giờ bị chép vào repo.
-3. Mở `npm run dev` rồi vào http://localhost:5173/photos-contact-sheet.html để xem toàn bộ ảnh kèm id
-   và tên file gốc. Ghi id vào `photos`, `couple.*.portrait`, `album.leaves` trong `wedding.config.js`.
+   Script (dùng `sharp`) **chỉ xuất những ảnh được ghi trong `wedding.config.js`** (ảnh bìa, lời mời,
+   giữa trang, kết, chân dung, album). Mỗi ảnh có **mã** lấy từ tên file: `IMG_3788.jpg` → `img3788`,
+   `IMG_3808_1.jpg` → `img3808-1`. Mỗi ảnh có 4 cỡ WebP chất lượng 88 trong `public/photos/`: cạnh dài
+   400 (thumbnail), 900 (điện thoại), 1600 (hiển thị), 2560 (phóng to). Giữ hướng xoay, chuyển về sRGB,
+   bỏ EXIF/GPS, không phóng to ảnh nhỏ. `photos.crops` cắt chân dung khung 4:5 từ ảnh chụp chung.
+   `share-1200x630.jpg` (JPEG q90, 4:4:4) được tạo từ ảnh `photos.share` làm ảnh xem trước khi gửi link.
+   Ảnh đã xuất mà config không còn dùng sẽ tự bị xóa. Chạy lại chỉ xử lý ảnh mới hoặc đã sửa.
+   Ảnh gốc không bao giờ bị chép vào repo.
+3. Mở `npm run dev` rồi vào http://localhost:5173/photos-contact-sheet.html: mọi ảnh trong thư mục nguồn,
+   ảnh nào đang dùng có viền xanh và ghi rõ vị trí. Đổi mã trong config rồi chạy lại `npm run photos`.
 
+Album lật trang tự đặt ảnh ngang trọn trên nền giấy (không cắt mặt); ghi `frontFit`/`backFit` để đổi.
 Trang tự dùng `srcset`: điện thoại tải cỡ vừa đủ nhưng vẫn nét trên màn hình retina, phóng to trong album
 dùng bản 2560. Vẫn có thể ghi đường dẫn file trực tiếp (vd `photos/rieng.jpg` trong `public/`).
 Đường dẫn dạng `photos/placeholder/<tên>.svg` là ảnh giữ chỗ tự sinh theo màu theme.
@@ -173,11 +177,11 @@ Tất cả nằm trong `wedding.config.js` (tìm chữ `TODO`), trừ các mục
 **Trang & chia sẻ**
 - [ ] `site.domain` — tên miền thật (và ô `CauHinh!B1` trong Sheet)
 - [ ] `site.description` — câu mô tả khi chia sẻ link (tùy chọn chỉnh)
-- [x] `site.ogImage` — đã tạo từ ảnh `p38` bởi `npm run photos` (đổi `photos.share` nếu muốn ảnh khác)
+- [x] `site.ogImage` — đã tạo từ ảnh `img3782` bởi `npm run photos` (đổi `photos.share` nếu muốn ảnh khác)
 
 **Cô dâu chú rể** (`couple.groom` và `couple.bride`)
 - [ ] `role` — Trưởng nam/Thứ nam…, Trưởng nữ/Út nữ…
-- [x] `portrait` — đã cắt từ ảnh dạm ngõ (`groom` ← p38, `bride` ← p53; chỉnh vùng cắt ở `photos.crops`)
+- [x] `portrait` — đã cắt từ ảnh dạm ngõ (`groom` ← img3831, `bride` ← img3799; chỉnh vùng cắt ở `photos.crops`)
 - [ ] `bio` — giới thiệu ngắn
 - [ ] `phone` — số điện thoại
 - [ ] `father`, `mother` — họ tên bố mẹ (đang là "Ông Lưu Viết TODO"…)
@@ -197,7 +201,7 @@ Tất cả nằm trong `wedding.config.js` (tìm chữ `TODO`), trừ các mục
 - [ ] `bankBin`, `bankName`, `accountNo`, `accountName` (hoặc `qrImage` nếu có ảnh QR sẵn)
 
 **Ảnh** (`photos`, `album.leaves`) — đã gán ảnh lễ dạm ngõ; xem lại và đổi tùy ý
-- [ ] Kiểm tra lựa chọn ảnh hero (p24), lời mời (p27), giữa trang (p14, p41), kết (p29) và 13 tờ album
+- [ ] Xem lại lựa chọn ảnh: bìa img3788, lời mời img3777, giữa trang img3818 + img3692, kết img3702, 12 tờ album (24 ảnh)
 - [ ] Chú thích trang album (`frontAlt`/`backAlt`) — đang là chú thích tạm
 - [ ] Khi có ảnh cưới chính thức: chép vào thư mục nguồn, chạy `npm run photos`, đổi id trong config
 

@@ -12,13 +12,14 @@ const PHOTO_MANIFEST = (Object.values(manifestModules)[0] || {}).default || { ph
  */
 export function photo(ref, displaySize = 1600) {
   const p = PHOTO_MANIFEST.photos?.[ref];
-  if (!p) return { src: ref || '', srcset: '', full: ref || '', thumb: ref || '' };
+  if (!p) return { src: ref || '', srcset: '', full: ref || '', thumb: ref || '', orientation: '' };
   const entries = Object.entries(p.sizes || {}).sort((a, b) => a[0] - b[0]);
   return {
     src: `photos/${ref}-${displaySize}.webp`,
     srcset: entries.map(([s, [w]]) => `photos/${ref}-${s}.webp ${w}w`).join(', '),
     full: `photos/${ref}-${entries.length ? entries[entries.length - 1][0] : displaySize}.webp`,
     thumb: `photos/${ref}-${entries.length ? entries[0][0] : displaySize}.webp`,
+    orientation: p.orientation || '',
   };
 }
 
@@ -40,6 +41,11 @@ function setImg(sel, ref, alt = '', sizes = SIZES_FULL) {
   }
   if (ph.src) el.src = ph.src;
   el.alt = alt;
+  // Khung ảnh theo hướng ảnh (dọc/ngang) để không cắt mất người
+  if (ph.orientation && el.parentElement) {
+    el.parentElement.classList.remove('is-portrait', 'is-landscape', 'is-square');
+    el.parentElement.classList.add(`is-${ph.orientation}`);
+  }
 }
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -219,7 +225,7 @@ export function renderStatic(config) {
   setText('#brideBio', bride.bio);
   setText('#endingNames', names);
   setText('#cdCoupleNames', `${groom.shortName} và ${bride.shortName}`);
-  setText('#theaterEyebrow', `THE WEDDING PHOTOBOOK · ${names.toUpperCase()}`);
+  setText('#theaterEyebrow', `${(config.album?.title || 'Album ảnh cưới').toUpperCase()} · ${names.toUpperCase()}`);
 
   // Bố mẹ
   setText('#familyGroomFather', groom.father);
@@ -483,7 +489,13 @@ export function buildAlbum(leavesCfg = []) {
     .map((l) => {
       const f = photo(l.front);
       const b = photo(l.back);
-      return { ...l, front: f.src, frontSrcset: f.srcset, frontFull: f.full, frontThumb: f.thumb, back: b.src, backSrcset: b.srcset, backFull: b.full, backThumb: b.thumb };
+      // Ảnh ngang trên trang dọc: mặc định "contain" (đặt trên nền giấy, không cắt mặt); ghi đè bằng frontFit/backFit
+      const fit = (ph, own) => own || (ph.orientation === 'landscape' ? 'contain' : 'cover');
+      return {
+        ...l,
+        front: f.src, frontSrcset: f.srcset, frontFull: f.full, frontThumb: f.thumb, frontFit: fit(f, l.frontFit),
+        back: b.src, backSrcset: b.srcset, backFull: b.full, backThumb: b.thumb, backFit: fit(b, l.backFit),
+      };
     });
   const n = leaves.length;
   const inner = Math.max(0, 2 * n - 2);

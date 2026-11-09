@@ -5534,3 +5534,36 @@ body.orn-none .intro-seal-badge {
   background: var(--c-bg);
   border-color: var(--c-line);
 }
+
+/* Album: ảnh ngang trên trang dọc → đặt trọn ảnh trên nền giấy (không cắt mặt) */
+.alb-face.is-contain {
+  background-color: var(--c-surface);
+  background-image: radial-gradient(circle at 50% 40%, var(--c-surface) 0%, var(--c-bg) 100%);
+}
+.alb-face.is-contain img {
+  object-fit: contain;
+  padding: 7%;
+  filter: drop-shadow(0 2px 6px rgb(var(--c-text-rgb) / 0.18));
+}
+.alb-face.is-contain.is-hardcover {
+  background-color: var(--c-primary);
+  background-image: radial-gradient(circle at 50% 40%, var(--c-primary) 0%, var(--c-strong) 100%);
+}
+
+/* Chân dung khung dọc 4:5 */
+.stt-profile-img-wrap {
+  aspect-ratio: 4 / 5;
+}
+.stt-profile-img-wrap img {
+  object-position: center top;
+}
+
+/* Khung ảnh theo hướng ảnh thật (render.js gắn is-portrait / is-landscape) */
+.stt-statement-img-wrap.is-portrait,
+.stt-middle-photo-wrap.is-portrait {
+  aspect-ratio: 4 / 5;
+}
+.stt-statement-img-wrap.is-landscape,
+.stt-middle-photo-wrap.is-landscape {
+  aspect-ratio: 3 / 2;
+}

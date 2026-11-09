@@ -22,3 +22,6 @@ Thumbs.db
 /photos-source/
 /originals/
 .claude/
+
+# Thumbnail xem trước ảnh chưa dùng (do npm run photos tạo, không đưa lên git)
+/photos-preview/
