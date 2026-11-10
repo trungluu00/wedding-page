@@ -19,7 +19,11 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const B_DIR = path.join(ROOT, 'huong-b');
 const DIST = path.join(ROOT, 'dist');
 
-const [, , command = 'dev', argVariant] = process.argv;
+// node scripts/phuong-an.mjs <dev|build> [a|b] [tham số khác…]
+// Tham số khác (vd --port 5191 --strictPort) được chuyển tiếp cho Vite (A); với B, --port thành biến PORT.
+const [, , command = 'dev', ...rest] = process.argv;
+const argVariant = /^[ab]$/i.test(rest[0] || '') ? rest.shift() : '';
+const extraArgs = rest;
 const config = (await import(pathToFileURL(path.join(ROOT, 'wedding.config.js')).href)).default;
 const variant = String(argVariant || process.env.PHUONG_AN || config.phuongAn || 'a').trim().toLowerCase();
 
@@ -32,9 +36,9 @@ if (!['dev', 'build'].includes(command)) {
   process.exit(1);
 }
 
-const run = (cmd, args, cwd = ROOT) =>
+const run = (cmd, args, cwd = ROOT, env = process.env) =>
   new Promise((resolve, reject) => {
-    const child = spawn(cmd, args, { cwd, stdio: 'inherit', shell: process.platform === 'win32' });
+    const child = spawn(cmd, args, { cwd, env, stdio: 'inherit', shell: process.platform === 'win32' });
     child.on('exit', (code) => (code === 0 ? resolve() : reject(new Error(`${cmd} ${args.join(' ')} thoát với mã ${code}`))));
   });
 
@@ -42,14 +46,16 @@ console.log(`▶ Phương án ${variant.toUpperCase()} — ${command === 'dev' ?
 
 try {
   if (variant === 'a') {
-    await run('npx', command === 'dev' ? ['vite'] : ['vite', 'build']);
+    await run('npx', [...(command === 'dev' ? ['vite'] : ['vite', 'build']), ...extraArgs]);
   } else {
     if (!fs.existsSync(path.join(B_DIR, 'node_modules'))) {
       console.log('Cài thư viện cho phương án B (lần đầu)…');
       await run('npm', ['install'], B_DIR);
     }
     if (command === 'dev') {
-      await run('npm', ['run', 'dev'], B_DIR);
+      const portIdx = extraArgs.indexOf('--port');
+      const port = portIdx >= 0 ? extraArgs[portIdx + 1] : '';
+      await run('npm', ['run', 'dev'], B_DIR, port ? { ...process.env, PORT: port } : process.env);
     } else {
       await run('npm', ['run', 'build'], B_DIR);
       // Phương án B build ra huong-b/public → chép sang dist/ để cách deploy giống nhau
