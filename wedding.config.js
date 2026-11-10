@@ -242,10 +242,14 @@ export default {
   //  lyrics: file .lrc (định dạng [mm:ss.xx] Lời bài hát), để "" nếu không có.
   // ---------------------------------------------------------------------------
   music: {
-    src: "music/le-duong.mp3", // TODO: THAY BÀI — "Lễ Đường" là bài có bản quyền, chỉ dùng tạm
-    title: "Lễ Đường", // TODO: tên bài mới
-    artist: "Kai Đinh", // TODO: ca sĩ
-    lyrics: "music/le-duong.lrc", // TODO: file lời .lrc của bài mới (hoặc "" nếu không có)
+    // TODO: chép file nhạc vào public/music/beautiful-in-white.mp3 (dùng chung cho cả phương án A và B).
+    // Chưa có file thì thiệp tự ẩn phần nhạc.
+    src: "music/beautiful-in-white.mp3",
+    title: "Beautiful in White",
+    artist: "Shane Filan",
+    // Lời chạy theo nhạc: tự đặt file .lrc (vd music/beautiful-in-white.lrc) rồi ghi đường dẫn vào đây.
+    // Để "" = không hiện khung lời.
+    lyrics: "",
   },
 
   // ---------------------------------------------------------------------------

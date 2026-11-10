@@ -187,9 +187,11 @@ export default {
 
   // --- Nhạc nền (bật khi khách bấm "Mở thiệp"). Để src rỗng = không có nhạc ---
   music: {
-    src: "", // TODO: vd "music/bai-hat.mp3" (nên < 3 MB, có bản quyền sử dụng)
-    title: "", // TODO
-    artist: "", // TODO
+    // Dùng chung file với phương án A: public/music/beautiful-in-white.mp3 ở thư mục gốc
+    // (hoặc đặt riêng trong huong-b/music/). Chưa có file thì nút nhạc tự ẩn.
+    src: "music/beautiful-in-white.mp3",
+    title: "Beautiful in White",
+    artist: "Shane Filan",
     lyrics: null,
   },
 
