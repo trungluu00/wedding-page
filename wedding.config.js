@@ -113,7 +113,7 @@ export default {
       lunar: "Nhằm ngày 04 tháng 11 năm Bính Ngọ",
       venue: "Chùa Phăn",
       address: "Xã Đại Sơn, TP. Hải Phòng",
-      mapsUrl: "https://www.google.com/maps/place/Ch%C3%B9a+Ph%C4%83n/@20.8834312,106.3558581,17z/data=!4m6!3m5!1s0x31358572cd7435f5:0x47aa3eab56164b3e!8m2!3d20.8834312!4d106.3558581", // Chùa Phăn (V9M4+99, Đại Sơn) trên Google Maps
+      mapsUrl: "https://www.google.com/maps/dir/?api=1&destination=Ch%C3%B9a%20Ph%C4%83n%2C%20%C4%90%E1%BA%A1i%20S%C6%A1n%2C%20H%E1%BA%A3i%20Ph%C3%B2ng", // chỉ đường tới Chùa Phăn (V9M4+99, Đại Sơn) — đã thử mở đúng địa điểm
       audience: ["nha-gai", "ban-chung", "public"],
     },
     // ----- Ngày 13/12/2026 (05/11 âm) -----
@@ -126,7 +126,7 @@ export default {
       lunar: "Nhằm ngày 05 tháng 11 năm Bính Ngọ",
       venue: "Tư gia nhà trai",
       address: "Thôn Phúc Hòa, Xã Thác Bà, Tỉnh Lào Cai",
-      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Th%C3%B4n%20Ph%C3%BAc%20H%C3%B2a%2C%20X%C3%A3%20Th%C3%A1c%20B%C3%A0%2C%20L%C3%A0o%20Cai", // TODO: link ghim đúng cổng nhà
+      mapsUrl: "https://www.google.com/maps/dir/?api=1&destination=Th%C3%B4n%20Ph%C3%BAc%20H%C3%B2a%2C%20X%C3%A3%20Th%C3%A1c%20B%C3%A0%2C%20L%C3%A0o%20Cai", // chỉ đường tới thôn Phúc Hòa (Hán Đà, Thác Bà) — TODO: thay bằng tọa độ cổng nhà để chính xác hơn
       audience: ["nha-trai", "public"],
     },
     {
@@ -139,7 +139,7 @@ export default {
       lunar: "Nhằm ngày 05 tháng 11 năm Bính Ngọ",
       venue: "Tư gia nhà trai",
       address: "Thôn Phúc Hòa, Xã Thác Bà, Tỉnh Lào Cai",
-      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Th%C3%B4n%20Ph%C3%BAc%20H%C3%B2a%2C%20X%C3%A3%20Th%C3%A1c%20B%C3%A0%2C%20L%C3%A0o%20Cai", // TODO: link ghim đúng cổng nhà
+      mapsUrl: "https://www.google.com/maps/dir/?api=1&destination=Th%C3%B4n%20Ph%C3%BAc%20H%C3%B2a%2C%20X%C3%A3%20Th%C3%A1c%20B%C3%A0%2C%20L%C3%A0o%20Cai", // chỉ đường tới thôn Phúc Hòa (Hán Đà, Thác Bà) — TODO: thay bằng tọa độ cổng nhà để chính xác hơn
       audience: ["nha-trai", "ban-chung", "public"],
     },
   ],

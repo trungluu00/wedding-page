@@ -205,10 +205,12 @@ sửa tùy ý. Ngày âm lịch tính bằng `npm run lunar -- YYYY-MM-DD` (vd `
 - [x] Thiệp gửi bạn bè, đồng nghiệp: lời văn xưng "chúng tôi" / gọi khách là "bạn"; tên hiển thị "Viết Trung",
       "Phương Nhi" (`displayName`); nhãn dưới tên ở khối báo hỷ là "Chú rể" / "Cô dâu" (`role`)
 - [ ] `couple.bride.familyPhone` — đang trùng số cô dâu nên mục Liên hệ tự ẩn dòng này; điền số bố/mẹ nếu muốn hiện
-- [x] Lịch: tiệc nhà gái chiều 12/12 (04/11 âm) tại Chùa Phăn (link Google Maps đúng địa điểm); Lễ Thành Hôn
+- [x] Lịch: tiệc nhà gái chiều 12/12 (04/11 âm) tại Chùa Phăn (nút Chỉ đường mở đường đi tới đúng Chùa Phăn); Lễ Thành Hôn
       10:00 và tiệc nhà trai sau lễ ngày 13/12 (05/11 âm) tại nhà trai
 - [ ] **Xác nhận giờ** tôi tự cân đối: tiệc nhà gái 16:00, tiệc nhà trai 11:00
-- [ ] `mapsUrl` nhà trai — đang là link tìm theo địa chỉ; nên thay bằng link ghim đúng cổng nhà
+- [ ] `mapsUrl` nhà trai — đang chỉ đường tới thôn Phúc Hòa. Muốn tới đúng cổng nhà: mở Google Maps, nhấn giữ
+      vào cổng nhà để thả ghim, chép tọa độ (vd `21.71191, 105.08898`) rồi ghi
+      `https://www.google.com/maps/dir/?api=1&destination=21.71191,105.08898`
 - [ ] Kiểm tra `audience` từng sự kiện (ai được thấy) cho đúng thực tế
 - [ ] `schedule` — giờ các mốc theo giờ tiệc thật
 - [ ] `gifts.accounts` — `bankBin`, `bankName`, `accountNo`, `accountName` (hoặc `qrImage`). Khi số tài khoản còn là
