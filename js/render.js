@@ -219,12 +219,15 @@ export function renderStatic(config) {
   setText('#introBrideName', bride.shortName);
   setText('#heroGroomName', groom.shortName);
   setText('#heroBrideName', bride.shortName);
-  setText('#profileGroomName', groom.fullName);
-  setText('#profileBrideName', bride.fullName);
+  // Tên hiển thị (vd "Viết Trung"); họ tên đầy đủ vẫn dùng cho chú thích ảnh, tài khoản…
+  const groomName = groom.displayName || groom.fullName;
+  const brideName = bride.displayName || bride.fullName;
+  setText('#profileGroomName', groomName);
+  setText('#profileBrideName', brideName);
   setText('#groomRole', (groom.role || '').toUpperCase());
   setText('#brideRole', (bride.role || '').toUpperCase());
-  setText('#groomProfileName', groom.fullName);
-  setText('#brideProfileName', bride.fullName);
+  setText('#groomProfileName', groomName);
+  setText('#brideProfileName', brideName);
   setText('#groomBio', groom.bio);
   setText('#brideBio', bride.bio);
   setText('#endingNames', names);
@@ -293,8 +296,8 @@ export function renderStatic(config) {
 
   // Liên hệ
   const contacts = [
-    { name: groom.fullName, role: 'Chú rể', phone: groom.phone },
-    { name: bride.fullName, role: 'Cô dâu', phone: bride.phone },
+    { name: groomName, role: 'Chú rể', phone: groom.phone },
+    { name: brideName, role: 'Cô dâu', phone: bride.phone },
     { name: groom.father || 'Nhà trai', role: 'Đại diện nhà trai', phone: groom.familyPhone },
     { name: bride.father || 'Nhà gái', role: 'Đại diện nhà gái', phone: bride.familyPhone },
   ].filter((c) => c.phone);

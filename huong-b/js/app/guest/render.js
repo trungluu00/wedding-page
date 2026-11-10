@@ -14,12 +14,12 @@ const FAMILY_LABEL = { 'nha-trai': 'Nhà trai', 'nha-gai': 'Nhà gái' };
 /** "Bác Hùng" — tránh lặp nếu tên đã có sẵn xưng hô ("Bác Hùng" + "Bác"). */
 export const guestDisplay = (guest) => {
     if (!guest) {
-        return 'Quý khách';
+        return 'Bạn';
     }
     const name = String(guest.name ?? '').trim();
     const xh = String(guest.xungHo ?? '').trim();
     if (!xh || name.toLowerCase().startsWith(xh.toLowerCase() + ' ') || name.toLowerCase() === xh.toLowerCase()) {
-        return name || xh || 'Quý khách';
+        return name || xh || 'Bạn';
     }
     return `${xh} ${name}`.trim();
 };
@@ -161,7 +161,7 @@ const renderInvitation = (cfg, ctx) => h('section', { id: 'invitation', class: '
 const personCard = (p, role, side, aos) => h('div', { class: 'py-2', 'data-aos': aos },
     img(p.portrait, `${role} ${p.fullName}`, 'portrait mb-3 mx-auto d-block', { sizes: fixedSizes(11) }),
     h('p', { class: 'section-kicker mb-1' }, role),
-    h('h3', { class: 'font-esthetic mb-2', style: { fontSize: '2.4rem', color: 'var(--c-strong)' } }, p.fullName),
+    h('h3', { class: 'font-esthetic mb-2', style: { fontSize: '2.4rem', color: 'var(--c-strong)' } }, p.displayName || p.fullName),
     (p.father || p.mother) ? h('p', { class: 'mb-1 small' },
         h('span', { class: 'text-muted-c' }, `${FAMILY_LABEL[side]}: `),
         [p.father, p.mother].filter(Boolean).join(' & ')) : null,

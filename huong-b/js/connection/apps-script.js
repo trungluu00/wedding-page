@@ -18,8 +18,8 @@ const DEMO_GUESTS = {
 };
 
 const DEMO_WISHES = [
-    { author: 'Thu Hà', relation: 'Bạn đại học', text: 'Chúc hai bạn trăm năm hạnh phúc, sớm có tin vui nhé!', createdAt: '2026-11-01T09:00:00+07:00' },
-    { author: 'Anh Tuấn', relation: 'Đồng nghiệp', text: 'Chúc mừng hạnh phúc Trung & Nhi! Hẹn gặp ở tiệc cưới.', createdAt: '2026-11-03T20:15:00+07:00' },
+    // Lời chúc minh họa cho chế độ demo (chưa nối Google Sheet) — không gắn tên người thật
+    { author: 'Lời chúc mẫu', relation: 'Chế độ demo', text: 'Chúc hai bạn trăm năm hạnh phúc, sớm có tin vui nhé!', createdAt: '2026-11-01T09:00:00+07:00' },
 ];
 
 /**

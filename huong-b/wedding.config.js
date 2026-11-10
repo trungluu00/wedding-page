@@ -38,6 +38,7 @@ export default {
   couple: {
     groom: {
       fullName: "Lưu Viết Trung",
+      displayName: "Viết Trung", // tên hiện ở phần giới thiệu, báo hỷ, liên hệ
       shortName: "Trung",
       portrait: "p38-chu-re", // cắt từ p38 (chưa có ảnh chú rể chụp riêng)
       bio: "Chàng trai hiền lành, chân thành, ít nói nhưng luôn chu đáo. Với Trung, Nhi là người khiến những ngày bình thường trở nên đặc biệt.", // (gợi ý)
@@ -48,13 +49,14 @@ export default {
     },
     bride: {
       fullName: "Đoàn Phương Nhi",
+      displayName: "Phương Nhi", // tên hiện ở phần giới thiệu, báo hỷ, liên hệ
       shortName: "Nhi",
       portrait: "p32", // cô dâu bên bảng tên lễ dạm ngõ
       bio: "Cô gái dịu dàng, hay cười và luôn quan tâm mọi người xung quanh. Với Nhi, Trung là bến bình yên để trở về sau mỗi ngày dài.", // (gợi ý)
       phone: "0345 512 667",
       father: "Ông Đoàn Văn Hưng",
-      mother: "Bà Nguyễn Thị Phượng",
-      address: "Thôn Tứ Kỳ, Xã Đại Sơn, Tỉnh Hải Phòng",
+      mother: "Bà Đoàn Thị Phượng",
+      address: "Thôn Kỳ Sơn, Xã Đại Sơn, TP. Hải Phòng",
     },
   },
 
@@ -76,8 +78,8 @@ export default {
       endTime: "19:00",
       lunar: "Nhằm ngày 04 tháng 11 năm Bính Ngọ",
       venue: "Tư gia nhà gái",
-      address: "Thôn Tứ Kỳ, Xã Đại Sơn, Tỉnh Hải Phòng",
-      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Th%C3%B4n%20T%E1%BB%A9%20K%E1%BB%B3%2C%20X%C3%A3%20%C4%90%E1%BA%A1i%20S%C6%A1n%2C%20H%E1%BA%A3i%20Ph%C3%B2ng", // TODO: link ghim đúng cổng nhà
+      address: "Thôn Kỳ Sơn, Xã Đại Sơn, TP. Hải Phòng",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Th%C3%B4n%20K%E1%BB%B3%20S%C6%A1n%2C%20X%C3%A3%20%C4%90%E1%BA%A1i%20S%C6%A1n%2C%20TP.%20H%E1%BA%A3i%20Ph%C3%B2ng", // TODO: link ghim đúng cổng nhà
       audience: ["nha-gai", "ban-chung", "public"],
     },
     {
@@ -88,8 +90,8 @@ export default {
       endTime: "23:30",
       lunar: "Nhằm ngày 04 tháng 11 năm Bính Ngọ",
       venue: "Tư gia nhà gái",
-      address: "Thôn Tứ Kỳ, Xã Đại Sơn, Tỉnh Hải Phòng",
-      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Th%C3%B4n%20T%E1%BB%A9%20K%E1%BB%B3%2C%20X%C3%A3%20%C4%90%E1%BA%A1i%20S%C6%A1n%2C%20H%E1%BA%A3i%20Ph%C3%B2ng", // TODO: link ghim đúng cổng nhà
+      address: "Thôn Kỳ Sơn, Xã Đại Sơn, TP. Hải Phòng",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Th%C3%B4n%20K%E1%BB%B3%20S%C6%A1n%2C%20X%C3%A3%20%C4%90%E1%BA%A1i%20S%C6%A1n%2C%20TP.%20H%E1%BA%A3i%20Ph%C3%B2ng", // TODO: link ghim đúng cổng nhà
       audience: ["nha-gai", "doan-nha-trai", "public"],
     },
     // ----- Ngày 13/12/2026 (05/11 âm) -----
@@ -101,8 +103,8 @@ export default {
       endTime: "01:00",
       lunar: "Nhằm ngày 05 tháng 11 năm Bính Ngọ",
       venue: "Tư gia nhà gái",
-      address: "Thôn Tứ Kỳ, Xã Đại Sơn, Tỉnh Hải Phòng",
-      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Th%C3%B4n%20T%E1%BB%A9%20K%E1%BB%B3%2C%20X%C3%A3%20%C4%90%E1%BA%A1i%20S%C6%A1n%2C%20H%E1%BA%A3i%20Ph%C3%B2ng", // TODO: link ghim đúng cổng nhà
+      address: "Thôn Kỳ Sơn, Xã Đại Sơn, TP. Hải Phòng",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Th%C3%B4n%20K%E1%BB%B3%20S%C6%A1n%2C%20X%C3%A3%20%C4%90%E1%BA%A1i%20S%C6%A1n%2C%20TP.%20H%E1%BA%A3i%20Ph%C3%B2ng", // TODO: link ghim đúng cổng nhà
       note: "Khoảng 01:00 đoàn xuất phát, về tới nhà trai khoảng 05:45 sáng.",
       audience: ["nha-gai", "doan-nha-trai", "public"],
     },
@@ -221,13 +223,13 @@ export default {
     lyrics: null,
   },
 
-  // --- Lời văn. {khach} sẽ được thay bằng cách xưng hô với khách, vd "Bác Hùng" hoặc "Quý khách" ---
+  // --- Lời văn. {khach} sẽ được thay bằng cách xưng hô với khách, vd "Anh Tuấn" hoặc "Bạn" (khi không có mã khách) ---
   texts: {
     quote: "Từ một lời hẹn ngày dạm ngõ, thành một đời thương nhau.", // (gợi ý)
     invitation:
-      "Trân trọng kính mời {khach} tới dự buổi lễ thành hôn và chung vui cùng gia đình chúng tôi.", // (gợi ý)
+      "Trân trọng kính mời {khach} tới dự lễ thành hôn của chúng tôi và cùng chung vui trong ngày hạnh phúc này.", // (gợi ý)
     thankYou:
-      "Sự hiện diện của {khach} là niềm vinh hạnh cho gia đình chúng tôi. Xin chân thành cảm ơn!", // (gợi ý)
+      "Sự hiện diện của {khach} là niềm vui lớn nhất với chúng tôi. Cảm ơn thật nhiều!", // (gợi ý)
   },
 
   // --- Thứ tự các phần trên thiệp. Bỏ tên nào khỏi danh sách thì phần đó bị ẩn ---

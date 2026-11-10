@@ -494,7 +494,7 @@ class AutoScrollEngine {
       const maxScroll = this.container.scrollHeight - this.container.clientHeight;
       if (this.container.scrollTop >= maxScroll - 4) {
         this.stop();
-        showToast('Đã xem trọn vẹn thiệp cưới! Cảm ơn quý khách ❤️');
+        showToast('Đã xem trọn vẹn thiệp cưới! Cảm ơn bạn ❤️');
         return;
       }
 
@@ -1984,7 +1984,7 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       const name = document.getElementById('guestName').value.trim().slice(0, 80);
       if (!name) {
-        showToast('Vui lòng nhập họ và tên của quý khách!');
+        showToast('Vui lòng nhập họ và tên của bạn!');
         return;
       }
       const side = rsvpForm.querySelector('input[name="guestSide"]:checked')?.value || 'nha-trai';
@@ -2005,7 +2005,7 @@ document.addEventListener('DOMContentLoaded', () => {
       closeSheet(rsvpModal);
       const dateText = document.getElementById('heroCalloutDate')?.textContent || '';
       if (willAttend) {
-        showToast(`Cảm ơn ${name}! Hẹn gặp quý khách${dateText ? ` vào ngày ${dateText}` : ''} ❤️`);
+        showToast(`Cảm ơn ${name}! Hẹn gặp bạn${dateText ? ` vào ngày ${dateText}` : ''} ❤️`);
       } else {
         showToast(`Cảm ơn ${name} đã phản hồi. Chúc bạn luôn an khang! 🌸`);
       }

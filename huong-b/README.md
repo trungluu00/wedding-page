@@ -77,7 +77,7 @@ Mở `wedding.config.js`, sửa giá trị (đừng đổi tên khóa — khung 
 - **Sự kiện** (`events`): `date` dạng `YYYY-MM-DD`, `time` dạng `HH:mm` theo giờ Việt Nam. `lunar` là chữ ghi sẵn (không tự tính âm lịch).
   `audience` quyết định ai thấy sự kiện: `"all"` = mọi khách; `"nha-trai"`, `"nha-gai"` hoặc tên nhóm bất kỳ khớp với cột `side`/`groups` của khách trong Sheet.
   Khách không có mã (`?to=` trống/sai) chỉ thấy sự kiện `"all"`. Đếm ngược và ngày trên bìa lấy sự kiện `"all"` sớm nhất.
-- **Lời văn** (`texts`): `{khach}` được thay bằng cách xưng hô, vd "Bác Hùng"; không có mã khách thì là "Quý khách".
+- **Lời văn** (`texts`): `{khach}` được thay bằng cách xưng hô, vd "Bác Hùng"; không có mã khách thì là "Bạn".
 - **Thứ tự các phần** (`sections`): đổi thứ tự hoặc xóa tên để ẩn phần đó. `cover` là bìa thư "Mở thiệp" (chạm vào mới bật nhạc).
 - **Ảnh** (`photos`, `album`, `couple.*.portrait`): ghi **mã ảnh** `pNN` hoặc mã ảnh cắt trong `photos.crops` (xem `photos-contact-sheet.html`). `photos.cover` là ảnh trong khung vòm ở bìa thư, `photos.hero` là ảnh lớn đầu thiệp sau khi mở. Thiệp tự dùng `srcset` để điện thoại tải cỡ vừa đủ mà vẫn nét trên màn hình retina; chạm ảnh mở bản 2560 px. Vẫn ghi được đường dẫn thường như `"photos/abc.jpg"`.
   `photos.shareFrom` là ảnh dùng để cắt ảnh chia sẻ 1200×630 (`sharePosition`: `"center"` hoặc `"attention"`); chạy lại `npm run photos` sau khi đổi.

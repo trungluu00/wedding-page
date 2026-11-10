@@ -37,7 +37,7 @@ export const guest = (() => {
         // Tên có dấu kèm trong link (&n=Bác%20Hùng, do Google Sheet tự sinh) — dùng khi không tra được khách
         const nameFromLink = (params.get('n') ?? '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim().slice(0, 60);
         if (!raw) {
-            return nameFromLink ? { guest: null, khach: nameFromLink, plain: nameFromLink } : { guest: null, khach: 'Quý khách', plain: '' };
+            return nameFromLink ? { guest: null, khach: nameFromLink, plain: nameFromLink } : { guest: null, khach: 'Bạn', plain: '' };
         }
 
         let found = null;
@@ -61,7 +61,7 @@ export const guest = (() => {
             return { guest: null, khach: nameFromLink, plain: nameFromLink };
         }
         const looksLikeName = /\s/.test(raw) || /[^a-z0-9_-]/i.test(raw);
-        return looksLikeName ? { guest: null, khach: raw, plain: raw } : { guest: null, khach: 'Quý khách', plain: '' };
+        return looksLikeName ? { guest: null, khach: raw, plain: raw } : { guest: null, khach: 'Bạn', plain: '' };
     };
 
     const countDown = () => {

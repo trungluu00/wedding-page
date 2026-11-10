@@ -132,7 +132,7 @@ export const forms = (client) => {
             h('p', { class: 'section-kicker mb-1' }, 'Xác nhận tham dự'),
             h('h2', { class: 'section-title mb-0' }, 'Bạn sẽ đến chứ?'),
             h('div', { class: 'divider-ornament', 'aria-hidden': 'true' }, icon('fa-heart', 'fa-xs')),
-            deadline ? h('p', { class: 'small text-muted-c' }, `Vui lòng phản hồi trước ngày ${plainDate(deadline)} để gia đình chuẩn bị chu đáo.`) : null,
+            deadline ? h('p', { class: 'small text-muted-c' }, `Vui lòng phản hồi trước ngày ${plainDate(deadline)} để chúng mình chuẩn bị chu đáo.`) : null,
             form,
         );
     };

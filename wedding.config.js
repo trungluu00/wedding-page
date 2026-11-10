@@ -64,8 +64,9 @@ export default {
   couple: {
     groom: {
       fullName: "Lưu Viết Trung",
+      displayName: "Viết Trung", // tên hiện ở phần giới thiệu, báo hỷ, liên hệ
       shortName: "Trung",
-      role: "Trưởng nam", // TODO: xác nhận (Trưởng nam / Thứ nam / Út nam…)
+      role: "Chú rể", // dòng nhỏ dưới tên ở khối báo hỷ (thiệp gửi bạn bè nên dùng "Chú rể"; có thể ghi "Trưởng nam"…)
       portrait: "groom", // ảnh cắt từ img3831 (xem photos.crops)
       bio: "Chàng trai hiền lành, chân thành, ít nói nhưng luôn chu đáo. Với Trung, Nhi là người khiến những ngày bình thường trở nên đặc biệt.", // (gợi ý)
       phone: "0334 395 967",
@@ -76,14 +77,15 @@ export default {
     },
     bride: {
       fullName: "Đoàn Phương Nhi",
+      displayName: "Phương Nhi", // tên hiện ở phần giới thiệu, báo hỷ, liên hệ
       shortName: "Nhi",
-      role: "Trưởng nữ", // TODO: xác nhận (Trưởng nữ / Thứ nữ / Út nữ…)
+      role: "Cô dâu", // dòng nhỏ dưới tên ở khối báo hỷ (có thể ghi "Trưởng nữ"…)
       portrait: "bride", // ảnh cắt từ img3799 (xem photos.crops)
       bio: "Cô gái dịu dàng, hay cười và luôn quan tâm mọi người xung quanh. Với Nhi, Trung là bến bình yên để trở về sau mỗi ngày dài.", // (gợi ý)
       phone: "0345 512 667",
       father: "Ông Đoàn Văn Hưng",
-      mother: "Bà Nguyễn Thị Phượng",
-      address: "Thôn Tứ Kỳ, Xã Đại Sơn, Tỉnh Hải Phòng",
+      mother: "Bà Đoàn Thị Phượng",
+      address: "Thôn Kỳ Sơn, Xã Đại Sơn, TP. Hải Phòng",
       familyPhone: "0345 512 667", // TODO: đang trùng số cô dâu — điền số bố/mẹ nếu muốn
     },
   },
@@ -112,8 +114,8 @@ export default {
       endTime: "19:00",
       lunar: "Nhằm ngày 04 tháng 11 năm Bính Ngọ",
       venue: "Tư gia nhà gái",
-      address: "Thôn Tứ Kỳ, Xã Đại Sơn, Tỉnh Hải Phòng",
-      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Th%C3%B4n%20T%E1%BB%A9%20K%E1%BB%B3%2C%20X%C3%A3%20%C4%90%E1%BA%A1i%20S%C6%A1n%2C%20H%E1%BA%A3i%20Ph%C3%B2ng", // TODO: link ghim đúng cổng nhà
+      address: "Thôn Kỳ Sơn, Xã Đại Sơn, TP. Hải Phòng",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Th%C3%B4n%20K%E1%BB%B3%20S%C6%A1n%2C%20X%C3%A3%20%C4%90%E1%BA%A1i%20S%C6%A1n%2C%20TP.%20H%E1%BA%A3i%20Ph%C3%B2ng", // TODO: link ghim đúng cổng nhà
       audience: ["nha-gai", "ban-chung", "public"],
     },
     {
@@ -124,8 +126,8 @@ export default {
       endTime: "23:30",
       lunar: "Nhằm ngày 04 tháng 11 năm Bính Ngọ",
       venue: "Tư gia nhà gái",
-      address: "Thôn Tứ Kỳ, Xã Đại Sơn, Tỉnh Hải Phòng",
-      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Th%C3%B4n%20T%E1%BB%A9%20K%E1%BB%B3%2C%20X%C3%A3%20%C4%90%E1%BA%A1i%20S%C6%A1n%2C%20H%E1%BA%A3i%20Ph%C3%B2ng", // TODO: link ghim đúng cổng nhà
+      address: "Thôn Kỳ Sơn, Xã Đại Sơn, TP. Hải Phòng",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Th%C3%B4n%20K%E1%BB%B3%20S%C6%A1n%2C%20X%C3%A3%20%C4%90%E1%BA%A1i%20S%C6%A1n%2C%20TP.%20H%E1%BA%A3i%20Ph%C3%B2ng", // TODO: link ghim đúng cổng nhà
       audience: ["nha-gai", "doan-nha-trai", "public"],
     },
     // ----- Ngày 13/12/2026 (05/11 âm) -----
@@ -137,8 +139,8 @@ export default {
       endTime: "01:00",
       lunar: "Nhằm ngày 05 tháng 11 năm Bính Ngọ",
       venue: "Tư gia nhà gái",
-      address: "Thôn Tứ Kỳ, Xã Đại Sơn, Tỉnh Hải Phòng",
-      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Th%C3%B4n%20T%E1%BB%A9%20K%E1%BB%B3%2C%20X%C3%A3%20%C4%90%E1%BA%A1i%20S%C6%A1n%2C%20H%E1%BA%A3i%20Ph%C3%B2ng", // TODO: link ghim đúng cổng nhà
+      address: "Thôn Kỳ Sơn, Xã Đại Sơn, TP. Hải Phòng",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Th%C3%B4n%20K%E1%BB%B3%20S%C6%A1n%2C%20X%C3%A3%20%C4%90%E1%BA%A1i%20S%C6%A1n%2C%20TP.%20H%E1%BA%A3i%20Ph%C3%B2ng", // TODO: link ghim đúng cổng nhà
       note: "Khoảng 01:00 đoàn xuất phát, về tới nhà trai khoảng 05:45 sáng.",
       audience: ["nha-gai", "doan-nha-trai", "public"],
     },
@@ -283,7 +285,7 @@ export default {
     // (gợi ý) — sửa tùy ý, xuống dòng bằng \n
     quote: "Từ một lời hẹn ngày dạm ngõ, thành một đời thương nhau.",
     invitation:
-      "Trân trọng kính mời quý khách đến dự\nlễ thành hôn của hai con chúng tôi\nvà cùng chung vui, chia sẻ niềm hạnh phúc trọn vẹn này.",
+      "Trân trọng kính mời bạn đến dự\nlễ thành hôn của chúng tôi\nvà cùng chung vui, chia sẻ niềm hạnh phúc này.",
     thankYou:
       "Cảm ơn bạn đã dành thời gian mở tấm thiệp nhỏ này.\nSự hiện diện và lời chúc của bạn\nlà món quà ý nghĩa nhất với Trung & Nhi.",
   },
