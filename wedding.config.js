@@ -101,10 +101,8 @@ export default {
   //  lunar: ghi sẵn bằng chữ. Đổi ngày thì tính lại bằng: npm run lunar -- 2026-12-12
   //  Trên thiệp, sự kiện tự sắp theo thời gian.
   // ---------------------------------------------------------------------------
-  //  Lễ Ăn Hỏi và Đón dâu ở nhà gái: khách nhà gái, và người trong đoàn nhà trai đi đón dâu —
-  //  ghi "doan-nha-trai" vào cột groups của những người này trong Google Sheet.
   events: [
-    // ----- Ngày 12/12/2026 (04/11 âm) — tại nhà gái -----
+    // ----- Ngày 12/12/2026 (04/11 âm) — tiệc nhà gái -----
     {
       id: "tiec-nha-gai",
       name: "Tiệc cưới nhà gái",
@@ -113,37 +111,12 @@ export default {
       time: "16:00", // (gợi ý) chiều ngày 4 — TODO: xác nhận giờ
       endTime: "19:00",
       lunar: "Nhằm ngày 04 tháng 11 năm Bính Ngọ",
-      venue: "Tư gia nhà gái",
-      address: "Thôn Kỳ Sơn, Xã Đại Sơn, TP. Hải Phòng",
-      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Th%C3%B4n%20K%E1%BB%B3%20S%C6%A1n%2C%20X%C3%A3%20%C4%90%E1%BA%A1i%20S%C6%A1n%2C%20TP.%20H%E1%BA%A3i%20Ph%C3%B2ng", // TODO: link ghim đúng cổng nhà
+      venue: "Chùa Phăn",
+      address: "Xã Đại Sơn, TP. Hải Phòng",
+      mapsUrl: "https://www.google.com/maps/place/Ch%C3%B9a+Ph%C4%83n/@20.8834312,106.3558581,17z/data=!4m6!3m5!1s0x31358572cd7435f5:0x47aa3eab56164b3e!8m2!3d20.8834312!4d106.3558581", // Chùa Phăn (V9M4+99, Đại Sơn) trên Google Maps
       audience: ["nha-gai", "ban-chung", "public"],
     },
-    {
-      id: "an-hoi",
-      name: "Lễ Ăn Hỏi",
-      date: "2026-12-12",
-      time: "22:30", // (gợi ý) làm trong đêm — TODO: xác nhận giờ
-      endTime: "23:30",
-      lunar: "Nhằm ngày 04 tháng 11 năm Bính Ngọ",
-      venue: "Tư gia nhà gái",
-      address: "Thôn Kỳ Sơn, Xã Đại Sơn, TP. Hải Phòng",
-      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Th%C3%B4n%20K%E1%BB%B3%20S%C6%A1n%2C%20X%C3%A3%20%C4%90%E1%BA%A1i%20S%C6%A1n%2C%20TP.%20H%E1%BA%A3i%20Ph%C3%B2ng", // TODO: link ghim đúng cổng nhà
-      audience: ["nha-gai", "doan-nha-trai", "public"],
-    },
     // ----- Ngày 13/12/2026 (05/11 âm) -----
-    {
-      id: "le-vu-quy",
-      name: "Lễ Vu Quy · Đón dâu",
-      date: "2026-12-13",
-      time: "00:30", // (gợi ý) ngay sau lễ ăn hỏi — TODO: xác nhận giờ
-      endTime: "01:00",
-      lunar: "Nhằm ngày 05 tháng 11 năm Bính Ngọ",
-      venue: "Tư gia nhà gái",
-      address: "Thôn Kỳ Sơn, Xã Đại Sơn, TP. Hải Phòng",
-      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Th%C3%B4n%20K%E1%BB%B3%20S%C6%A1n%2C%20X%C3%A3%20%C4%90%E1%BA%A1i%20S%C6%A1n%2C%20TP.%20H%E1%BA%A3i%20Ph%C3%B2ng", // TODO: link ghim đúng cổng nhà
-      note: "Khoảng 01:00 đoàn xuất phát, về tới nhà trai khoảng 05:45 sáng.",
-      audience: ["nha-gai", "doan-nha-trai", "public"],
-    },
     {
       id: "le-thanh-hon",
       name: "Lễ Thành Hôn",
@@ -178,9 +151,6 @@ export default {
   // Lịch trình hai ngày cưới (day: ngày dương, hiện dưới giờ). TODO: chỉnh giờ khi chốt
   schedule: [
     { day: "12/12", time: "16:00", title: "Tiệc nhà gái", icon: "cheers" },
-    { day: "12/12", time: "22:30", title: "Lễ ăn hỏi", icon: "heart" },
-    { day: "13/12", time: "00:30", title: "Đón dâu", icon: "car" },
-    { day: "13/12", time: "05:45", title: "Về nhà trai", icon: "home" },
     { day: "13/12", time: "10:00", title: "Lễ thành hôn", icon: "rings" },
     { day: "13/12", time: "11:00", title: "Tiệc nhà trai", icon: "cheers" },
   ],
