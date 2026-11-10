@@ -94,12 +94,18 @@ export const buildHtml = async (cfg) => {
   await fs.writeFile(path.join(OUT, 'index.html'), html, 'utf8');
 };
 
+/** Nhạc dùng chung với phương án A (thư mục gốc/public/music) khi huong-b/ không có thư mục music riêng. */
+const SHARED = { music: path.join(ROOT, '..', 'public', 'music') };
+
+const exists = async (p) => fs.access(p).then(() => true, () => false);
+
 export const copyStatic = async () => {
   for (const dir of STATIC_DIRS) {
-    const src = path.join(ROOT, dir);
-    try {
-      await fs.access(src);
-    } catch {
+    let src = path.join(ROOT, dir);
+    if (!(await exists(src)) && SHARED[dir] && (await exists(SHARED[dir]))) {
+      src = SHARED[dir];
+    }
+    if (!(await exists(src))) {
       continue;
     }
     // manifest.json/sizes.json chỉ dùng lúc build (sizes.json đã gói vào JS); manifest có tên file gốc nên không deploy.

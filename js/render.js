@@ -281,7 +281,7 @@ export function renderStatic(config) {
   const m = config.music || {};
   setText('#musicSectionTitle', m.title);
   setText('#songTitle', m.title);
-  setText('#songArtist', [m.artist, 'Lời tự động chạy'].filter(Boolean).join(' · '));
+  setText('#songArtist', [m.artist, m.lyrics ? 'Lời tự động chạy' : ''].filter(Boolean).join(' · '));
   setText('#autoplayPromptText', `Chạm màn hình để nghe bài hát ${m.title || ''}`.trim());
 
   // RSVP

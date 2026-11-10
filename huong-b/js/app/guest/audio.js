@@ -53,13 +53,20 @@ export const audio = (() => {
         }
 
         el = new Audio();
+        // Chưa có file nhạc (hoặc tải lỗi): bỏ nút nhạc thay vì để nút bấm không phát được
+        el.addEventListener('error', () => {
+            isPlay = false;
+            button?.remove();
+            button = null;
+            el = null;
+        });
         el.src = src;
         el.loop = true;
         el.preload = 'auto';
 
         button.addEventListener('click', toggle);
         document.addEventListener('undangan.open', () => {
-            button.classList.remove('d-none');
+            button?.classList.remove('d-none');
             play();
         });
         // Tạm dừng khi khách chuyển sang app khác.

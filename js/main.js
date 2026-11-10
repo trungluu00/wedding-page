@@ -1645,7 +1645,17 @@ document.addEventListener('DOMContentLoaded', () => {
   startCountdown(defaultMainEvent);
 
   const audioEl = document.getElementById('weddingBgMusic');
-  if (audioEl && MUSIC.src) audioEl.src = MUSIC.src;
+  if (audioEl && MUSIC.src) {
+    // Chưa có file nhạc (hoặc tải lỗi): ẩn phần nhạc thay vì để nút phát không chạy
+    audioEl.addEventListener('error', () => {
+      ['#musicSection', '#audio-control-wrapper', '#audioAutoplayPrompt'].forEach((sel) => {
+        const node = document.querySelector(sel);
+        if (node) node.hidden = true;
+      });
+      console.info(`[Thiệp cưới] Không tải được file nhạc "${MUSIC.src}" — đã ẩn phần nhạc.`);
+    });
+    audioEl.src = MUSIC.src;
+  }
 
   // Mã QR mở thiệp trên điện thoại (chỉ hiện ở màn hình lớn)
   const desktopQrImg = document.getElementById('desktopQrImg');
