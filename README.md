@@ -215,8 +215,6 @@ sửa tùy ý. Ngày âm lịch tính bằng `npm run lunar -- YYYY-MM-DD` (vd `
 - [ ] `schedule` — giờ các mốc theo giờ tiệc thật
 - [ ] `gifts.accounts` — `bankBin`, `bankName`, `accountNo`, `accountName` (hoặc `qrImage`). Khi số tài khoản còn là
       số giữ chỗ (`0000000000`), mục Mừng cưới và nút quà tự ẩn để khách không quét nhầm QR
-- [ ] **Nhạc "Beautiful in White" (Shane Filan)**: chép file mp3 vào `public/music/beautiful-in-white.mp3`
-      (dùng chung cho cả A và B; nên dưới ~5 MB). Chưa có file thì thiệp tự ẩn phần nhạc. Muốn có lời chạy theo
-      nhạc thì tự đặt file `.lrc` và ghi vào `music.lyrics`. Bài hát có bản quyền: thiệp gửi riêng cho bạn bè
-      thường không sao, nhưng nếu thiệp công khai rộng thì cân nhắc bản nhạc được phép dùng.
+- [x] Nhạc "Beautiful in White" (Shane Filan): `public/music/beautiful-in-white.mp3` (dùng chung cho A và B).
+      Muốn có lời chạy theo nhạc thì tự đặt file `.lrc` và ghi vào `music.lyrics`.
 - [ ] `backend.appsScriptUrl` — URL Web App (mục 4); xóa 2 khách mẫu `bac-hung`, `ban-lan` trong sheet `KhachMoi`
