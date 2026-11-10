@@ -301,8 +301,13 @@ const accountCard = (acc, ctx) => {
     );
 };
 
+/** Tài khoản đã điền thật: có ảnh QR riêng, hoặc số tài khoản không phải số giữ chỗ (toàn số 0 / TODO). */
+const isRealAccount = (a) =>
+    !!a && (!!a.qrImage || (/\d/.test(a.accountNo ?? '') && !/^0+$/.test(String(a.accountNo).replace(/\s/g, '')) && !/TODO/i.test(`${a.accountNo}${a.bankBin}`)));
+
 const renderGifts = (cfg, ctx) => {
-    const accounts = cfg.gifts?.accounts ?? [];
+    // Chưa có tài khoản thật thì ẩn mục mừng cưới (tránh khách quét nhầm QR giữ chỗ)
+    const accounts = (cfg.gifts?.accounts ?? []).filter(isRealAccount);
     if (!accounts.length) {
         return null;
     }

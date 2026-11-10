@@ -203,15 +203,17 @@ sửa tùy ý. Ngày âm lịch tính bằng `npm run lunar -- YYYY-MM-DD` (vd `
 
 **Cần bạn điền / xác nhận**
 - [ ] `site.domain` — tên miền thật (và ô `CauHinh!B1` trong Sheet)
-- [ ] `couple.*.role` — Trưởng nam/Thứ nam…, Trưởng nữ/Út nữ…
-- [ ] `couple.bride.familyPhone` — đang trùng số cô dâu
+- [x] Thiệp gửi bạn bè, đồng nghiệp: lời văn xưng "chúng tôi" / gọi khách là "bạn"; tên hiển thị "Viết Trung",
+      "Phương Nhi" (`displayName`); nhãn dưới tên ở khối báo hỷ là "Chú rể" / "Cô dâu" (`role`)
+- [ ] `couple.bride.familyPhone` — đang trùng số cô dâu nên mục Liên hệ tự ẩn dòng này; điền số bố/mẹ nếu muốn hiện
 - [x] Lịch: tiệc nhà gái chiều 12/12 (04/11 âm), ăn hỏi + đón dâu trong đêm, về nhà trai ~05:45 ngày 13/12
       (05/11 âm), Lễ Thành Hôn 10:00, tiệc nhà trai sau lễ
 - [ ] **Xác nhận giờ** tôi tự cân đối: tiệc nhà gái 16:00, ăn hỏi 22:30, đón dâu 00:30, tiệc nhà trai 11:00
 - [ ] `mapsUrl` hai nhà — đang là link tìm theo địa chỉ; nên thay bằng link ghim đúng cổng nhà
 - [ ] Kiểm tra `audience` từng sự kiện (ai được thấy) cho đúng thực tế
 - [ ] `schedule` — giờ các mốc theo giờ tiệc thật
-- [ ] `gifts.accounts` — `bankBin`, `bankName`, `accountNo`, `accountName` (hoặc `qrImage`)
+- [ ] `gifts.accounts` — `bankBin`, `bankName`, `accountNo`, `accountName` (hoặc `qrImage`). Khi số tài khoản còn là
+      số giữ chỗ (`0000000000`), mục Mừng cưới và nút quà tự ẩn để khách không quét nhầm QR
 - [ ] **Thay bài hát**: `music/le-duong.mp3` ("Lễ Đường" — Kai Đinh) có bản quyền, chỉ dùng tạm.
       Thay `src`, `title`, `artist`, `lyrics` (.lrc) và xóa file cũ khỏi `public/music/`
 - [ ] `backend.appsScriptUrl` — URL Web App (mục 4); xóa 2 khách mẫu `bac-hung`, `ban-lan` trong sheet `KhachMoi`

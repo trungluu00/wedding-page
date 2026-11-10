@@ -58,6 +58,7 @@ function setLines(container, text, pClass) {
   if (!container) return;
   container.replaceChildren(...String(text || '').split('\n').filter(Boolean).map((line) => el('p', pClass, line)));
 }
+const digits = (s) => String(s || '').replace(/\D/g, '');
 const safeUrl = (u) => (/^(https?:|tel:|mailto:)/i.test(String(u || '')) ? String(u) : '#');
 
 // ---------------------------------------------------------------------------
@@ -300,7 +301,10 @@ export function renderStatic(config) {
     { name: brideName, role: 'Cô dâu', phone: bride.phone },
     { name: groom.father || 'Nhà trai', role: 'Đại diện nhà trai', phone: groom.familyPhone },
     { name: bride.father || 'Nhà gái', role: 'Đại diện nhà gái', phone: bride.familyPhone },
-  ].filter((c) => c.phone);
+  ]
+    .filter((c) => c.phone)
+    // Bỏ số trùng (vd số đại diện gia đình đang trùng số cô dâu) để khách không gọi nhầm
+    .filter((c, i, arr) => arr.findIndex((x) => digits(x.phone) === digits(c.phone)) === i);
   const list = $('#contactList');
   if (list) {
     list.replaceChildren(
@@ -330,10 +334,22 @@ export function vietQrUrl(acc, addInfo) {
   return `https://img.vietqr.io/image/${encodeURIComponent(acc.bankBin)}-${encodeURIComponent(acc.accountNo)}-compact2.png?${q}`;
 }
 
+/** Tài khoản đã điền thật: có ảnh QR riêng, hoặc số tài khoản không phải số giữ chỗ (toàn số 0 / TODO). */
+export const isRealAccount = (a) =>
+  !!a && (!!a.qrImage || (/\d/.test(a.accountNo || '') && !/^0+$/.test(String(a.accountNo).replace(/\s/g, '')) && !/TODO/i.test(`${a.accountNo}${a.bankBin}`)));
+
 export function renderGifts(config, guest) {
   const wrap = $('#giftGroups');
   if (!wrap) return;
-  const accounts = config.gifts?.accounts || [];
+  // Chưa có tài khoản thật thì ẩn mục mừng cưới (tránh khách quét nhầm QR giữ chỗ)
+  const accounts = (config.gifts?.accounts || []).filter(isRealAccount);
+  const noGifts = accounts.length === 0;
+  $('#accountSection')?.toggleAttribute('hidden', noGifts || !(config.sections || []).includes('gifts'));
+  $('#openGiftModalBtn')?.toggleAttribute('hidden', noGifts || !(config.sections || []).includes('gifts'));
+  if (noGifts) {
+    wrap.replaceChildren();
+    return;
+  }
   const collapsed = config.gifts?.collapsed !== false;
   const { groom, bride } = config.couple;
   const addInfo = `Mung cuoi ${groom.shortName} ${bride.shortName}${guest ? ' ' + guestTitle(guest) : ''}`;
