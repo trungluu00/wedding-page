@@ -796,8 +796,25 @@ section.bg-alt {
 #float-tools {
     transition: bottom 0.35s ease;
 }
-.rsvp-cta-on #float-tools {
-    bottom: calc(12vh + 4.5rem) !important;
+/* Nút sáng/tối + nhạc: góc trên bên phải (trước đây ở mép phải giữa màn hình, che chữ cuối dòng) */
+#float-tools {
+    top: calc(env(safe-area-inset-top) + 0.75rem);
+    bottom: auto !important;
+    right: 0.75rem !important;
+    flex-direction: row !important;
+    gap: 0.4rem;
+}
+#float-tools .btn-float {
+    margin-top: 0 !important;
+    width: 2.25rem;
+    height: 2.25rem;
+    background-color: rgba(var(--c-surface-rgb), 0.85) !important;
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+}
+/* Thẻ lời chúc chừa chỗ cho hai nút ở góc phải */
+.wish-ticker-card {
+    right: 5.6rem;
 }
 
 /* Mục "Xác nhận" trên thanh điều hướng: nổi bật cho tới khi khách đã gửi */
