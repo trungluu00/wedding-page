@@ -41,64 +41,20 @@
     {
       "id": "p02",
       "original": "Ảnh con/DUN00036.JPG",
-      "used": true,
+      "used": false,
       "width": 5304,
       "height": 7952,
       "orientation": "doc",
-      "widths": [
-        {
-          "size": 2560,
-          "w": 1708,
-          "h": 2560
-        },
-        {
-          "size": 1600,
-          "w": 1067,
-          "h": 1600
-        },
-        {
-          "size": 900,
-          "w": 600,
-          "h": 900
-        },
-        {
-          "size": 400,
-          "w": 267,
-          "h": 400
-        }
-      ],
       "bytes": 12648448,
       "mtime": 1795522573409
     },
     {
       "id": "p03",
       "original": "Ảnh con/DUN00062.JPG",
-      "used": true,
+      "used": false,
       "width": 5304,
       "height": 7952,
       "orientation": "doc",
-      "widths": [
-        {
-          "size": 2560,
-          "w": 1708,
-          "h": 2560
-        },
-        {
-          "size": 1600,
-          "w": 1067,
-          "h": 1600
-        },
-        {
-          "size": 900,
-          "w": 600,
-          "h": 900
-        },
-        {
-          "size": 400,
-          "w": 267,
-          "h": 400
-        }
-      ],
       "bytes": 12025856,
       "mtime": 1795522574617
     },
@@ -681,32 +637,10 @@
     {
       "id": "p22",
       "original": "Ảnh con/DUN00652.JPG",
-      "used": true,
+      "used": false,
       "width": 5304,
       "height": 7952,
       "orientation": "doc",
-      "widths": [
-        {
-          "size": 2560,
-          "w": 1708,
-          "h": 2560
-        },
-        {
-          "size": 1600,
-          "w": 1067,
-          "h": 1600
-        },
-        {
-          "size": 900,
-          "w": 600,
-          "h": 900
-        },
-        {
-          "size": 400,
-          "w": 267,
-          "h": 400
-        }
-      ],
       "bytes": 13893632,
       "mtime": 1795522573309
     },

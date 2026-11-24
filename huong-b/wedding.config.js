@@ -13,7 +13,7 @@ export default {
   site: {
     domain: "https://trung-nhi.vercel.app", // Vercel (không có "/" cuối)
     title: "Thiệp cưới Trung & Nhi",
-    description: "Trung & Nhi trân trọng mời bạn đến chung vui trong ngày trọng đại của chúng tôi. Mở thiệp để xem thời gian, địa điểm và gửi lời chúc nhé!", // (gợi ý)
+    description: "Trân trọng kính mời anh chị và các bạn tới dự bữa cơm thân mật mừng lễ thành hôn của Viết Trung và Phương Nhi. Mở thiệp để xem thời gian, địa điểm và gửi lời chúc.", // (gợi ý)
     ogImage: "photos/share-1200x630.jpg", // ảnh JPG 1200x630 khi chia sẻ link; sinh từ photos.shareFrom bởi `npm run photos`
   },
 
@@ -172,13 +172,14 @@ export default {
     shareFrom: "p04", // ảnh chia sẻ Zalo/Facebook 1200x630: hai bạn tạo hình trái tim trong vườn (ảnh ngang)
     sharePosition: "center",
     cover: "p36", // bìa thư (khung vòm): vest trắng dưới vòm hoa, nhìn nhau
-    hero: "p32", // ảnh lớn đầu thiệp: trong vườn, vest đen + váy cưới
+    hero: "p31", // ảnh lớn đầu thiệp: trong vườn, vest đen + váy cưới (DUN00013)
     statement: "p01", // nền mờ sau lời mời: tà voan bay trong vườn (ảnh ngang)
     // Ảnh phóng chèn xen giữa các phần tương tác (sau: cặp đôi, đếm ngược, mừng cưới, xác nhận)
-    middle: ["p33", "p35", "p34", "p37"],
-    ending: "p31", // ảnh cuối thiệp: trong vườn
+    middle: ["p33", "p35", "p34", "p25"], // sảnh cổ điển, vòm hoa, cửa trắng, vòm hoa (ảnh con DUN09571)
+    ending: "p37", // ảnh cuối thiệp: vest trắng trong sảnh (DUN09723)
     // Màn hình máy tính: cột ảnh bên trái trình chiếu lần lượt các ảnh phóng
-    desktop: ["p36", "p32", "p33", "p35", "p34", "p37", "p31"],
+    // DUN00033 (p32) ưu tiên thấp: không dùng ở đây, chỉ nằm cuối album (phần "Xem thêm")
+    desktop: ["p36", "p31", "p33", "p35", "p34", "p37", "p25"],
     // Ảnh cắt từ một vùng của ảnh gốc (left/top/width/height theo tỉ lệ 0..1 của ảnh gốc đã xoay đúng chiều).
     crops: {
       "p06-chu-re": { from: "p06", left: 0, top: 0.02, width: 0.44, height: 0.367 }, // chú rể, khung dọc 4:5
@@ -192,21 +193,22 @@ export default {
     kicker: "Khoảnh khắc",
     title: "Album ảnh cưới",
     leaves: [
+      // 12 ảnh đầu (hiện ngay)
       { front: "p04", back: "p15", frontAlt: "Trái tim trao nhau", backAlt: "Chạm trán" },
       { front: "p25", back: "p19", frontAlt: "Dưới vòm hoa", backAlt: "Bên cây đàn piano" },
-      { front: "p01", back: "p22", frontAlt: "Tà voan bay trong vườn", backAlt: "Áo dài truyền thống" },
+      { front: "p01", back: "p29", frontAlt: "Tà voan bay trong vườn", backAlt: "Trao hoa bên đài phun nước" },
       { front: "p05", back: "p27", frontAlt: "Bên sofa cổ điển", backAlt: "Ánh mắt nàng" },
-      { front: "p23", back: "p02", frontAlt: "Ôm nhau trên phố", backAlt: "Vẫy tay trong vườn" },
+      { front: "p23", back: "p13", frontAlt: "Ôm nhau trên phố", backAlt: "Mời nàng một điệu nhảy" },
       { front: "p20", back: "p28", frontAlt: "Bên đàn piano", backAlt: "Hai đứa mình" },
-      { front: "p03", back: "p06", frontAlt: "Niềm vui trong vườn", backAlt: "Khoảnh khắc trong sảnh" },
-      { front: "p07", back: "p08", frontAlt: "Bên bức tranh cổ", backAlt: "Ngồi cạnh nhau" },
-      { front: "p09", back: "p10", frontAlt: "Sảnh cổ điển", backAlt: "Đối diện nhau" },
-      { front: "p11", back: "p12", frontAlt: "Đợi nhau", backAlt: "Dắt tay cô dâu" },
-      { front: "p13", back: "p14", frontAlt: "Mời nàng một điệu nhảy", backAlt: "Dưới chùm đèn pha lê" },
+      // phần "Xem thêm"
+      { front: "p06", back: "p07", frontAlt: "Khoảnh khắc trong sảnh", backAlt: "Bên bức tranh cổ" },
+      { front: "p08", back: "p09", frontAlt: "Ngồi cạnh nhau", backAlt: "Sảnh cổ điển" },
+      { front: "p10", back: "p11", frontAlt: "Đối diện nhau", backAlt: "Đợi nhau" },
+      { front: "p12", back: "p14", frontAlt: "Dắt tay cô dâu", backAlt: "Dưới chùm đèn pha lê" },
       { front: "p16", back: "p17", frontAlt: "Nhẫn cưới", backAlt: "Bó hoa và nhẫn" },
       { front: "p18", back: "p21", frontAlt: "Khoe nhẫn cưới", backAlt: "Tựa vào nhau" },
       { front: "p24", back: "p26", frontAlt: "Dạo phố", backAlt: "Căn phòng trắng" },
-      { front: "p29", back: "p30", frontAlt: "Trao hoa bên đài phun nước", backAlt: "Bên đài phun nước" },
+      { front: "p30", back: "p32", frontAlt: "Bên đài phun nước", backAlt: "Trong vườn" }, // p32 = DUN00033, ưu tiên thấp
     ],
   },
 
