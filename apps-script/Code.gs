@@ -76,20 +76,20 @@ var BANKS = {
 
 /** Lời chúc mẫu (tên giả, mã "mau") để sổ lưu bút không trống khi mới gửi thiệp. Xóa / bỏ tick "Hiện" khi đã có lời chúc thật. */
 var SAMPLE_WISHES = [
-  ['Minh Anh', 'Bạn đại học của Nhi', 'Cô dâu xinh nhất lớp mình cuối cùng cũng lên xe hoa rồi! Chúc Nhi và Trung luôn thương nhau như ngày đầu, nhà lúc nào cũng rộn tiếng cười nhé.'],
-  ['Hoàng Long', 'Đồng nghiệp của Trung', 'Chúc mừng ông anh đã chốt đơn thành công! Chúc anh chị trăm năm hạnh phúc, sớm có tin vui để anh em còn đi ăn đầy tháng.'],
-  ['Thu Trang', 'Bạn thân của Nhi', 'Nhìn bạn mình hạnh phúc thế này tự nhiên thấy rưng rưng. Chúc hai bạn bình an, đủ đầy, giận nhau không quá ba phút.'],
-  ['Đức Huy', 'Bạn cấp 3 của Trung', 'Từ cậu bạn ngồi bàn cuối giờ đã thành chú rể rồi. Chúc Trung Nhi bách niên giai lão, sống với nhau thật vui.'],
-  ['Ngọc Ánh', 'Đồng nghiệp của Nhi', 'Chúc chị Nhi và anh Trung có một đám cưới thật trọn vẹn, về chung một nhà là thương nhau gấp đôi.'],
-  ['Quang Vinh', 'Đồng nghiệp của Trung', 'Chúc hai bạn tân hôn vui vẻ, công việc thuận lợi, gia đình nhỏ luôn ấm áp. Hẹn gặp ở bữa cơm nhé!'],
-  ['Phương Thảo', 'Bạn đại học của Nhi', 'Ngày 12/12 nhất định có mặt! Chúc cô dâu chú rể mãi hạnh phúc, cùng nhau đi thật nhiều nơi.'],
-  ['Tuấn Anh', 'Bạn đại học của Trung', 'Chúc mừng hạnh phúc hai bạn. Mong mọi điều tốt đẹp nhất sẽ đến với gia đình nhỏ của Trung và Nhi.'],
-  ['Hải Yến', 'Đồng nghiệp của Nhi', 'Thiệp xinh quá, cặp đôi còn xinh hơn! Chúc hai bạn mãi nắm tay nhau qua mọi mùa mưa nắng.'],
-  ['Văn Nam', 'Bạn của Trung', 'Chúc anh chị răng long đầu bạc, con cháu đầy nhà. Hôm cưới nhớ dành cho anh em một ly cho trọn ngày vui!'],
-  ['Khánh Linh', 'Bạn thân của Nhi', 'Nhi ơi, chúc bạn lấy chồng thật hạnh phúc, được yêu thương chiều chuộng mỗi ngày. Trung nhớ đối xử tốt với bạn mình đấy!'],
-  ['Thanh Tùng', 'Đồng nghiệp của Trung', 'Chúc mừng đám cưới hai bạn! Chúc gia đình nhỏ luôn bình an, mọi dự định đều suôn sẻ.'],
-  ['Bảo Ngọc', 'Bạn cấp 3 của Nhi', 'Chúc đôi uyên ương trăm năm hòa hợp, sớm đón thiên thần nhỏ về nhà.'],
-  ['Mạnh Cường', 'Bạn đại học của Trung', 'Chúc hai bạn một đời bình yên, có nhau trong mọi khoảnh khắc. Hạnh phúc nhé!'],
+  ['Minh Anh', 'Bạn đại học của Nhi', 'Trăm năm một chữ đồng lòng, chúc hai bạn mãi thuận dòng yêu thương. Dù mưa nắng, dẫu gió sương, tay trong tay bước con đường bình yên.'],
+  ['Hoàng Long', 'Đồng nghiệp của Trung', 'Cuối năm trời đất se duyên, Trung – Nhi về một mái hiên chung nhà. Chúc cho hạnh phúc đậm đà, sớm hôm vui vẻ, cửa nhà ấm êm.'],
+  ['Thu Trang', 'Bạn thân của Nhi', 'Từ nay hai đứa thành đôi, chung mâm cơm tối, chung lời ước mơ. Chúc cho tình mãi như thơ, bạc đầu vẫn nhớ ngày chờ ngày mong.'],
+  ['Đức Huy', 'Bạn cấp 3 của Trung', 'Chúc hai bạn giữ mãi ánh mắt của ngày hôm nay — ánh mắt nhìn nhau như thể cả thế giới chỉ còn hai người. Trăm năm hạnh phúc nhé!'],
+  ['Ngọc Ánh', 'Đồng nghiệp của Nhi', 'Hoa cau thơm ngát hiên nhà, trầu cau đã ngỏ, mẹ cha vui mừng. Chúc anh chị trăm năm hòa hợp, sớm đón tin vui!'],
+  ['Quang Vinh', 'Đồng nghiệp của Trung', 'Gió đưa duyên thắm về đây, hai bờ thương nhớ nay xây một nhà. Chúc cho tình mãi mặn mà, như trăng mười sáu, như hoa đầu mùa.'],
+  ['Phương Thảo', 'Bạn đại học của Nhi', 'Lào Cai đến với Hải Phòng, núi xanh tìm biển, đúng lòng mong nhau. Chúc cho nghĩa nặng tình sâu, trăm năm vẫn giữ trước sau một lòng.'],
+  ['Tuấn Anh', 'Bạn đại học của Trung', 'Ngày vui pháo đỏ rợp đường, cô dâu e ấp, chàng thương ngập lòng. Chúc hai bạn thuận vợ chồng, biển Đông cũng cạn, mặn nồng sớm hôm.'],
+  ['Hải Yến', 'Đồng nghiệp của Nhi', 'Có những người đi cùng nhau một đoạn, và có những người chọn đi cùng nhau cả đời. Mừng vì hai bạn đã tìm thấy nhau — chúc mái nhà nhỏ luôn đầy tiếng cười.'],
+  ['Văn Nam', 'Bạn của Trung', 'Mùa đông mà ấm như xuân, bởi vì có một người thân bên mình. Chúc hai bạn trọn chữ tình, sớm mai thức dậy, bình minh có nhau.'],
+  ['Khánh Linh', 'Bạn thân của Nhi', 'Chúc hai bạn: giận thì nói, thương thì ôm, mệt thì tựa vào nhau. Hôn nhân không cần hoàn hảo, chỉ cần hai người luôn chọn nhau mỗi ngày.'],
+  ['Thanh Tùng', 'Đồng nghiệp của Trung', 'Ngõ quê rộn tiếng cười vui, đón cô dâu mới, ngọt bùi chia nhau. Chúc cho son sắt trước sau, đầu xanh đến lúc bạc màu vẫn thương.'],
+  ['Bảo Ngọc', 'Bạn cấp 3 của Nhi', 'Chúc tình yêu của hai bạn như bếp lửa ngày đông: không cần rực rỡ, chỉ cần ấm áp và bền lâu. Trăm năm hạnh phúc!'],
+  ['Mạnh Cường', 'Bạn đại học của Trung', 'Đôi chim về đậu chung cành, đôi tim chung một nhịp lành yêu thương. Chúc hai bạn vững con đường, trăm năm như thuở mới vương tơ hồng.'],
 ];
 
 // ---------------------------------------------------------------------------
@@ -527,13 +527,27 @@ function setupSettingRows_(cfg) {
   cfg.setColumnWidth(3, 200);
 }
 
-/** Thêm lời chúc mẫu (mã "mau") — chỉ thêm một lần. */
+/**
+ * Thêm lời chúc mẫu (mã "mau"). Đã có rồi thì chỉ cập nhật nội dung lời chúc theo SAMPLE_WISHES
+ * (giữ nguyên tên người chúc và "bạn là" mà bạn đã sửa trong Sheet).
+ */
 function seedSampleWishes() {
   var sheet = getSheet_(SHEETS.wishes);
   var last = sheet.getLastRow();
-  if (last >= 2 && sheet.getRange(2, 2, last - 1, 1).getValues().some(function (r) { return r[0] === 'mau'; })) {
-    Logger.log('Đã có lời chúc mẫu — bỏ qua.');
-    return;
+  if (last >= 2) {
+    var rows = sheet.getRange(2, 1, last - 1, WISH_HEADERS.length).getValues();
+    var mau = [];
+    rows.forEach(function (r, i) { if (r[1] === 'mau') mau.push({ row: i + 2, at: r[0] }); });
+    if (mau.length) {
+      // cũ nhất trước = thứ tự lúc thêm
+      mau.sort(function (a, b) { return new Date(a.at).getTime() - new Date(b.at).getTime(); });
+      mau.forEach(function (m, i) {
+        if (SAMPLE_WISHES[i]) sheet.getRange(m.row, WISH_HEADERS.indexOf('text') + 1).setValue(SAMPLE_WISHES[i][2]);
+      });
+      CacheService.getScriptCache().remove(WISHES_CACHE_KEY);
+      Logger.log('Đã cập nhật nội dung ' + Math.min(mau.length, SAMPLE_WISHES.length) + ' lời chúc mẫu.');
+      return;
+    }
   }
   var now = Date.now();
   var n = SAMPLE_WISHES.length;
@@ -621,7 +635,7 @@ function onOpen() {
     .addItem('Tạo / kiểm tra các sheet', 'setupDatabase')
     .addItem('Sinh code cho khách còn trống', 'fillMissingCodes')
     .addSeparator()
-    .addItem('Thêm lời chúc mẫu', 'seedSampleWishes')
+    .addItem('Thêm / cập nhật lời chúc mẫu', 'seedSampleWishes')
     .addItem('Xóa 2 khách mẫu (bac-hung, ban-lan)', 'removeSampleGuests')
     .addToUi();
 }
