@@ -112,7 +112,7 @@ export default {
       lunar: "Tức ngày 04 tháng 11 năm Bính Ngọ",
       venue: "Tư gia nhà trai",
       address: "Thôn Phúc Hoà, Xã Thác Bà, Tỉnh Lào Cai",
-      mapsUrl: "https://www.google.com/maps/dir/?api=1&destination=Th%C3%B4n%20Ph%C3%BAc%20H%C3%B2a%2C%20X%C3%A3%20Th%C3%A1c%20B%C3%A0%2C%20L%C3%A0o%20Cai", // chỉ đường tới thôn Phúc Hoà — TODO: tọa độ cổng nhà để chính xác hơn
+      mapsUrl: "https://www.google.com/maps/dir/?api=1&destination=Th%C3%B4n%20Ph%C3%BAc%20H%C3%B2a%2C%20X%C3%A3%20Th%C3%A1c%20B%C3%A0%2C%20L%C3%A0o%20Cai", // chỉ đường theo địa chỉ trên thiệp in
       audience: ["nha-trai", "ban-chung", "public"],
     },
     {
@@ -124,7 +124,7 @@ export default {
       lunar: "Tức ngày 04 tháng 11 năm Bính Ngọ",
       venue: "Tư gia nhà gái",
       address: "Thôn Kỳ Sơn, Xã Đại Sơn, TP. Hải Phòng",
-      mapsUrl: "https://www.google.com/maps/dir/?api=1&destination=Ch%C3%B9a%20Ph%C4%83n%2C%20%C4%90%E1%BA%A1i%20S%C6%A1n%2C%20H%E1%BA%A3i%20Ph%C3%B2ng", // chỉ đường tới Chùa Phăn (mốc gần nhà gái, theo yêu cầu) — TODO: tọa độ cổng nhà nếu muốn chính xác
+      mapsUrl: "https://www.google.com/maps/dir/?api=1&destination=Ch%C3%B9a%20Ph%C4%83n%2C%20%C4%90%E1%BA%A1i%20S%C6%A1n%2C%20H%E1%BA%A3i%20Ph%C3%B2ng", // chỉ đường tới Chùa Phăn (mốc gần nhà gái)
       audience: ["nha-gai", "ban-chung", "public"],
     },
     // ----- Chủ nhật 13/12/2026 (05/11 âm) -----

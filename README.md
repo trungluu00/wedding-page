@@ -217,17 +217,19 @@ sửa tùy ý. Ngày âm lịch tính bằng `npm run lunar -- YYYY-MM-DD` (vd `
 - [x] Thiệp gửi bạn bè, đồng nghiệp: lời văn xưng "chúng tôi" / gọi khách là "bạn"; tên hiển thị "Viết Trung",
       "Phương Nhi" (`displayName`); nhãn dưới tên ở khối báo hỷ là "Chú rể" / "Cô dâu" (`role`)
 - [ ] `couple.bride.familyPhone` — đang trùng số cô dâu nên mục Liên hệ tự ẩn dòng này; điền số bố/mẹ nếu muốn hiện
-- [x] Lịch: tiệc nhà gái chiều 12/12 (04/11 âm) tại Chùa Phăn (nút Chỉ đường mở đường đi tới đúng Chùa Phăn); Lễ Thành Hôn
-      10:00 và tiệc nhà trai sau lễ ngày 13/12 (05/11 âm) tại nhà trai
-- [ ] **Xác nhận giờ** tôi tự cân đối: tiệc nhà gái 16:00, tiệc nhà trai 11:00
-- [ ] `mapsUrl` nhà trai — đang chỉ đường tới thôn Phúc Hòa. Muốn tới đúng cổng nhà: mở Google Maps, nhấn giữ
-      vào cổng nhà để thả ghim, chép tọa độ (vd `21.71191, 105.08898`) rồi ghi
-      `https://www.google.com/maps/dir/?api=1&destination=21.71191,105.08898`
+- [x] Lịch theo thiệp in: bữa cơm thân mật hai nhà Thứ Bảy 12/12 (04/11 âm), Lễ Vu Quy 06:00 và Lễ Thành Hôn
+      10:00 Chủ nhật 13/12 (05/11 âm). Nút Chỉ đường: nhà trai theo địa chỉ trên thiệp, nhà gái tới Chùa Phăn
+- [ ] **Giờ bữa cơm hai nhà** — điền trong Google Sheet, sheet `CauHinh`, nhóm *GIỜ SỰ KIỆN* (gõ `17:30` hoặc
+      `17h30`). Thiệp đọc giờ từ Sheet mỗi lần mở (sửa xong khoảng vài giây là thấy), không cần build lại.
+      Ô để trống thì thiệp chỉ hiện ngày. Giờ trong `wedding.config.js` chỉ là dự phòng khi không nối được Sheet
+- [ ] **Mừng cưới** — điền trong sheet `CauHinh`, nhóm *MỪNG CƯỚI*: chọn ngân hàng, gõ số tài khoản, tên chủ
+      tài khoản. Thiệp tự tạo mã QR VietQR (quét được bằng mọi app ngân hàng). Có sẵn ảnh QR từ app ngân hàng thì
+      tải lên Google Drive, chia sẻ "Bất kỳ ai có đường liên kết", dán link vào ô *Link ảnh QR riêng*; hoặc chép ảnh
+      vào `public/images/` rồi ghi `qrImage: "images/ten-anh.jpg"` trong `gifts.accounts`. Để trống số tài khoản
+      thì mục Mừng cưới tự ẩn
 - [ ] Kiểm tra `audience` từng sự kiện (ai được thấy) cho đúng thực tế
-- [ ] `schedule` — giờ các mốc theo giờ tiệc thật
-- [ ] `gifts.accounts` — `bankBin`, `bankName`, `accountNo`, `accountName` (hoặc `qrImage`). Khi số tài khoản còn là
-      số giữ chỗ (`0000000000`), mục Mừng cưới và nút quà tự ẩn để khách không quét nhầm QR
 - [x] Nhạc "Beautiful in White" (Shane Filan): `public/music/beautiful-in-white.mp3` (dùng chung cho A và B).
       Muốn có lời chạy theo nhạc thì tự đặt file `.lrc` và ghi vào `music.lyrics`.
 - [x] `backend.appsScriptUrl` — đã nối Web App (mục 4)
-- [ ] Xóa 2 khách mẫu `bac-hung-7k2`, `ban-lan-3x9` trong sheet `KhachMoi` trước khi gửi thiệp thật
+- [x] Đã xóa 2 khách mẫu; sổ lưu bút có 14 lời chúc mẫu (mã `mau` trong sheet `LoiChuc`) để thiệp không trống —
+      khi đã có lời chúc thật, bỏ tick cột **Hiện** hoặc xóa các dòng `mau`
