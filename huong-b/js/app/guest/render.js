@@ -295,6 +295,16 @@ const renderMusic = (cfg) => {
 const accountCard = (acc, ctx) => {
     const info = `Mung cuoi ${ctx.guestNamePlain || ''}`.trim();
     const qrSrc = acc.qrImage || vietQrUrl(acc, info);
+    // Ảnh QR riêng (vd Google Drive) không tải được — hay gặp khi khách đang đăng nhập Google —
+    // thì dùng mã VietQR tự sinh từ ngân hàng + số tài khoản
+    const fallback = acc.qrImage && acc.bankBin && acc.accountNo ? vietQrUrl({ ...acc, qrImage: null }, info) : null;
+    const onQrError = (e) => {
+        const img = e.currentTarget;
+        if (fallback && img.getAttribute('src') === img.dataset.qr) {
+            img.dataset.qr = fallback;
+            img.src = fallback;
+        }
+    };
     return h('div', { class: 'card-c p-3 mb-3 text-start' },
         h('p', { class: 'fw-semibold mb-1' }, icon('fa-user', 'me-2 text-accent-c'), acc.owner || acc.accountName),
         h('p', { class: 'small mb-1' }, icon('fa-building-columns', 'me-2 text-accent-c'), acc.bankName),
@@ -306,7 +316,7 @@ const accountCard = (acc, ctx) => {
             }, icon('fa-copy', 'me-1'), 'Chép')),
         acc.accountName ? h('p', { class: 'small text-muted-c mb-2' }, acc.accountName) : null,
         h('div', { class: 'text-center' },
-            h('img', { 'data-qr': qrSrc, src: 'data:,', alt: `Mã QR chuyển khoản ${acc.bankName} ${acc.accountNo}`, class: 'qr-img js-zoom cursor-pointer', loading: 'lazy' }),
+            h('img', { 'data-qr': qrSrc, src: 'data:,', alt: `Mã QR chuyển khoản ${acc.bankName} ${acc.accountNo}`, class: 'qr-img js-zoom cursor-pointer', loading: 'lazy', onerror: onQrError }),
             h('p', { class: 'small text-muted-c mt-1 mb-0' }, 'Quét bằng app ngân hàng bất kỳ')),
     );
 };

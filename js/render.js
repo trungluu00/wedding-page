@@ -405,6 +405,11 @@ export function renderGifts(config, guest) {
           img.loading = 'lazy';
           img.alt = `Mã QR chuyển khoản ${a.owner || ''}`.trim();
           img.src = vietQrUrl(a, addInfo);
+          // Ảnh QR riêng (vd Google Drive) không tải được — hay gặp khi khách đang đăng nhập Google —
+          // thì dùng mã VietQR tự sinh từ ngân hàng + số tài khoản
+          if (a.qrImage && a.bankBin && a.accountNo) {
+            img.addEventListener('error', () => { img.src = vietQrUrl({ ...a, qrImage: null }, addInfo); }, { once: true });
+          }
           qrBox.append(img);
           const copy = el('button', 'stt-copy-btn', 'Sao chép số tài khoản');
           copy.type = 'button';
