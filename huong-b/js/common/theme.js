@@ -1,5 +1,6 @@
 // Chuyển sáng/tối — dựa trên js/common/theme.js của dewanakl/undangan v3.14.0.
-// Khác bản gốc: mặc định luôn là giao diện sáng (thiệp thiết kế cho nền kem); màu thanh trạng thái
+// Khác bản gốc: mỗi lần mở thiệp luôn bắt đầu bằng giao diện sáng (ngày), kể cả khi lần trước khách
+// đã chuyển sang tối — nút sáng/tối chỉ có tác dụng trong lần xem đó; màu thanh trạng thái
 // điện thoại lấy từ bảng màu thiệp (xanh khi đang ở bìa thư, kem sau khi mở thiệp) thay cho đen/trắng.
 import { storage } from './storage.js';
 
@@ -39,7 +40,7 @@ export const theme = (() => {
     const init = () => {
         themes = storage('theme');
         metaTheme = document.querySelector('meta[name="theme-color"]');
-        apply(isDarkMode() ? 'dark' : 'light');
+        apply('light'); // mặc định giao diện ngày (ghi đè lựa chọn tối đã lưu từ lần trước)
     };
 
     return {
