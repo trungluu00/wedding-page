@@ -52,7 +52,7 @@
       </div>
 
       <div class="intro-date" id="introWeddingDate"></div>
-      <div class="intro-sub-greeting" id="introSubGreeting">Trân trọng kính mời</div>
+      <div class="intro-sub-greeting" id="introSubGreeting">Trân trọng kính mời Quý vị</div>
 
       <button type="button" class="intro-open-btn" id="btnOpenInvitation" aria-label="Mở thiệp cưới">
         <span class="btn-open-text">Mở thiệp</span>
@@ -190,8 +190,8 @@
 
         <!-- CHÂN DUNG HAI BẠN -->
         <section class="stt-profile-section" id="profileSection" data-section="couple">
-          <div class="stt-section-tag">PROFILE</div>
-          <h2 class="stt-section-title">Giới thiệu hai bên</h2>
+          <div class="stt-section-tag">THE COUPLE</div>
+          <h2 class="stt-section-title">Đôi nét về chúng tôi</h2>
           <div class="stt-profile-grid">
             <div class="stt-profile-card stt-photo-reveal">
               <div class="stt-profile-img-wrap">
@@ -329,11 +329,11 @@
 
         <!-- MỪNG CƯỚI -->
         <section class="stt-account-section" id="accountSection" data-section="gifts">
-          <div class="stt-section-tag">ACCOUNT</div>
+          <div class="stt-section-tag">WEDDING GIFT</div>
           <h2 class="stt-section-title">Mừng cưới</h2>
           <p class="stt-account-desc">
-            Sự hiện diện của bạn là món quà ý nghĩa nhất.<br>
-            Nếu muốn gửi lời chúc mừng, xin vui lòng chuyển khoản:
+            Sự hiện diện của bạn là món quà ý nghĩa nhất với chúng tôi.<br>
+            Nếu muốn gửi quà mừng từ xa, bạn có thể chuyển khoản qua:
           </p>
           <div class="stt-accordion-wrap" id="giftGroups"></div>
         </section>
@@ -411,8 +411,8 @@
     <div class="cl-bottom-sheet-box">
       <button class="cl-sheet-close" id="closeWishModalBtn" aria-label="Đóng">&times;</button>
       <div class="cl-sheet-head">
-        <h3>Gửi Lời Chúc Mừng</h3>
-        <p>Lời chúc của bạn sẽ xuất hiện trên màn hình thiệp cưới</p>
+        <h3>Gửi lời chúc mừng</h3>
+        <p>Lời chúc của bạn sẽ bay lên trên thiệp để mọi người cùng đọc</p>
       </div>
       <div class="cl-quick-chips" id="promptChips">
         <button type="button" class="chip" data-text="Chúc hai bạn trăm năm hòa hợp, vạn sự cát tường!">Trăm năm hòa hợp</button>
@@ -428,7 +428,7 @@
           <input type="text" id="wishRelation" placeholder="Bạn chú rể / Bạn cô dâu..." maxlength="80">
         </div>
         <textarea id="wishMessage" rows="3" placeholder="Viết lời chúc yêu thương của bạn ở đây..." maxlength="500" required></textarea>
-        <button type="submit" class="btn-sheet-submit">GỬI LỜI CHÚC YÊU THƯƠNG ❤</button>
+        <button type="submit" class="btn-sheet-submit">Gửi lời chúc ❤</button>
       </form>
     </div>
   </div>
@@ -438,52 +438,50 @@
     <div class="cl-bottom-sheet-box">
       <button class="cl-sheet-close" id="closeRsvpModalBtn" aria-label="Đóng">&times;</button>
       <div class="cl-sheet-head">
-        <h3>Xác Nhận Tham Dự</h3>
-        <p id="rsvpDeadlineText">Xin vui lòng phản hồi sớm để chúng mình chuẩn bị chu đáo</p>
+        <h3>Xác nhận tham dự</h3>
+        <p id="rsvpDeadlineText">Bạn phản hồi sớm giúp chúng tôi chuẩn bị chu đáo nhé</p>
       </div>
-      <form id="rsvpForm" class="cl-sheet-form">
+      <form id="rsvpForm" class="cl-sheet-form rsvp-form" novalidate>
         <input type="text" name="website" id="rsvpHp" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
-        <div class="form-field">
-          <label for="guestName">Họ và tên của bạn *</label>
-          <input type="text" id="guestName" placeholder="Ví dụ: Anh Nguyễn Văn An" maxlength="80" required>
-        </div>
-        <div class="form-field">
-          <label>Khách mời của ai?</label>
-          <div class="side-options">
-            <label class="side-btn"><input type="radio" name="guestSide" value="nha-trai" checked><span>Nhà Trai</span></label>
-            <label class="side-btn"><input type="radio" name="guestSide" value="nha-gai"><span>Nhà Gái</span></label>
-            <label class="side-btn"><input type="radio" name="guestSide" value="ban-chung"><span>Bạn Cả Hai</span></label>
-          </div>
-        </div>
-        <div class="form-field">
-          <label>Bạn sẽ tham dự chứ?</label>
-          <div class="attend-options">
-            <label class="attend-choice active" id="choiceYes">
-              <input type="radio" name="willAttend" value="yes" checked>
-              <span>✓ Có, tôi sẽ đến chung vui!</span>
-            </label>
-            <label class="attend-choice" id="choiceNo">
-              <input type="radio" name="willAttend" value="no">
-              <span>✕ Rất tiếc, tôi không thể đến</span>
-            </label>
-          </div>
-        </div>
         <div id="rsvpPersonalizedBadge" class="rsvp-personal-badge" style="display: none;">
           💌 Thiệp mời riêng: <strong id="rsvpGuestTitle"></strong>
         </div>
-        <div class="form-field" id="guestCountRow">
-          <label>Số người tham dự (tính cả bạn)</label>
-          <div class="stepper-wrap">
-            <button type="button" class="btn-step" id="decStepBtn" aria-label="Bớt">-</button>
-            <input type="number" id="guestCount" value="1" min="1" max="4" readonly>
-            <button type="button" class="btn-step" id="incStepBtn" aria-label="Thêm">+</button>
-          </div>
-        </div>
         <div class="form-field">
-          <label for="rsvpNotes">Lời nhắn gửi dâu rể (Tùy chọn)</label>
-          <textarea id="rsvpNotes" class="rsvp-notes" rows="2" maxlength="500" placeholder="Ví dụ: Chúc mừng hai bạn, mình sẽ đến đúng giờ nhé!"></textarea>
+          <label for="guestName">Họ và tên</label>
+          <input type="text" id="guestName" placeholder="Ví dụ: Nguyễn Văn An" maxlength="80" autocomplete="name" enterkeyhint="next" required>
         </div>
-        <button type="submit" class="btn-sheet-submit">GỬI XÁC NHẬN THAM DỰ 💌</button>
+        <fieldset class="form-field">
+          <legend>Bạn là khách của</legend>
+          <div class="rsvp-chips rsvp-chips--3">
+            <label class="rsvp-chip"><input type="radio" name="guestSide" value="nha-trai" checked><span>Nhà trai</span></label>
+            <label class="rsvp-chip"><input type="radio" name="guestSide" value="nha-gai"><span>Nhà gái</span></label>
+            <label class="rsvp-chip"><input type="radio" name="guestSide" value="ban-chung"><span>Cả hai bên</span></label>
+          </div>
+        </fieldset>
+        <fieldset class="form-field">
+          <legend>Bạn sẽ đến chứ?</legend>
+          <div class="rsvp-attend">
+            <label class="rsvp-attend-card" id="choiceYes">
+              <input type="radio" name="willAttend" value="yes" checked>
+              <span class="rsvp-attend-icon" aria-hidden="true">🥂</span>
+              <span class="rsvp-attend-text">Có, mình sẽ đến</span>
+            </label>
+            <label class="rsvp-attend-card" id="choiceNo">
+              <input type="radio" name="willAttend" value="no">
+              <span class="rsvp-attend-icon" aria-hidden="true">💌</span>
+              <span class="rsvp-attend-text">Tiếc quá, mình bận</span>
+            </label>
+          </div>
+        </fieldset>
+        <fieldset class="form-field" id="guestCountRow">
+          <legend>Số người đến (tính cả bạn)</legend>
+          <div class="rsvp-chips rsvp-chips--count" id="guestCountChips" role="radiogroup" aria-label="Số người đến"></div>
+        </fieldset>
+        <div class="form-field">
+          <label for="rsvpNotes">Lời nhắn <span class="rsvp-optional">(không bắt buộc)</span></label>
+          <textarea id="rsvpNotes" class="rsvp-notes" rows="3" maxlength="500" placeholder="Ví dụ: Chúc mừng hai bạn, mình sẽ đến đúng giờ nhé!"></textarea>
+        </div>
+        <button type="submit" class="btn-sheet-submit">Gửi xác nhận</button>
       </form>
     </div>
   </div>
@@ -494,8 +492,8 @@
       <button class="cl-sheet-close" id="closeContactModalBtn" aria-label="Đóng">&times;</button>
       <div class="cl-sheet-head">
         <span class="head-emoji">📞</span>
-        <h3>Thông Tin Liên Hệ</h3>
-        <p>Liên hệ trực tiếp với cô dâu, chú rể và hai bên gia đình</p>
+        <h3>Thông tin liên hệ</h3>
+        <p>Cần hỏi đường hay thông tin gì, bạn cứ gọi cho chúng tôi nhé</p>
       </div>
       <div class="stt-contact-list" id="contactList"></div>
     </div>

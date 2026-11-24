@@ -5869,3 +5869,175 @@ body.side-nha-gai .stt-couple-announce {
 body.side-nha-gai .stt-profile-grid > :first-child {
   order: 2;
 }
+
+/* ==========================================================================
+   Xác nhận tham dự — form gọn, nút to dễ bấm trên điện thoại
+   ========================================================================== */
+/* iPhone tự phóng to trang khi chạm ô nhập có chữ nhỏ hơn 16px */
+.cl-sheet-form input[type="text"],
+.cl-sheet-form textarea {
+  font-size: 16px;
+  line-height: 1.4;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--c-line);
+  background: var(--c-surface);
+  color: var(--c-text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.cl-sheet-form input[type="text"]:focus,
+.cl-sheet-form textarea:focus {
+  outline: none;
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 3px rgb(var(--c-primary-rgb) / 0.15);
+}
+.cl-sheet-form textarea {
+  resize: none;
+}
+
+.rsvp-form {
+  gap: 16px;
+}
+.rsvp-form fieldset.form-field {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.rsvp-form .form-field {
+  gap: 8px;
+}
+.rsvp-form .form-field > label,
+.rsvp-form .form-field > legend {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--c-strong);
+  padding: 0;
+  margin: 0 0 8px;
+}
+.rsvp-form .form-field > label {
+  margin: 0;
+}
+.rsvp-optional {
+  font-weight: 400;
+  color: var(--c-muted);
+}
+.rsvp-form [hidden] {
+  display: none !important;
+}
+
+/* Nút chọn dạng viên thuốc (bên khách, số người) */
+.rsvp-chips {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(68px, 1fr));
+  gap: 8px;
+}
+.rsvp-chips--3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.rsvp-chip {
+  position: relative;
+  cursor: pointer;
+  margin: 0 !important;
+}
+.rsvp-chip input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.rsvp-chip span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 6px 8px;
+  border: 1px solid var(--c-line);
+  border-radius: 999px;
+  background: var(--c-surface);
+  color: var(--c-text);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: center;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+.rsvp-chip:active span {
+  transform: scale(0.97);
+}
+.rsvp-chip input:checked + span {
+  background: var(--c-primary);
+  border-color: var(--c-primary);
+  color: var(--c-on-primary);
+  box-shadow: 0 4px 12px rgb(var(--c-primary-rgb) / 0.25);
+}
+.rsvp-chip input:focus-visible + span {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 2px;
+}
+
+/* Có / không đến: hai thẻ cạnh nhau */
+.rsvp-attend {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.rsvp-attend-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 8px 12px;
+  border: 1px solid var(--c-line);
+  border-radius: 16px;
+  background: var(--c-surface);
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  margin: 0 !important;
+}
+.rsvp-attend-card input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.rsvp-attend-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+.rsvp-attend-text {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--c-text);
+}
+.rsvp-attend-card:has(input:checked) {
+  background: var(--c-soft);
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 1px var(--c-primary) inset;
+}
+.rsvp-attend-card:has(input:checked) .rsvp-attend-text {
+  color: var(--c-strong);
+}
+.rsvp-attend-card:has(input:focus-visible) {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 2px;
+}
+
+.rsvp-form .btn-sheet-submit {
+  min-height: 50px;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  margin-top: 4px;
+}
+.rsvp-form .rsvp-personal-badge {
+  margin-bottom: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rsvp-chip span,
+  .rsvp-attend-card,
+  .cl-sheet-form input[type="text"],
+  .cl-sheet-form textarea {
+    transition: none;
+  }
+}

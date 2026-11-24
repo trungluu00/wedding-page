@@ -314,10 +314,25 @@ export function renderStatic(config) {
     '#rsvpDesc',
     `Vui lòng xác nhận${deadline ? ` trước ngày ${dotDate(deadline)}` : ' sớm'} để ${names} chuẩn bị đón tiếp chu đáo nhất.`
   );
-  if (deadline) setText('#rsvpDeadlineText', `Xin vui lòng phản hồi trước ngày ${dotDate(deadline)} để chuẩn bị chu đáo`);
+  if (deadline) setText('#rsvpDeadlineText', `Bạn phản hồi giúp trước ngày ${dotDate(deadline)} để chúng tôi chuẩn bị chu đáo nhé`);
+  // Số người đến: các nút chọn 1…max (dễ bấm trên điện thoại hơn ô nhập số)
   const max = Math.max(1, Math.min(10, Number(config.backend?.maxGuestsPerInvite) || 4));
-  const gc = $('#guestCount');
-  if (gc) gc.max = String(max);
+  const chips = $('#guestCountChips');
+  if (chips) {
+    chips.replaceChildren(
+      ...Array.from({ length: max }, (_, i) => {
+        const n = i + 1;
+        const label = el('label', 'rsvp-chip');
+        const input = el('input');
+        input.type = 'radio';
+        input.name = 'guestCount';
+        input.value = String(n);
+        if (n === 1) input.checked = true;
+        label.append(input, el('span', null, n === 1 ? '1 người' : `${n} người`));
+        return label;
+      })
+    );
+  }
 
   // Liên hệ
   const contacts = [
@@ -476,7 +491,7 @@ export function renderGuest(config, guest) {
     if (title) {
       greet.replaceChildren(document.createTextNode('Kính mời '), el('strong', 'intro-guest-name', title));
     } else {
-      greet.textContent = 'Trân trọng kính mời';
+      greet.textContent = 'Trân trọng kính mời Quý vị';
     }
   }
   if (!guest) return;

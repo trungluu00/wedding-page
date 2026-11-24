@@ -1904,7 +1904,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const hp = document.getElementById('wishHp')?.value || '';
 
       if (!author || !text) {
-        showToast('Vui lòng điền tên và lời chúc của bạn!');
+        showToast('Bạn điền tên và lời chúc giúp chúng tôi nhé!');
         return;
       }
 
@@ -1922,7 +1922,7 @@ document.addEventListener('DOMContentLoaded', () => {
       wishForm.reset();
       renderGuest(config, currentGuest);
       closeSheet(wishModal);
-      showToast('Lời chúc của bạn đã được gửi & bay lên màn hình thiệp cưới! ❤️');
+      showToast('Đã gửi lời chúc! Cảm ơn bạn rất nhiều ❤️');
     });
   }
 
@@ -1981,52 +1981,31 @@ document.addEventListener('DOMContentLoaded', () => {
   const triggerRsvpModalBtn = document.getElementById('triggerRsvpModalBtn');
   const closeRsvpModalBtn = document.getElementById('closeRsvpModalBtn');
   const rsvpForm = document.getElementById('rsvpForm');
-  const choiceYes = document.getElementById('choiceYes');
-  const choiceNo = document.getElementById('choiceNo');
   const guestCountRow = document.getElementById('guestCountRow');
-  const decStepBtn = document.getElementById('decStepBtn');
-  const incStepBtn = document.getElementById('incStepBtn');
-  const guestCountInput = document.getElementById('guestCount');
-  const maxGuests = () => parseInt(guestCountInput?.max || '4', 10) || 4;
+  const maxGuests = () => document.querySelectorAll('#guestCountChips input').length || 4;
 
   if (triggerRsvpModalBtn) triggerRsvpModalBtn.addEventListener('click', () => openSheet(rsvpModal));
   if (closeRsvpModalBtn) closeRsvpModalBtn.addEventListener('click', () => closeSheet(rsvpModal));
 
-  if (choiceYes && choiceNo) {
-    choiceYes.addEventListener('click', () => {
-      choiceYes.classList.add('active');
-      choiceNo.classList.remove('active');
-      if (guestCountRow) guestCountRow.style.display = 'block';
-    });
-    choiceNo.addEventListener('click', () => {
-      choiceNo.classList.add('active');
-      choiceYes.classList.remove('active');
-      if (guestCountRow) guestCountRow.style.display = 'none';
-    });
-  }
-
-  if (decStepBtn && incStepBtn && guestCountInput) {
-    decStepBtn.addEventListener('click', () => {
-      const val = parseInt(guestCountInput.value, 10) || 1;
-      if (val > 1) guestCountInput.value = val - 1;
-    });
-    incStepBtn.addEventListener('click', () => {
-      const val = parseInt(guestCountInput.value, 10) || 1;
-      if (val < maxGuests()) guestCountInput.value = val + 1;
-    });
-  }
+  // Không đến thì ẩn phần số người
+  rsvpForm?.querySelectorAll('input[name="willAttend"]').forEach((r) =>
+    r.addEventListener('change', () => {
+      if (guestCountRow) guestCountRow.hidden = r.value === 'no' && r.checked;
+    })
+  );
 
   if (rsvpForm) {
     rsvpForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = document.getElementById('guestName').value.trim().slice(0, 80);
       if (!name) {
-        showToast('Vui lòng nhập họ và tên của bạn!');
+        showToast('Bạn nhập họ tên giúp chúng tôi nhé!');
         return;
       }
       const side = rsvpForm.querySelector('input[name="guestSide"]:checked')?.value || 'nha-trai';
       const willAttend = rsvpForm.querySelector('input[name="willAttend"]:checked')?.value === 'yes';
-      const guestCount = willAttend ? Math.min(maxGuests(), Math.max(1, parseInt(guestCountInput.value, 10) || 1)) : 0;
+      const picked = parseInt(rsvpForm.querySelector('input[name="guestCount"]:checked')?.value, 10) || 1;
+      const guestCount = willAttend ? Math.min(maxGuests(), Math.max(1, picked)) : 0;
       const notes = (document.getElementById('rsvpNotes')?.value || '').trim().slice(0, 500);
       const hp = document.getElementById('rsvpHp')?.value || '';
 
@@ -2044,7 +2023,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (willAttend) {
         showToast(`Cảm ơn ${name}! Hẹn gặp bạn${dateText ? ` vào ngày ${dateText}` : ''} ❤️`);
       } else {
-        showToast(`Cảm ơn ${name} đã phản hồi. Chúc bạn luôn an khang! 🌸`);
+        showToast(`Cảm ơn ${name} đã báo cho chúng tôi. Hẹn gặp bạn dịp khác nhé! 🌸`);
       }
     });
   }
