@@ -14,12 +14,12 @@ const FAMILY_LABEL = { 'nha-trai': 'Nhà trai', 'nha-gai': 'Nhà gái' };
 /** "Bác Hùng" — tránh lặp nếu tên đã có sẵn xưng hô ("Bác Hùng" + "Bác"). */
 export const guestDisplay = (guest) => {
     if (!guest) {
-        return 'Bạn';
+        return 'Quý vị';
     }
     const name = String(guest.name ?? '').trim();
     const xh = String(guest.xungHo ?? '').trim();
     if (!xh || name.toLowerCase().startsWith(xh.toLowerCase() + ' ') || name.toLowerCase() === xh.toLowerCase()) {
-        return name || xh || 'Bạn';
+        return name || xh || 'Quý vị';
     }
     return `${xh} ${name}`.trim();
 };
@@ -48,6 +48,15 @@ export const mainEvent = (events, visible) => {
 };
 
 const fill = (text, khach) => String(text ?? '').split('{khach}').join(khach);
+
+/** Link theo nhà (?ben=nha-trai / ?ben=nha-gai) → "nha-trai" / "nha-gai"; giá trị khác → "". */
+export const sideFromParam = (v) => {
+    const s = String(v ?? '').trim().toLowerCase();
+    return s === 'nha-trai' || s === 'nha-gai' ? s : '';
+};
+
+/** Lời chung, ghi đè bằng lời riêng của nhà đó (texts.bySide[ctx.side]). */
+const text = (cfg, ctx, key) => cfg.texts?.bySide?.[ctx?.side]?.[key] ?? cfg.texts?.[key];
 
 export const ornament = (cfg, small = false, large = false) => {
     const type = cfg.theme?.ornament ?? 'song-hy';
@@ -137,7 +146,7 @@ const renderHero = (cfg, ctx) => {
         ctx.main?.lunar ? h('p', { class: 'text-muted-c small mb-3' }, `(${ctx.main.lunar})`) : null,
         ctx.main ? h('a', {
             class: 'btn btn-outline-auto btn-sm rounded-pill px-3 shadow-sm',
-            href: calendarUrl(ctx.main, `Đám cưới ${coupleNames(cfg)}`, fill(cfg.texts?.invitation, ctx.khach)),
+            href: calendarUrl(ctx.main, `Đám cưới ${coupleNames(cfg)}`, fill(text(cfg, ctx, 'invitation'), ctx.khach)),
             target: '_blank',
             rel: 'noopener',
         }, icon('fa-calendar-plus', 'me-2'), 'Lưu vào Google Calendar') : null,
@@ -154,7 +163,7 @@ const renderInvitation = (cfg, ctx) => h('section', { id: 'invitation', class: '
         h('div', { class: 'd-flex justify-content-center mb-3' }, ornament(cfg, true)),
         cfg.texts?.quote ? h('p', { class: 'quote px-2 mb-0', 'data-aos': 'fade-up' }, `“${cfg.texts.quote}”`) : null,
         divider(),
-        h('p', { class: 'px-2 mb-0', style: { fontSize: '1.05rem' }, 'data-aos': 'fade-up', id: 'invitation-text' }, fill(cfg.texts?.invitation, ctx.khach)),
+        h('p', { class: 'px-2 mb-0', style: { fontSize: '1.05rem' }, 'data-aos': 'fade-up', id: 'invitation-text' }, fill(text(cfg, ctx, 'invitation'), ctx.khach)),
     ),
 );
 
@@ -171,20 +180,21 @@ const personCard = (p, role, side, aos) => h('div', { class: 'py-2', 'data-aos':
         icon('fa-phone', 'me-2'), `Gọi ${role.toLowerCase()}`) : null,
 );
 
-const renderCouple = (cfg) => sectionShell('couple', { kicker: 'Cô dâu & chú rể', title: 'Chúng mình' },
-    h('div', { class: 'overflow-hidden' },
-        personCard(cfg.couple.groom, 'Chú rể', 'nha-trai', 'fade-right'),
-        h('p', { class: 'font-esthetic my-3', style: { fontSize: '3.5rem', color: 'var(--c-accent)' } }, '&'),
-        personCard(cfg.couple.bride, 'Cô dâu', 'nha-gai', 'fade-left'),
-    ),
-);
+const renderCouple = (cfg, ctx) => {
+    const groom = personCard(cfg.couple.groom, 'Chú rể', 'nha-trai', 'fade-right');
+    const bride = personCard(cfg.couple.bride, 'Cô dâu', 'nha-gai', 'fade-left');
+    const amp = h('p', { class: 'font-esthetic my-3', style: { fontSize: '3.5rem', color: 'var(--c-accent)' } }, '&');
+    // Thiệp nhà gái: cô dâu và bố mẹ nhà gái đứng trước, như thiệp in
+    const pair = ctx?.side === 'nha-gai' ? [bride, amp, groom] : [groom, amp, bride];
+    return sectionShell('couple', { kicker: 'Cô dâu & chú rể', title: 'Chúng mình' }, h('div', { class: 'overflow-hidden' }, ...pair));
+};
 
 const eventCard = (cfg, ev, ctx) => {
     const d = eventDate(ev);
     return h('div', { class: 'card-c p-4 mb-4', 'data-aos': 'fade-up' },
         h('h3', { class: 'section-title mb-3', style: { fontSize: '1.35rem' } }, ev.name),
         d ? h('div', { class: 'd-flex justify-content-center align-items-center gap-3 mb-2' },
-            h('div', { class: 'text-end small' }, h('div', null, weekday(d)), h('div', { class: 'text-muted-c' }, timeText(d))),
+            h('div', { class: 'text-end small' }, h('div', null, weekday(d)), h('div', { class: 'text-muted-c' }, ev.time ? timeText(d) : '')),
             h('div', { class: 'event-date-big px-3 border-start border-end border-accent' }, dayNum(d)),
             h('div', { class: 'text-start small' }, h('div', null, monthYear(d)))) : null,
         ev.lunar ? h('p', { class: 'small text-muted-c mb-3' }, `(${ev.lunar})`) : null,
@@ -196,7 +206,7 @@ const eventCard = (cfg, ev, ctx) => {
                 icon('fa-map-location-dot', 'me-2'), 'Chỉ đường') : null,
             d ? h('a', {
                 class: 'btn btn-outline-auto btn-sm rounded-pill px-3',
-                href: calendarUrl(ev, `${ev.name} - ${coupleNames(cfg)}`, fill(cfg.texts?.invitation, ctx.khach)),
+                href: calendarUrl(ev, `${ev.name} - ${coupleNames(cfg)}`, fill(text(cfg, ctx, 'invitation'), ctx.khach)),
                 target: '_blank',
                 rel: 'noopener',
             }, icon('fa-calendar-plus', 'me-2'), 'Lưu lịch') : null,
@@ -335,7 +345,7 @@ const renderGifts = (cfg, ctx) => {
 
 const renderEnding = (cfg, ctx) => h('section', { id: 'ending', class: 'bg-page text-center pb-5' },
     img(cfg.photos?.ending, `Ảnh cưới ${coupleNames(cfg)}`, 'hero-photo mb-4'),
-    h('p', { class: 'px-2', style: { fontSize: '1.05rem' }, id: 'thank-you-text' }, fill(cfg.texts?.thankYou, ctx.khach)),
+    h('p', { class: 'px-2', style: { fontSize: '1.05rem' }, id: 'thank-you-text' }, fill(text(cfg, ctx, 'thankYou'), ctx.khach)),
     h('h2', { class: 'font-esthetic my-3', style: { fontSize: '3rem', color: 'var(--c-strong)' } }, coupleNames(cfg)),
     h('div', { class: 'd-flex justify-content-center' }, ornament(cfg, true)),
     h('hr', { class: 'my-4', style: { borderColor: 'var(--c-line)' } }),

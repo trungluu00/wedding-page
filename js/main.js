@@ -23,6 +23,9 @@ import {
   renderCalendar,
   startCountdown,
   buildAlbum,
+  renderSide,
+  sideFromParam,
+  visibleEvents,
 } from './render.js';
 
 const MUSIC = config.music || {};
@@ -1634,15 +1637,23 @@ document.addEventListener('DOMContentLoaded', () => {
   // Tên có dấu kèm trong link (&n=Bác%20Hùng, do Google Sheet tự sinh): hiện ngay, đúng dấu,
   // kể cả khi chưa nối backend. Nếu tra được khách trong Sheet thì dùng dữ liệu Sheet.
   const nameFromLink = String(params.get('n') || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim().slice(0, 60);
+  // Link theo nhà (?ben=nha-trai / ?ben=nha-gai): không cần mã khách, hiện đúng thiệp của nhà đó
+  const sideParam = sideFromParam(params.get('ben') || params.get('side'));
+  const sideGuest = sideParam ? { name: '', xungHo: '', side: sideParam, groups: [] } : null;
   let currentGuest = null;
 
   applySections(config);
   renderStatic(config);
+  renderSide(config, { side: sideParam });
   renderGifts(config, null);
   renderGuest(config, null);
-  const defaultMainEvent = renderEvents(config, null);
-  renderCalendar(defaultMainEvent);
+  const defaultMainEvent = renderEvents(config, sideGuest);
+  renderCalendar(defaultMainEvent, visibleEvents(config, sideGuest));
   startCountdown(defaultMainEvent);
+  if (sideParam) {
+    const radio = document.querySelector(`input[name="guestSide"][value="${sideParam}"]`);
+    if (radio) radio.checked = true;
+  }
 
   const audioEl = document.getElementById('weddingBgMusic');
   if (audioEl && MUSIC.src) {
@@ -1672,7 +1683,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- KHÁCH MỜI RIÊNG (?to=ma-khach) ---
   // Chỉ có tên trong link: chào đúng tên, vẫn hiện các sự kiện chung ("public")
-  if (nameFromLink) renderGuest(config, { name: nameFromLink, xungHo: '', side: '', groups: [] });
+  if (nameFromLink) {
+    const linkGuest = { name: nameFromLink, xungHo: '', side: sideParam, groups: [] };
+    renderGuest(config, linkGuest);
+    renderSide(config, { guest: linkGuest, side: sideParam });
+  }
 
   async function applyGuest() {
     if (!guestCode) return;
@@ -1680,9 +1695,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!guest) return;
     currentGuest = guest;
     renderGuest(config, guest);
+    renderSide(config, { guest, side: sideFromParam(guest.side) || sideParam });
     renderGifts(config, guest);
     const main = renderEvents(config, guest);
-    renderCalendar(main);
+    renderCalendar(main, visibleEvents(config, guest));
     startCountdown(main);
   }
   applyGuest();

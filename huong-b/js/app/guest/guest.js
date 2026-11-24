@@ -7,7 +7,7 @@ import { audio } from './audio.js';
 import { progress } from './progress.js';
 import { forms } from './forms.js';
 import {
-    renderCover, renderMain, renderNavbar, renderDesktopSide, guestDisplay, visibleEvents, mainEvent, ornament,
+    renderCover, renderMain, renderNavbar, renderDesktopSide, guestDisplay, visibleEvents, mainEvent, ornament, sideFromParam,
 } from './render.js';
 import { util } from '../../common/util.js';
 import { theme } from '../../common/theme.js';
@@ -37,7 +37,7 @@ export const guest = (() => {
         // Tên có dấu kèm trong link (&n=Bác%20Hùng, do Google Sheet tự sinh) — dùng khi không tra được khách
         const nameFromLink = (params.get('n') ?? '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim().slice(0, 60);
         if (!raw) {
-            return nameFromLink ? { guest: null, khach: nameFromLink, plain: nameFromLink } : { guest: null, khach: 'Bạn', plain: '' };
+            return nameFromLink ? { guest: null, khach: nameFromLink, plain: nameFromLink } : { guest: null, khach: 'Quý vị', plain: '' };
         }
 
         let found = null;
@@ -61,7 +61,7 @@ export const guest = (() => {
             return { guest: null, khach: nameFromLink, plain: nameFromLink };
         }
         const looksLikeName = /\s/.test(raw) || /[^a-z0-9_-]/i.test(raw);
-        return looksLikeName ? { guest: null, khach: raw, plain: raw } : { guest: null, khach: 'Bạn', plain: '' };
+        return looksLikeName ? { guest: null, khach: raw, plain: raw } : { guest: null, khach: 'Quý vị', plain: '' };
     };
 
     const countDown = () => {
@@ -278,8 +278,11 @@ export const guest = (() => {
         loader({ aos: true, confetti: true }).then(() => progress.complete('libs'));
 
         const g = await resolveGuest();
-        const events = visibleEvents(cfg.events, g.guest);
+        // Bên của khách: theo Google Sheet, hoặc link theo nhà ?ben=nha-trai / ?ben=nha-gai
+        const side = sideFromParam(g.guest?.side) || sideFromParam(new URLSearchParams(window.location.search).get('ben'));
+        const events = visibleEvents(cfg.events, g.guest ?? (side ? { side, groups: [] } : null));
         ctx = {
+            side,
             guest: g.guest,
             khach: g.khach,
             guestNamePlain: g.plain,

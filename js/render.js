@@ -107,6 +107,31 @@ export function guestTitle(guest) {
   return [guest.xungHo, guest.name].filter(Boolean).join(' ').trim();
 }
 
+// ---------------------------------------------------------------------------
+// Thiệp theo từng nhà (khách nhà trai / nhà gái, hoặc link ?ben=nha-trai / ?ben=nha-gai)
+// ---------------------------------------------------------------------------
+export const SIDES = ['nha-trai', 'nha-gai'];
+/** "?ben=nha-gai" → "nha-gai"; giá trị khác → "" */
+export const sideFromParam = (v) => (SIDES.includes(slugify(v)) ? slugify(v) : '');
+
+/** Lời chung, ghi đè bằng lời riêng của nhà đó (texts.bySide[side]). */
+export function textsFor(config, side) {
+  const t = config.texts || {};
+  return { ...t, ...((t.bySide || {})[side] || {}) };
+}
+const fillKhach = (text, khach) => String(text || '').split('{khach}').join(khach);
+
+/**
+ * Lời mời, dòng báo hỷ và thứ tự hai nhà theo bên của khách:
+ * thiệp nhà gái (side "nha-gai") để tên cô dâu và bố mẹ nhà gái đứng trước, như thiệp in.
+ */
+export function renderSide(config, { guest = null, side = '' } = {}) {
+  const t = textsFor(config, side);
+  setLines($('#statementText'), fillKhach(t.invitation, guestTitle(guest) || 'Quý vị'));
+  if (t.announce) setText('#announceLine2', t.announce);
+  document.body.classList.toggle('side-nha-gai', side === 'nha-gai');
+}
+
 /**
  * Sự kiện khách được thấy: audience có "all", hoặc khớp side / groups của khách.
  * Người mở link không có mã khách (hoặc mã không tồn tại) mang nhãn "public".
@@ -253,7 +278,6 @@ export function renderStatic(config) {
 
   // Câu chữ
   const t = config.texts || {};
-  setLines($('#statementText'), t.invitation);
   setText('#coupleQuote', t.quote);
   if (!t.quote) $('#coupleQuote')?.setAttribute('hidden', '');
   setLines($('#thankYouText'), t.thankYou, 'stt-ending-p');
@@ -452,10 +476,6 @@ export function renderGuest(config, guest) {
   }
   if (!guest) return;
 
-  const box = $('#letterPersonalizedBox');
-  if (box) box.style.display = 'block';
-  setText('#letterGuestName', title);
-
   const nameInput = $('#guestName');
   if (nameInput && !nameInput.value) nameInput.value = guest.name || '';
   const side = slugify(guest.side);
@@ -472,7 +492,7 @@ export function renderGuest(config, guest) {
 // ---------------------------------------------------------------------------
 // Lịch tháng & đếm ngược
 // ---------------------------------------------------------------------------
-export function renderCalendar(ev) {
+export function renderCalendar(ev, events = []) {
   const p = parseDate(ev?.date);
   const matrix = $('#calDaysMatrix');
   if (!p || !matrix) return;
@@ -483,9 +503,15 @@ export function renderCalendar(ev) {
   const offset = new Date(Date.UTC(p.y, p.m - 1, 1)).getUTCDay();
   const cells = [];
   for (let i = 0; i < offset; i++) cells.push(el('span', 'cal-cell other-month'));
+  // Đánh dấu mọi ngày có sự kiện khách được thấy trong tháng này (vd 12 và 13/12)
+  const marked = new Set([p.d]);
+  events.forEach((e) => {
+    const q = parseDate(e.date);
+    if (q && q.y === p.y && q.m === p.m) marked.add(q.d);
+  });
   for (let d = 1; d <= total; d++) {
-    const c = el('span', d === p.d ? 'cal-cell is-wedding-day' : 'cal-cell', String(d));
-    if (d === p.d) c.title = 'Ngày cưới';
+    const c = el('span', marked.has(d) ? 'cal-cell is-wedding-day' : 'cal-cell', String(d));
+    if (marked.has(d)) c.title = 'Ngày cưới';
     cells.push(c);
   }
   matrix.replaceChildren(...cells);

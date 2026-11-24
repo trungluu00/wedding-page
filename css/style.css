@@ -5860,3 +5860,12 @@ body.orn-none .toast-box::before {
   font-style: italic;
   color: var(--c-strong);
 }
+
+/* Thiệp nhà gái (khách nhà gái hoặc ?ben=nha-gai): nhà gái, cô dâu đứng trước — như thiệp in */
+body.side-nha-gai .stt-parents-grid,
+body.side-nha-gai .stt-couple-announce {
+  flex-direction: row-reverse;
+}
+body.side-nha-gai .stt-profile-grid > :first-child {
+  order: 2;
+}

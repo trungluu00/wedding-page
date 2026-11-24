@@ -48,7 +48,7 @@ export const forms = (client) => {
         const notes = h('textarea', { id: 'rsvp-notes', class: 'form-control rounded-4', rows: '2', maxlength: '300', placeholder: 'VD: ăn chay, đi cùng em bé...' });
         notes.value = prev?.notes ?? '';
 
-        const side = prev?.side ?? ctx.guest?.side ?? '';
+        const side = prev?.side ?? ctx.guest?.side ?? ctx.side ?? '';
         const attend = prev ? (prev.willAttend ? 'yes' : 'no') : 'yes';
 
         const countWrap = field('rsvp-count', 'Số người tham dự (tính cả bạn)', count);
