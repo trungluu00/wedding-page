@@ -11,7 +11,7 @@
 export default {
   // --- Thông tin trang (dùng cho tiêu đề tab và ảnh xem trước khi gửi link qua Zalo/Facebook) ---
   site: {
-    domain: "https://TODO.pages.dev", // TODO: địa chỉ thật sau khi deploy (không có "/" cuối)
+    domain: "https://trung-nhi.vercel.app", // Vercel (không có "/" cuối)
     title: "Thiệp cưới Trung & Nhi",
     description: "Trung & Nhi trân trọng mời bạn đến chung vui trong ngày trọng đại của chúng mình. Mở thiệp để xem thời gian, địa điểm và gửi lời chúc nhé!", // (gợi ý)
     ogImage: "photos/share-1200x630.jpg", // ảnh JPG 1200x630 khi chia sẻ link; sinh từ photos.shareFrom bởi `npm run photos`

@@ -27,7 +27,7 @@ export default {
   // 1. THÔNG TIN TRANG (dùng cho <title> và ảnh xem trước khi gửi qua Zalo/Facebook)
   // ---------------------------------------------------------------------------
   site: {
-    domain: "https://TODO.pages.dev", // TODO: tên miền thật, không có dấu "/" ở cuối
+    domain: "https://trung-nhi.vercel.app", // Vercel (không có dấu "/" ở cuối)
     title: "Thiệp cưới Trung & Nhi",
     description:
       "Trung & Nhi trân trọng mời bạn đến chung vui trong ngày trọng đại của chúng mình. Mở thiệp để xem thời gian, địa điểm và gửi lời chúc nhé!", // (gợi ý)

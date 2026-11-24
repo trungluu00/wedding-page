@@ -14,7 +14,7 @@ Thông tin thật (tên, bố mẹ, địa chỉ, SĐT, ngày cưới, sự ki�
 **sửa một bên thì nhớ sửa bên kia.** Phần dưới đây hướng dẫn phương án A; phương án B xem
 [`huong-b/README.md`](huong-b/README.md) (ảnh của B xử lý bằng `npm run photos:b`).
 
-- **Không có server riêng.** Build ra thư mục `dist/` rồi đưa lên Cloudflare Pages (hoặc Vercel, Netlify…).
+- **Không có server riêng.** Build ra thư mục `dist/`, chạy trên Vercel (mục 6).
 - **Mọi nội dung và màu sắc nằm trong một file:** [`wedding.config.js`](wedding.config.js).
 - **Dữ liệu khách mời, xác nhận tham dự, lời chúc** nằm trong Google Sheet, đọc/ghi qua Google Apps Script
   ([`apps-script/Code.gs`](apps-script/Code.gs)).
@@ -138,7 +138,7 @@ Các bước dưới đây chỉ cần khi cài lại từ đầu trên Sheet kh
 2. Menu **Tiện ích mở rộng → Apps Script**. Xóa code mẫu, dán toàn bộ nội dung [`apps-script/Code.gs`](apps-script/Code.gs), bấm Lưu.
 3. Chọn hàm `setupDatabase` ở thanh trên → **Chạy**. Lần đầu Google hỏi quyền: chọn tài khoản →
    "Advanced / Nâng cao" → "Go to … (unsafe)" → Cho phép. Script tạo các sheet:
-   - `CauHinh`: ô **B1** điền tên miền thiệp, vd `https://trung-nhi.pages.dev` (không có `/` ở cuối).
+   - `CauHinh`: ô **B1** điền tên miền thiệp, vd `https://trung-nhi.vercel.app` (không có `/` ở cuối).
    - `KhachMoi`: danh sách khách (code, name, xungHo, side, groups, phone, notes, link, rsvpStatus, guestCount).
    - `RSVP`, `LoiChuc` (cột **Hiện**: bỏ tick để ẩn một lời chúc), `LuotMo` (ai đã mở thiệp).
 4. **Triển khai → Tùy chọn triển khai mới** → biểu tượng bánh răng → **Ứng dụng web**:
@@ -176,29 +176,23 @@ cho thiệp cưới. Muốn ẩn lời chúc không phù hợp: bỏ tick cột 
 
 Link không có `?to=` vẫn xem được thiệp, thấy các sự kiện có `"public"` hoặc `"all"` trong `audience`.
 
-## 6. Deploy lên Cloudflare Pages
+## 6. Trang thật trên Vercel
 
-**Cách 1 — kết nối GitHub (tự build mỗi lần push):**
-1. Đẩy repo lên GitHub.
-2. Cloudflare Dashboard → **Workers & Pages → Create → Pages → Connect to Git** → chọn repo.
-3. Build settings: Framework preset **None** (hoặc Vite), Build command `npm run build`,
-   Build output directory `dist`. Nếu cần, thêm biến môi trường `NODE_VERSION` = `20`.
-4. Save and Deploy. Tên miền mặc định dạng `https://<tên-dự-án>.pages.dev`; có thể gắn tên miền riêng ở
-   tab **Custom domains**.
+Thiệp đang chạy tại **<https://trung-nhi.vercel.app>** (dự án `trung-nhi` trên Vercel, gói Hobby miễn phí).
 
-**Cách 2 — tải thư mục lên tay:**
+- Vercel nối với repo GitHub: **mỗi lần push lên `main` là tự build và cập nhật** sau khoảng 1 phút.
+- Cấu hình build và header bảo mật nằm trong [`vercel.json`](vercel.json): build `npm run build`, thư mục `dist`
+  (đổi phương án A/B bằng `phuongAn` trong `wedding.config.js` rồi push).
+- Header bảo mật: CSP chỉ cho phép các dịch vụ thiệp dùng (Google Fonts, Apps Script, VietQR, ảnh Google Drive,
+  jsDelivr cho phương án B), cấm nhúng thiệp vào trang khác, `nosniff`, HTTPS bắt buộc (HSTS), và
+  `X-Robots-Tag: noindex` để Google không đưa tên, địa chỉ, số điện thoại lên kết quả tìm kiếm.
+  Thêm dịch vụ ngoài mới (ảnh, script) thì nhớ thêm tên miền đó vào `Content-Security-Policy`.
+- Giờ sự kiện, tài khoản mừng cưới, lời chúc, khách mời sửa trong Google Sheet — không cần deploy lại.
 
-```bash
-npm run build
-```
-
-Rồi Cloudflare → Pages → **Upload assets** → kéo thả thư mục `dist/`.
-
-Sau khi có tên miền thật: cập nhật `site.domain` trong `wedding.config.js` **và** ô `CauHinh!B1` trong Sheet,
-rồi build/deploy lại (thẻ `og:image` cần URL tuyệt đối để Zalo/Facebook hiện ảnh xem trước).
-Facebook giữ cache ảnh xem trước; dùng [Sharing Debugger](https://developers.facebook.com/tools/debug/) để làm mới.
-
-(Vercel/Netlify tương tự: build `npm run build`, thư mục `dist`.)
+Tên miền đã điền ở `site.domain` (cả `wedding.config.js` và `huong-b/wedding.config.js`) và ô `CauHinh!B1`
+trong Sheet (cột link mời tự dùng tên miền này). Đổi sang tên miền riêng sau này: thêm ở Vercel →
+Project → Settings → Domains, rồi cập nhật hai chỗ trên. Facebook giữ cache ảnh xem trước; dùng
+[Sharing Debugger](https://developers.facebook.com/tools/debug/) để làm mới.
 
 ## 7. Danh sách TODO cần điền
 
@@ -213,7 +207,7 @@ sửa tùy ý. Ngày âm lịch tính bằng `npm run lunar -- YYYY-MM-DD` (vd `
 - [x] Âm lịch tính đúng theo ngày đang ghi; địa chỉ Lễ Vu Quy / Lễ Thành Hôn lấy theo địa chỉ hai nhà
 
 **Cần bạn điền / xác nhận**
-- [ ] `site.domain` — tên miền thật (và ô `CauHinh!B1` trong Sheet)
+- [x] `site.domain` — `https://trung-nhi.vercel.app` (và ô `CauHinh!B1` trong Sheet)
 - [x] Thiệp gửi bạn bè, đồng nghiệp: lời văn xưng "chúng tôi" / gọi khách là "bạn"; tên hiển thị "Viết Trung",
       "Phương Nhi" (`displayName`); nhãn dưới tên ở khối báo hỷ là "Chú rể" / "Cô dâu" (`role`)
 - [ ] `couple.bride.familyPhone` — đang trùng số cô dâu nên mục Liên hệ tự ẩn dòng này; điền số bố/mẹ nếu muốn hiện
