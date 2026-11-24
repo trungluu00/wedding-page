@@ -1,6 +1,7 @@
 // Xử lý ảnh cưới gốc thành ảnh web chất lượng cao.
 //   npm run photos
 // Nguồn: biến môi trường PHOTO_SOURCE, hoặc photos.source trong wedding.config.js.
+// Đọc cả thư mục con (vd "Ảnh phóng/", "Ảnh con/"): tên gốc lưu dạng "thư-mục/tên-file".
 // Ảnh gốc KHÔNG chép vào repo; chỉ ảnh đã nén nằm trong photos/w/.
 //
 // - Mỗi ảnh gốc có mã cố định pNN (photos/manifest.json, theo thứ tự tên file). Chỉ những mã
@@ -50,6 +51,7 @@ const collectUsage = (cfg) => {
   add(ph.statement, 'Nền lời mời');
   (ph.middle ?? []).forEach((id, i) => add(id, `Ảnh chèn ${i + 1}`));
   add(ph.ending, 'Cuối thiệp');
+  (ph.desktop ?? []).forEach((id, i) => add(id, `Trình chiếu màn hình lớn ${i + 1}`));
   add(ph.shareFrom, 'Ảnh chia sẻ Zalo/Facebook');
   add(cfg.couple?.groom?.portrait, 'Chân dung chú rể');
   add(cfg.couple?.bride?.portrait, 'Chân dung cô dâu');
@@ -170,6 +172,19 @@ ul{margin:4px 0 0;padding-left:18px;color:#1f5c45}
   await fs.writeFile(SHEET, html, 'utf8');
 };
 
+/** Liệt kê ảnh trong thư mục và các thư mục con, trả về đường dẫn tương đối dạng "con/tên.jpg". */
+const listPhotos = async (dir, prefix = '') => {
+  const out = [];
+  for (const d of await fs.readdir(dir, { withFileTypes: true })) {
+    if (d.isDirectory()) {
+      out.push(...(await listPhotos(path.join(dir, d.name), `${prefix}${d.name}/`)));
+    } else if (EXT.test(d.name)) {
+      out.push(`${prefix}${d.name}`);
+    }
+  }
+  return out;
+};
+
 const run = async () => {
   const cfg = await loadConfig();
   const source = process.env.PHOTO_SOURCE || cfg.photos?.source;
@@ -187,7 +202,7 @@ const run = async () => {
   let nextNo = manifest.photos.reduce((m, p) => Math.max(m, Number(p.id.slice(1))), 0) + 1;
 
   // 1. Gán mã cố định cho mọi ảnh gốc (kể cả ảnh chưa dùng, để mã không đổi về sau).
-  const files = (await fs.readdir(source)).filter((f) => EXT.test(f)).sort(naturalCompare);
+  const files = (await listPhotos(source)).sort(naturalCompare);
   for (const name of files) {
     if (!byName.has(name)) {
       const entry = { id: `p${String(nextNo++).padStart(2, '0')}`, original: name };
