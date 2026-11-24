@@ -312,7 +312,7 @@ export default {
   //  appsScriptUrl để trống = chế độ demo (không gọi mạng, lưu tạm trong trình duyệt).
   // ---------------------------------------------------------------------------
   backend: {
-    appsScriptUrl: "", // TODO: dán URL Web App dạng https://script.google.com/macros/s/.../exec
+    appsScriptUrl: "https://script.google.com/macros/s/AKfycbweK_k5I16ouNV189PTuKVvl_dJfq5KNAK6ltCqHaCRxO78p8huvzEPG4_42DN8FZfjVg/exec", // Web App của Google Sheet "Thiệp cưới Trung & Nhi — khách mời"
     rsvpDeadline: "2026-12-02", // (gợi ý) 10 ngày trước tiệc cưới
     maxGuestsPerInvite: 4, // số người tối đa một thiệp được đăng ký
   },
