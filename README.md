@@ -221,6 +221,8 @@ sửa tùy ý. Ngày âm lịch tính bằng `npm run lunar -- YYYY-MM-DD` (vd `
       tải lên Google Drive, chia sẻ "Bất kỳ ai có đường liên kết", dán link vào ô *Link ảnh QR riêng*; hoặc chép ảnh
       vào `public/images/` rồi ghi `qrImage: "images/ten-anh.jpg"` trong `gifts.accounts`. Để trống số tài khoản
       thì mục Mừng cưới tự ẩn
+- [x] **Câu trích & giới thiệu Cặp đôi** — sửa trong sheet `CauHinh`, nhóm *LỜI TRÊN THIỆP* (phương án B đọc
+      trực tiếp; ô trống thì dùng lời mặc định trong `huong-b/wedding.config.js`)
 - [ ] Kiểm tra `audience` từng sự kiện (ai được thấy) cho đúng thực tế
 - [x] Nhạc "Beautiful in White" (Shane Filan): `public/music/beautiful-in-white.mp3` (dùng chung cho A và B).
       Muốn có lời chạy theo nhạc thì tự đặt file `.lrc` và ghi vào `music.lyrics`.
