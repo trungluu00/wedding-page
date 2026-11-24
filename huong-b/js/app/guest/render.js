@@ -267,7 +267,7 @@ const renderCountdown = (cfg, ctx) => {
 
 const ALBUM_FIRST = 12;
 // sizes cho ô lưới 3 cột trong cột thiệp.
-const GRID_SIZES = '(min-width: 1400px) 9vw, (min-width: 1200px) 11vw, (min-width: 992px) 14vw, (min-width: 768px) 17vw, (min-width: 576px) 20vw, 34vw';
+const GRID_SIZES = '(min-width: 768px) 160px, 34vw';
 
 /** Album: lưới 3 cột, hiện 12 ảnh đầu, nút "Xem thêm"; chạm ảnh mở lightbox có nút trước/sau. */
 const renderAlbum = (cfg) => {
@@ -405,16 +405,52 @@ export const renderNavbar = (present) => {
         h('a', { class: 'nav-link', href }, icon(ic), h('span', { class: 'd-block', style: { fontSize: '0.68rem' } }, label)))));
 };
 
+/**
+ * Màn hình máy tính: cột trái trình chiếu ảnh phóng (photos.desktop), mỗi ảnh hiện trọn khung
+ * trên nền chính ảnh đó làm mờ, chuyển ảnh mỗi 6 giây; chữ tên cô dâu chú rể ở dưới.
+ */
 export const renderDesktopSide = (cfg, ctx) => {
     const side = document.getElementById('desktop-side');
+    if (!side) {
+        return;
+    }
     const d = ctx.main ? eventDate(ctx.main) : null;
+    const refs = (cfg.photos?.desktop?.length ? cfg.photos.desktop : [cfg.photos?.hero]).filter(Boolean);
+    const slides = refs.map((ref, i) => {
+        const attrs = photoAttrs(ref, '66vw');
+        const lazy = i === 0 ? 'eager' : 'lazy';
+        return h('div', { class: `side-slide ${i === 0 ? 'is-active' : ''}`, 'aria-hidden': 'true' },
+            h('img', { ...attrs, alt: '', class: 'side-bg', loading: lazy, decoding: 'async' }),
+            h('img', { ...attrs, alt: '', class: 'side-fg', loading: lazy, decoding: 'async' }));
+    });
+    const dots = slides.length > 1 ? slides.map((_, i) => h('span', { class: i === 0 ? 'is-active' : '' })) : [];
     side.replaceChildren(
-        cfg.photos?.hero ? h('img', { ...photoAttrs(cfg.photos.hero, '75vw'), alt: '', class: 'position-absolute bg-cover-home', style: { opacity: '0.3' }, loading: 'lazy', decoding: 'async', 'aria-hidden': 'true' }) : null,
-        h('div', { class: 'position-relative text-center p-4 bg-overlay-auto rounded-5' },
+        h('div', { class: 'side-show' }, ...slides),
+        h('div', { class: 'side-shade', 'aria-hidden': 'true' }),
+        h('div', { class: 'side-caption text-center' },
             h('div', { class: 'd-flex justify-content-center mb-2' }, ornament(cfg, true)),
-            h('h2', { class: 'font-esthetic mb-3', style: { fontSize: '3rem', color: 'var(--c-strong)' } }, coupleNames(cfg)),
-            d ? h('p', { class: 'm-0' }, longDate(d)) : null),
+            h('p', { class: 'side-kicker mb-2' }, `Trân trọng kính mời ${ctx.khach}`),
+            h('h2', { class: 'font-esthetic side-names mb-2' }, coupleNames(cfg)),
+            d ? h('p', { class: 'side-date mb-1' }, longDate(d)) : null,
+            ctx.main?.lunar ? h('p', { class: 'side-lunar mb-0' }, `(${ctx.main.lunar})`) : null,
+            dots.length ? h('div', { class: 'side-dots' }, ...dots) : null),
     );
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (slides.length < 2 || reduce) {
+        return;
+    }
+    let i = 0;
+    setInterval(() => {
+        if (document.hidden || !side.offsetWidth) {
+            return; // màn hình nhỏ (cột ảnh ẩn) hoặc tab ẩn: không đổi ảnh
+        }
+        slides[i].classList.remove('is-active');
+        dots[i].classList.remove('is-active');
+        i = (i + 1) % slides.length;
+        slides[i].querySelectorAll('img').forEach((im) => { im.loading = 'eager'; });
+        slides[i].classList.add('is-active');
+        dots[i].classList.add('is-active');
+    }, 6000);
 };
 
 /**
@@ -439,7 +475,8 @@ export const renderMain = (cfg, ctx) => {
         ending: renderEnding,
     };
     // Ảnh chèn giữa: lần lượt đặt sau các phần này (nếu có).
-    const breakAfter = ['couple', 'countdown', 'gifts', 'schedule'];
+    // Đặt xen giữa các phần có ô nhập / nút bấm để trang cân đối giữa ảnh và phần tương tác.
+    const breakAfter = ['couple', 'countdown', 'gifts', 'rsvp', 'schedule'];
     const middle = [...(cfg.photos?.middle ?? [])];
 
     const main = document.getElementById('main');

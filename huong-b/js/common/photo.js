@@ -7,8 +7,8 @@ import sizes from '../../photos/sizes.json';
 const byId = new Map(Object.entries(sizes));
 const url = (id, size) => `photos/w/${id}-${size}.webp`;
 
-/** Cột thiệp: 100% màn hình điện thoại, hẹp dần trên màn hình lớn (khớp lưới Bootstrap trong index.html). */
-export const COLUMN_SIZES = '(min-width: 1400px) 25vw, (min-width: 1200px) 33vw, (min-width: 992px) 42vw, (min-width: 768px) 50vw, (min-width: 576px) 58vw, 100vw';
+/** Cột thiệp: 100% màn hình điện thoại / máy tính bảng dọc; từ 768px rộng tối đa 480px (.invite-col trong guest.css). */
+export const COLUMN_SIZES = '(min-width: 768px) 480px, 100vw';
 
 export const isPhotoId = (ref) => byId.has(ref);
 
