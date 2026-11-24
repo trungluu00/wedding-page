@@ -18,8 +18,8 @@ npm run dev
 
 Mở http://localhost:8080. Thử thêm:
 
-- http://localhost:8080/?to=bac-hung → bìa ghi "Kính mời **Bác Hùng**", khách nhà trai (thấy Lễ Thành Hôn + Tiệc cưới)
-- http://localhost:8080/?to=co-lan → "Cô Lan", khách nhà gái (thấy Lễ Vu Quy + Tiệc cưới)
+- http://localhost:8080/?to=bac-hung-7k2 → bìa ghi "Kính mời **Bác Hùng**", khách nhà trai (thấy Lễ Thành Hôn + Tiệc cưới)
+- http://localhost:8080/?to=ban-lan-3x9 → "Bạn Lan", khách nhà gái (thấy Lễ Vu Quy + Tiệc cưới)
 - http://localhost:8080/?to=Anh%20Nam → mã không có trong danh sách nhưng trông như tên người thì hiện đúng chữ đó
 
 Khi `backend.appsScriptUrl` để trống, thiệp chạy **chế độ demo**: tra khách dùng dữ liệu mẫu ở
@@ -135,7 +135,7 @@ Thiệp gọi theo hợp đồng chung:
 
 | Gọi | Gửi | Nhận |
 | --- | --- | --- |
-| `GET ?action=lookup&code=bac-hung` | | `{success, found, data:{code,name,xungHo,side,groups}}` |
+| `GET ?action=lookup&code=bac-hung-7k2` | | `{success, found, data:{code,name,xungHo,side,groups}}` |
 | `GET ?action=wishes` | | `{success, data:[{author,relation,text,createdAt}]}` |
 | `POST` (`Content-Type: text/plain`, thân JSON) | `{action:"rsvp", code, name, side, willAttend, guestCount, notes, hp}` | `{success, message?}` |
 | `POST` | `{action:"wish", code, author, relation, text, hp}` | `{success, message?}` |

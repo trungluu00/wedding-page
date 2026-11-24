@@ -11,15 +11,15 @@ export const isDemo = !ENDPOINT;
 if (isDemo) {
   console.info(
     '%c[Thiệp cưới] Chế độ demo%c — chưa điền backend.appsScriptUrl trong wedding.config.js. ' +
-      'RSVP và lời chúc chỉ lưu trong trình duyệt này. Thử link mời mẫu: ?to=bac-hung hoặc ?to=ban-lan',
+      'RSVP và lời chúc chỉ lưu trong trình duyệt này. Thử link mời mẫu: ?to=bac-hung-7k2 hoặc ?to=ban-lan-3x9, hoặc link theo nhà ?ben=nha-trai / ?ben=nha-gai',
     'font-weight:bold', ''
   );
 }
 
 // Khách mẫu cho chế độ demo
 const DEMO_GUESTS = {
-  'bac-hung': { code: 'bac-hung', name: 'Hùng', xungHo: 'Bác', side: 'nha-trai', groups: ['gia-dinh'] },
-  'ban-lan': { code: 'ban-lan', name: 'Lan', xungHo: 'Bạn', side: 'nha-gai', groups: ['ban-be'] },
+  'bac-hung-7k2': { code: 'bac-hung-7k2', name: 'Hùng', xungHo: 'Bác', side: 'nha-trai', groups: ['gia-dinh'] },
+  'ban-lan-3x9': { code: 'ban-lan-3x9', name: 'Lan', xungHo: 'Bạn', side: 'nha-gai', groups: ['ban-be'] },
 };
 
 const LS_WISHES = 'wedding_demo_wishes';

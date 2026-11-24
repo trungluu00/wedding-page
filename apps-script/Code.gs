@@ -249,8 +249,14 @@ function headerIndex_(headers) {
 }
 
 function getSheet_(name) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name);
-  if (!sheet) throw new Error('Chưa có sheet ' + name + ' — hãy chạy setupDatabase()');
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(name);
+  if (!sheet) {
+    // Lần dùng đầu tiên (chưa chạy setupDatabase): tự tạo các sheet
+    setupCore_();
+    sheet = ss.getSheetByName(name);
+  }
+  if (!sheet) throw new Error('Không tạo được sheet ' + name);
   return sheet;
 }
 
@@ -270,11 +276,26 @@ function findGuestRow_(code) {
 // ---------------------------------------------------------------------------
 /** Chạy MỘT LẦN để tạo các sheet và tiêu đề cột. Chạy lại không làm mất dữ liệu. */
 function setupDatabase() {
+  setupCore_();
+  var msg = 'Đã tạo xong các sheet. Nhớ điền tên miền vào CauHinh!B1 rồi triển khai Web App.';
+  try {
+    SpreadsheetApp.getUi().alert(msg); // chỉ có khi chạy từ menu trong Google Sheet
+  } catch (uiErr) {
+    Logger.log(msg); // chạy từ trình soạn Apps Script: xem ở "Nhật ký thực thi"
+  }
+}
+
+/** Tạo các sheet, tiêu đề, công thức link (chạy lại không mất dữ liệu). */
+function setupCore_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
 
   var cfg = ensureSheet_(ss, SHEETS.config, ['Tên miền thiệp (không có / ở cuối)', 'https://TODO.pages.dev']);
   cfg.setColumnWidth(1, 280);
-  cfg.setColumnWidth(2, 320);
+  cfg.setColumnWidth(2, 420);
+  // Link theo nhà: gửi chung cho bạn bè / đồng nghiệp của mỗi bên (không cần mã khách)
+  cfg.getRange(3, 1, 2, 1).setValues([['Link thiệp nhà trai'], ['Link thiệp nhà gái']]);
+  cfg.getRange(3, 2).setFormula('=B1 & "/?ben=nha-trai"');
+  cfg.getRange(4, 2).setFormula('=B1 & "/?ben=nha-gai"');
 
   var guests = ensureSheet_(ss, SHEETS.guests, GUEST_HEADERS);
   // Cột link tự ghép tên miền + ?to= + code cho mọi dòng
@@ -285,7 +306,7 @@ function setupDatabase() {
     .setFormula('={"link"; ARRAYFORMULA(IF(A2:A="", "", ' + SHEETS.config + '!$B$1 & "/?to=" & A2:A & "&n=" & ENCODEURL(TRIM(C2:C & " " & B2:B))))}');
   var sideRule = SpreadsheetApp.newDataValidation().requireValueInList(['nha-trai', 'nha-gai', 'ban-chung'], true).setAllowInvalid(true).build();
   guests.getRange(2, GUEST_HEADERS.indexOf('side') + 1, guests.getMaxRows() - 1, 1).setDataValidation(sideRule);
-  guests.getRange(1, 1).setNote('Để trống code: hệ thống tự sinh từ xưng hô + tên khi bạn nhập tên (hoặc chạy fillMissingCodes).');
+  guests.getRange(1, 1).setNote('Để trống code: tự sinh khi bạn nhập tên, dạng xưng-hô-tên + 3 ký tự ngẫu nhiên (vd bac-hung-7k2) để khó đoán.');
   guests.getRange(1, GUEST_HEADERS.indexOf('groups') + 1).setNote('Các nhóm cách nhau dấu phẩy, vd: gia-dinh, ban-be. Khớp với audience trong wedding.config.js');
 
   ensureSheet_(ss, SHEETS.rsvp, RSVP_HEADERS);
@@ -297,15 +318,9 @@ function setupDatabase() {
   // Khách mẫu để thử link mời
   if (guests.getLastRow() < 2) {
     guests.getRange(2, 1, 2, 7).setValues([
-      ['bac-hung', 'Hùng', 'Bác', 'nha-trai', 'gia-dinh', '', 'Khách mẫu — xóa khi dùng thật'],
-      ['ban-lan', 'Lan', 'Bạn', 'nha-gai', 'ban-be', '', 'Khách mẫu — xóa khi dùng thật'],
+      ['bac-hung-7k2', 'Hùng', 'Bác', 'nha-trai', 'gia-dinh', '', 'Khách mẫu — xóa khi dùng thật'],
+      ['ban-lan-3x9', 'Lan', 'Bạn', 'nha-gai', 'ban-be', '', 'Khách mẫu — xóa khi dùng thật'],
     ]);
-  }
-  var msg = 'Đã tạo xong các sheet. Nhớ điền tên miền vào CauHinh!B1 rồi triển khai Web App.';
-  try {
-    SpreadsheetApp.getUi().alert(msg); // chỉ có khi chạy từ menu trong Google Sheet
-  } catch (uiErr) {
-    Logger.log(msg); // chạy từ trình soạn Apps Script: xem ở "Nhật ký thực thi"
   }
 }
 
@@ -318,7 +333,18 @@ function ensureSheet_(ss, name, headers) {
   return sheet;
 }
 
-/** Sinh code cho mọi khách chưa có code (từ xưng hô + tên), đảm bảo không trùng. */
+/** Đuôi ngẫu nhiên cho mã khách (bỏ ký tự dễ nhầm: 0 o 1 l i). */
+function randomSuffix_(n) {
+  var chars = 'abcdefghjkmnpqrstuvwxyz23456789';
+  var out = '';
+  for (var i = 0; i < n; i++) out += chars.charAt(Math.floor(Math.random() * chars.length));
+  return out;
+}
+
+/**
+ * Sinh code cho mọi khách chưa có code, dạng "bac-hung-7k2" (xưng hô + tên + 3 ký tự ngẫu nhiên),
+ * đảm bảo không trùng. Đuôi ngẫu nhiên giúp người khác khó đoán mã để xem tên khách.
+ */
 function fillMissingCodes() {
   var sheet = getSheet_(SHEETS.guests);
   var last = sheet.getLastRow();
@@ -329,10 +355,9 @@ function fillMissingCodes() {
   rows.forEach(function (r) { if (r[0]) used[String(r[0]).toLowerCase()] = true; });
   rows.forEach(function (r, i) {
     if (r[0] || !r[1]) return;
-    var base = generateSlug((r[2] ? r[2] + ' ' : '') + r[1]) || 'khach';
-    var code = base;
-    var n = 2;
-    while (used[code]) code = base + '-' + n++;
+    var base = (generateSlug((r[2] ? r[2] + ' ' : '') + r[1]) || 'khach').slice(0, 50);
+    var code = base + '-' + randomSuffix_(3);
+    while (used[code]) code = base + '-' + randomSuffix_(3);
     used[code] = true;
     sheet.getRange(i + 2, 1).setValue(code);
   });

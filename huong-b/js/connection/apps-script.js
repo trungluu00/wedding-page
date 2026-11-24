@@ -12,9 +12,9 @@ import { storage } from '../common/storage.js';
 const TIMEOUT_MS = 12000;
 
 const DEMO_GUESTS = {
-    'bac-hung': { code: 'bac-hung', name: 'Hùng', xungHo: 'Bác', side: 'nha-trai', groups: ['nha-trai', 'ho-hang'] },
-    'co-lan': { code: 'co-lan', name: 'Lan', xungHo: 'Cô', side: 'nha-gai', groups: ['nha-gai'] },
-    'ban-minh': { code: 'ban-minh', name: 'Minh', xungHo: 'Bạn', side: 'nha-trai', groups: ['nha-trai', 'ban-be'] },
+    'bac-hung-7k2': { code: 'bac-hung-7k2', name: 'Hùng', xungHo: 'Bác', side: 'nha-trai', groups: ['nha-trai', 'ho-hang'] },
+    'ban-lan-3x9': { code: 'ban-lan-3x9', name: 'Lan', xungHo: 'Bạn', side: 'nha-gai', groups: ['nha-gai'] },
+    'ban-minh-p4d': { code: 'ban-minh-p4d', name: 'Minh', xungHo: 'Bạn', side: 'nha-trai', groups: ['nha-trai', 'ban-be'] },
 };
 
 const DEMO_WISHES = [
