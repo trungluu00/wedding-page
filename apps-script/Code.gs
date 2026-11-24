@@ -13,7 +13,7 @@
  *  Hợp đồng API (dùng chung cho hướng A và hướng B):
  *   GET  ?action=lookup&code=xxx → {success:true, found:true, data:{code,name,xungHo,side,groups:[]}} | {success:true, found:false}
  *   GET  ?action=wishes          → {success:true, data:[{author,relation,text,createdAt}]}  (cột Hiện = TRUE, mới nhất trước, tối đa 200, cache 60s)
- *   GET  ?action=settings        → {success:true, data:{events:{<id>:{time}}, accounts:[{family,bankBin,bankName,accountNo,accountName,qrImage}]}}
+ *   GET  ?action=settings        → {success:true, data:{events:{<id>:{time}}, accounts:[{family,bankBin,bankName,accountNo,accountName,qrImage}], texts:{quote,groomBio,brideBio}}}
  *                                  (đọc sheet CauHinh, cột C là khóa; cache 60s, sửa CauHinh là xóa cache)
  *   POST (Content-Type: text/plain, body JSON)
  *        {action:"rsvp", code, name, side, willAttend, guestCount, notes, hp}
@@ -61,6 +61,10 @@ var SETTING_ROWS = [
   ['Cô dâu · Số tài khoản', '', 'bank:nha-gai:accountNo'],
   ['Cô dâu · Tên chủ tài khoản (IN HOA, không dấu)', 'DOAN PHUONG NHI', 'bank:nha-gai:accountName'],
   ['Cô dâu · Link ảnh QR riêng (không bắt buộc, vd link Google Drive đã chia sẻ công khai)', '', 'bank:nha-gai:qrImage'],
+  ['LỜI TRÊN THIỆP — sửa thoải mái; để trống ô nào thì thiệp dùng lời mặc định', null, null],
+  ['Câu trích phía trên lời mời', 'Từ một lời hẹn ngày dạm ngõ, thành một đời thương nhau.', 'text:quote'],
+  ['Giới thiệu chú rể (mục Cặp đôi)', 'Chàng trai hiền lành, chân thành, ít nói nhưng luôn chu đáo. Với Trung, Nhi là người khiến những ngày bình thường trở nên đặc biệt.', 'text:groomBio'],
+  ['Giới thiệu cô dâu (mục Cặp đôi)', 'Cô gái dịu dàng, hay cười và luôn quan tâm mọi người xung quanh. Với Nhi, Trung là bến bình yên để trở về sau mỗi ngày dài.', 'text:brideBio'],
 ];
 
 /** Tên ngân hàng → mã BIN (NAPAS) dùng cho VietQR. */
@@ -209,6 +213,7 @@ function getSettings_() {
   var tz = SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetTimeZone();
   var events = {};
   var banks = {};
+  var texts = {};
   if (last >= 1) {
     sheet.getRange(1, 1, last, 3).getValues().forEach(function (r) {
       var key = String(r[2] || '').trim();
@@ -222,6 +227,12 @@ function getSettings_() {
       if (m) {
         banks[m[1]] = banks[m[1]] || {};
         banks[m[1]][m[2]] = String(r[1] == null ? '' : r[1]).trim();
+        return;
+      }
+      m = key.match(/^text:(quote|groomBio|brideBio)$/);
+      if (m) {
+        var t = String(r[1] == null ? '' : r[1]).replace(/\s+/g, ' ').trim().slice(0, 600);
+        if (t) texts[m[1]] = t; // ô trống → thiệp dùng lời mặc định
       }
     });
   }
@@ -237,7 +248,7 @@ function getSettings_() {
       qrImage: publicImageUrl_(b.qrImage || ''),
     };
   });
-  var data = { events: events, accounts: accounts };
+  var data = { events: events, accounts: accounts, texts: texts };
   try {
     cache.put(SETTINGS_CACHE_KEY, JSON.stringify(data), WISHES_CACHE_SECONDS);
   } catch (cacheErr) {
@@ -510,8 +521,19 @@ function setupSettingRows_(cfg) {
   var last = cfg.getLastRow();
   var keys = {};
   if (last >= 1) cfg.getRange(1, 3, last, 1).getValues().forEach(function (r) { if (r[0]) keys[String(r[0]).trim()] = true; });
-  var fresh = !SETTING_ROWS.some(function (r) { return r[2] && keys[r[2]]; });
-  var rows = SETTING_ROWS.filter(function (r) { return r[2] ? !keys[r[2]] : fresh; });
+  // Theo nhóm (dòng tiêu đề + các dòng khóa): chỉ thêm dòng còn thiếu; cả nhóm mới thì thêm cả tiêu đề
+  var groups = [];
+  SETTING_ROWS.forEach(function (r) {
+    if (!r[2]) groups.push({ title: r, items: [] });
+    else if (groups.length) groups[groups.length - 1].items.push(r);
+  });
+  var rows = [];
+  groups.forEach(function (g) {
+    var missing = g.items.filter(function (r) { return !keys[r[2]]; });
+    if (!missing.length) return;
+    if (missing.length === g.items.length) rows.push(g.title);
+    rows.push.apply(rows, missing);
+  });
   if (!rows.length) return;
   var start = last + 2;
   cfg.getRange(start, 1, rows.length, 3).setNumberFormat('@').setValues(rows.map(function (r) {
@@ -522,6 +544,7 @@ function setupSettingRows_(cfg) {
     var row = start + i;
     if (!r[2]) cfg.getRange(row, 1, 1, 2).setFontWeight('bold').setBackground('#e8f0ea');
     else if (/:bank$/.test(r[2])) cfg.getRange(row, 2).setDataValidation(bankRule);
+    else if (/^text:/.test(r[2])) cfg.getRange(row, 2).setWrap(true);
   });
   cfg.getRange(1, 3).setNote('Cột C là khóa để thiệp đọc cấu hình — đừng sửa. Chỉ sửa cột B.');
   cfg.setColumnWidth(3, 200);
