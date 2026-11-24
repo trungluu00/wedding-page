@@ -188,7 +188,7 @@ export const forms = (client) => {
 
     const loadWishes = async () => {
         if (!listEl) {
-            return;
+            return [];
         }
         try {
             const res = await client.wishes();
@@ -197,6 +197,7 @@ export const forms = (client) => {
         } catch {
             listEl.replaceChildren(h('p', { class: 'text-muted-c small m-0' }, 'Chưa tải được lời chúc, bạn tải lại trang sau nhé.'));
         }
+        return cache;
     };
 
     const wishes = (cfg, ctx) => {
