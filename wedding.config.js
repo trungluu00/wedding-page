@@ -21,7 +21,7 @@ export default {
   //   "b": dựa trên dewanakl/undangan — cấu hình ở huong-b/wedding.config.js
   //   Cũng chọn được khi chạy: npm run build -- b   hoặc   npm run dev:b
   // ---------------------------------------------------------------------------
-  phuongAn: "a",
+  phuongAn: "b", // tạm dùng phương án B cho trang thật (đổi lại "a" để quay về A)
 
   // ---------------------------------------------------------------------------
   // 1. THÔNG TIN TRANG (dùng cho <title> và ảnh xem trước khi gửi qua Zalo/Facebook)
