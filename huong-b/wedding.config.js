@@ -178,7 +178,6 @@ export default {
     middle: ["p33", "p35", "p34", "p25"], // sảnh cổ điển, vòm hoa, cửa trắng, vòm hoa (ảnh con DUN09571)
     ending: "p37", // ảnh cuối thiệp: vest trắng trong sảnh (DUN09723)
     // Màn hình máy tính: cột ảnh bên trái trình chiếu lần lượt các ảnh phóng
-    // DUN00033 (p32) ưu tiên thấp: không dùng ở đây, chỉ nằm cuối album (phần "Xem thêm")
     desktop: ["p36", "p31", "p33", "p35", "p34", "p37", "p25"],
     // Ảnh cắt từ một vùng của ảnh gốc (left/top/width/height theo tỉ lệ 0..1 của ảnh gốc đã xoay đúng chiều).
     crops: {
@@ -198,18 +197,14 @@ export default {
       { front: "p04", back: "p15", frontAlt: "Trái tim trao nhau", backAlt: "Chạm trán" },
       { front: "p25", back: "p19", frontAlt: "Dưới vòm hoa", backAlt: "Bên cây đàn piano" },
       { front: "p01", back: "p29", frontAlt: "Tà voan bay trong vườn", backAlt: "Trao hoa bên đài phun nước" },
-      { front: "p05", back: "p27", frontAlt: "Bên sofa cổ điển", backAlt: "Ánh mắt nàng" },
-      { front: "p23", back: "p13", frontAlt: "Ôm nhau trên phố", backAlt: "Mời nàng một điệu nhảy" },
+      { front: "p07", back: "p27", frontAlt: "Bên bức tranh cổ", backAlt: "Ánh mắt nàng" },
+      { front: "p14", back: "p13", frontAlt: "Dưới chùm đèn pha lê", backAlt: "Mời nàng một điệu nhảy" },
       { front: "p20", back: "p28", frontAlt: "Bên đàn piano", backAlt: "Hai đứa mình" },
       // phần "Xem thêm"
-      { front: "p06", back: "p07", frontAlt: "Khoảnh khắc trong sảnh", backAlt: "Bên bức tranh cổ" },
-      { front: "p08", back: "p09", frontAlt: "Ngồi cạnh nhau", backAlt: "Sảnh cổ điển" },
-      { front: "p10", back: "p11", frontAlt: "Đối diện nhau", backAlt: "Đợi nhau" },
-      { front: "p12", back: "p14", frontAlt: "Dắt tay cô dâu", backAlt: "Dưới chùm đèn pha lê" },
+      { front: "p08", back: "p12", frontAlt: "Ngồi cạnh nhau", backAlt: "Dắt tay cô dâu" },
       { front: "p16", back: "p17", frontAlt: "Nhẫn cưới", backAlt: "Bó hoa và nhẫn" },
       { front: "p18", back: "p21", frontAlt: "Khoe nhẫn cưới", backAlt: "Tựa vào nhau" },
-      { front: "p24", back: "p26", frontAlt: "Dạo phố", backAlt: "Căn phòng trắng" },
-      { front: "p30", back: "p32", frontAlt: "Bên đài phun nước", backAlt: "Trong vườn" }, // p32 = DUN00033, ưu tiên thấp
+      { front: "p26", frontAlt: "Căn phòng trắng" },
     ],
   },
 
