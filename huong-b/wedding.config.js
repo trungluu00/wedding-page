@@ -13,7 +13,7 @@ export default {
   site: {
     domain: "https://trung-nhi.vercel.app", // Vercel (không có "/" cuối)
     title: "Thiệp cưới Trung & Nhi",
-    description: "Trung & Nhi trân trọng mời bạn đến chung vui trong ngày trọng đại của chúng mình. Mở thiệp để xem thời gian, địa điểm và gửi lời chúc nhé!", // (gợi ý)
+    description: "Trung & Nhi trân trọng mời bạn đến chung vui trong ngày trọng đại của chúng tôi. Mở thiệp để xem thời gian, địa điểm và gửi lời chúc nhé!", // (gợi ý)
     ogImage: "photos/share-1200x630.jpg", // ảnh JPG 1200x630 khi chia sẻ link; sinh từ photos.shareFrom bởi `npm run photos`
   },
 
@@ -213,12 +213,19 @@ export default {
   texts: {
     quote: "Từ một lời hẹn ngày dạm ngõ, thành một đời thương nhau.", // (gợi ý)
     invitation: "Trân trọng kính mời {khach} tới dự bữa cơm thân mật mừng lễ thành hôn của chúng tôi.",
+    coverLine: "tới dự bữa cơm thân mật mừng lễ thành hôn của chúng tôi", // dòng dưới tên khách trên bìa
     thankYou: "Sự hiện diện của Quý vị là niềm vinh hạnh cho gia đình chúng tôi!",
     // Lời riêng theo từng nhà (khách nhà nào, hoặc link ?ben=nha-trai / ?ben=nha-gai).
     // Thiệp nhà gái: cô dâu đứng trước (tự đảo thứ tự).
     bySide: {
-      "nha-trai": { invitation: "Trân trọng kính mời {khach} tới dự bữa cơm thân mật mừng lễ thành hôn của chúng tôi." },
-      "nha-gai": { invitation: "Trân trọng kính mời {khach} tới dự bữa cơm thân mật mừng lễ vu quy của chúng tôi." },
+      "nha-trai": {
+        invitation: "Trân trọng kính mời {khach} tới dự bữa cơm thân mật mừng lễ thành hôn của chúng tôi.",
+        coverLine: "tới dự bữa cơm thân mật mừng lễ thành hôn của chúng tôi",
+      },
+      "nha-gai": {
+        invitation: "Trân trọng kính mời {khach} tới dự bữa cơm thân mật mừng lễ vu quy của chúng tôi.",
+        coverLine: "tới dự bữa cơm thân mật mừng lễ vu quy của chúng tôi",
+      },
     },
   },
 
