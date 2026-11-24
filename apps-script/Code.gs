@@ -161,7 +161,7 @@ function saveRsvp_(b) {
   var side = generateSlug(b.side || '').slice(0, 30);
   var notes = cleanText_(b.notes, LIMITS.notes);
 
-  getSheet_(SHEETS.rsvp).appendRow([new Date(), code, safeCell_(name), side, willAttend, count, safeCell_(notes)]);
+  appendRowSafe_(getSheet_(SHEETS.rsvp), [new Date(), code, safeCell_(name), side, willAttend, count, safeCell_(notes)]);
 
   // Cập nhật trạng thái trên danh sách khách mời
   if (code) {
@@ -185,7 +185,11 @@ function saveWish_(b) {
   if (String(b.text || '').trim().length > LIMITS.text) return { success: false, message: 'Lời chúc quá dài (tối đa 500 ký tự)' };
   var relation = cleanText_(b.relation, LIMITS.relation);
 
-  getSheet_(SHEETS.wishes).appendRow([new Date(), normalizeCode_(b.code), safeCell_(author), safeCell_(relation), safeCell_(text), true]);
+  var wishes = getSheet_(SHEETS.wishes);
+  var row = appendRowSafe_(wishes, [new Date(), normalizeCode_(b.code), safeCell_(author), safeCell_(relation), safeCell_(text), true]);
+  var showCell = wishes.getRange(row, WISH_HEADERS.length);
+  showCell.insertCheckboxes();
+  showCell.check();
   CacheService.getScriptCache().remove(WISHES_CACHE_KEY);
   return { success: true };
 }
@@ -196,7 +200,7 @@ function saveOpen_(b) {
   var found = findGuestRow_(code);
   if (!found) return { success: false, message: 'Không tìm thấy khách' };
   var col = headerIndex_(GUEST_HEADERS);
-  getSheet_(SHEETS.opens).appendRow([new Date(), code, safeCell_(String(found.values[col.name] || ''))]);
+  appendRowSafe_(getSheet_(SHEETS.opens), [new Date(), code, safeCell_(String(found.values[col.name] || ''))]);
   return { success: true };
 }
 
@@ -246,6 +250,26 @@ function headerIndex_(headers) {
   var idx = {};
   headers.forEach(function (h, i) { idx[h] = i; });
   return idx;
+}
+
+/**
+ * Dòng ngay sau dòng cuối có dữ liệu ở cột A. Không dùng appendRow vì ô checkbox / định dạng trống
+ * làm getLastRow() trỏ tới cuối sheet → dữ liệu mới bị ghi tận dòng 1000+.
+ */
+function nextEmptyRow_(sheet) {
+  var last = sheet.getLastRow();
+  if (last < 2) return 2;
+  var colA = sheet.getRange(1, 1, last, 1).getValues();
+  for (var i = colA.length - 1; i >= 1; i--) {
+    if (colA[i][0] !== '' && colA[i][0] !== null) return i + 2;
+  }
+  return 2;
+}
+
+function appendRowSafe_(sheet, values) {
+  var row = nextEmptyRow_(sheet);
+  sheet.getRange(row, 1, 1, values.length).setValues([values]);
+  return row;
 }
 
 function getSheet_(name) {
@@ -325,7 +349,12 @@ function setupCore_() {
 
   ensureSheet_(ss, SHEETS.rsvp, RSVP_HEADERS);
   var wishes = ensureSheet_(ss, SHEETS.wishes, WISH_HEADERS);
-  wishes.getRange(2, WISH_HEADERS.length, wishes.getMaxRows() - 1, 1).insertCheckboxes();
+  // Checkbox "Hiện" được thêm khi ghi lời chúc; xóa checkbox trống bên dưới (bản cũ tạo sẵn cả cột).
+  // Không insertCheckboxes() ở dòng cũ: hàm đó đặt mọi ô về FALSE → ẩn hết lời chúc
+  var firstEmpty = nextEmptyRow_(wishes);
+  if (wishes.getMaxRows() >= firstEmpty) {
+    wishes.getRange(firstEmpty, WISH_HEADERS.length, wishes.getMaxRows() - firstEmpty + 1, 1).removeCheckboxes();
+  }
   wishes.getRange(1, WISH_HEADERS.length).setNote('Bỏ tick để ẩn lời chúc khỏi thiệp (cập nhật sau tối đa 60 giây).');
   ensureSheet_(ss, SHEETS.opens, OPEN_HEADERS);
 
