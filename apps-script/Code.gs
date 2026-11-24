@@ -13,6 +13,8 @@
  *  Hợp đồng API (dùng chung cho hướng A và hướng B):
  *   GET  ?action=lookup&code=xxx → {success:true, found:true, data:{code,name,xungHo,side,groups:[]}} | {success:true, found:false}
  *   GET  ?action=wishes          → {success:true, data:[{author,relation,text,createdAt}]}  (cột Hiện = TRUE, mới nhất trước, tối đa 200, cache 60s)
+ *   GET  ?action=settings        → {success:true, data:{events:{<id>:{time}}, accounts:[{family,bankBin,bankName,accountNo,accountName,qrImage}]}}
+ *                                  (đọc sheet CauHinh, cột C là khóa; cache 60s, sửa CauHinh là xóa cache)
  *   POST (Content-Type: text/plain, body JSON)
  *        {action:"rsvp", code, name, side, willAttend, guestCount, notes, hp}
  *        {action:"wish", code, author, relation, text, hp}
@@ -38,6 +40,57 @@ var LIMITS = { name: 80, relation: 80, text: 500, notes: 500, maxGuests: 10 };
 var WISHES_CACHE_KEY = 'wishes_v1';
 var WISHES_CACHE_SECONDS = 60;
 var WISHES_MAX = 200;
+var SETTINGS_CACHE_KEY = 'settings_v1';
+
+/**
+ * Các dòng cấu hình trong sheet CauHinh: [mô tả, giá trị mặc định, khóa]. Khóa null = dòng tiêu đề nhóm.
+ * Khóa "time:<id sự kiện>" khớp id trong wedding.config.js; "bank:<nhà>:<trường>" cho mục mừng cưới.
+ */
+var SETTING_ROWS = [
+  ['GIỜ SỰ KIỆN — gõ dạng 17:30 hoặc 17h30; để trống thì thiệp chỉ hiện ngày', null, null],
+  ['Bữa cơm thân mật nhà trai · Thứ Bảy 12/12/2026', '', 'time:tiec-nha-trai'],
+  ['Bữa cơm thân mật nhà gái · Thứ Bảy 12/12/2026', '', 'time:tiec-nha-gai'],
+  ['Lễ Vu Quy (nhà gái) · Chủ nhật 13/12/2026', '06:00', 'time:le-vu-quy'],
+  ['Lễ Thành Hôn (nhà trai) · Chủ nhật 13/12/2026', '10:00', 'time:le-thanh-hon'],
+  ['MỪNG CƯỚI — điền số tài khoản thì thiệp tự tạo mã QR (VietQR); để trống thì ẩn mục mừng cưới', null, null],
+  ['Chú rể · Ngân hàng (chọn trong danh sách, hoặc gõ mã BIN 6 số)', '', 'bank:nha-trai:bank'],
+  ['Chú rể · Số tài khoản', '', 'bank:nha-trai:accountNo'],
+  ['Chú rể · Tên chủ tài khoản (IN HOA, không dấu)', 'LUU VIET TRUNG', 'bank:nha-trai:accountName'],
+  ['Chú rể · Link ảnh QR riêng (không bắt buộc, vd link Google Drive đã chia sẻ công khai)', '', 'bank:nha-trai:qrImage'],
+  ['Cô dâu · Ngân hàng (chọn trong danh sách, hoặc gõ mã BIN 6 số)', '', 'bank:nha-gai:bank'],
+  ['Cô dâu · Số tài khoản', '', 'bank:nha-gai:accountNo'],
+  ['Cô dâu · Tên chủ tài khoản (IN HOA, không dấu)', 'DOAN PHUONG NHI', 'bank:nha-gai:accountName'],
+  ['Cô dâu · Link ảnh QR riêng (không bắt buộc, vd link Google Drive đã chia sẻ công khai)', '', 'bank:nha-gai:qrImage'],
+];
+
+/** Tên ngân hàng → mã BIN (NAPAS) dùng cho VietQR. */
+var BANKS = {
+  'Vietcombank': '970436', 'VietinBank': '970415', 'BIDV': '970418', 'Agribank': '970405',
+  'Techcombank': '970407', 'MB Bank': '970422', 'ACB': '970416', 'VPBank': '970432',
+  'TPBank': '970423', 'Sacombank': '970403', 'VIB': '970441', 'HDBank': '970437',
+  'SHB': '970443', 'MSB': '970426', 'OCB': '970448', 'SeABank': '970440',
+  'LPBank': '970449', 'Eximbank': '970431', 'Nam A Bank': '970428', 'SCB': '970429',
+  'PVcomBank': '970412', 'Bac A Bank': '970409', 'ABBANK': '970425', 'Kienlongbank': '970452',
+  'NCB': '970419', 'VietABank': '970427', 'BVBank': '970454', 'Cake by VPBank': '546034',
+};
+
+/** Lời chúc mẫu (tên giả, mã "mau") để sổ lưu bút không trống khi mới gửi thiệp. Xóa / bỏ tick "Hiện" khi đã có lời chúc thật. */
+var SAMPLE_WISHES = [
+  ['Minh Anh', 'Bạn đại học của Nhi', 'Cô dâu xinh nhất lớp mình cuối cùng cũng lên xe hoa rồi! Chúc Nhi và Trung luôn thương nhau như ngày đầu, nhà lúc nào cũng rộn tiếng cười nhé.'],
+  ['Hoàng Long', 'Đồng nghiệp của Trung', 'Chúc mừng ông anh đã chốt đơn thành công! Chúc anh chị trăm năm hạnh phúc, sớm có tin vui để anh em còn đi ăn đầy tháng.'],
+  ['Thu Trang', 'Bạn thân của Nhi', 'Nhìn bạn mình hạnh phúc thế này tự nhiên thấy rưng rưng. Chúc hai bạn bình an, đủ đầy, giận nhau không quá ba phút.'],
+  ['Đức Huy', 'Bạn cấp 3 của Trung', 'Từ cậu bạn ngồi bàn cuối giờ đã thành chú rể rồi. Chúc Trung Nhi bách niên giai lão, sống với nhau thật vui.'],
+  ['Ngọc Ánh', 'Đồng nghiệp của Nhi', 'Chúc chị Nhi và anh Trung có một đám cưới thật trọn vẹn, về chung một nhà là thương nhau gấp đôi.'],
+  ['Quang Vinh', 'Đồng nghiệp của Trung', 'Chúc hai bạn tân hôn vui vẻ, công việc thuận lợi, gia đình nhỏ luôn ấm áp. Hẹn gặp ở bữa cơm nhé!'],
+  ['Phương Thảo', 'Bạn đại học của Nhi', 'Ngày 12/12 nhất định có mặt! Chúc cô dâu chú rể mãi hạnh phúc, cùng nhau đi thật nhiều nơi.'],
+  ['Tuấn Anh', 'Bạn đại học của Trung', 'Chúc mừng hạnh phúc hai bạn. Mong mọi điều tốt đẹp nhất sẽ đến với gia đình nhỏ của Trung và Nhi.'],
+  ['Hải Yến', 'Đồng nghiệp của Nhi', 'Thiệp xinh quá, cặp đôi còn xinh hơn! Chúc hai bạn mãi nắm tay nhau qua mọi mùa mưa nắng.'],
+  ['Văn Nam', 'Bạn của Trung', 'Chúc anh chị răng long đầu bạc, con cháu đầy nhà. Hôm cưới nhớ dành cho anh em một ly cho trọn ngày vui!'],
+  ['Khánh Linh', 'Bạn thân của Nhi', 'Nhi ơi, chúc bạn lấy chồng thật hạnh phúc, được yêu thương chiều chuộng mỗi ngày. Trung nhớ đối xử tốt với bạn mình đấy!'],
+  ['Thanh Tùng', 'Đồng nghiệp của Trung', 'Chúc mừng đám cưới hai bạn! Chúc gia đình nhỏ luôn bình an, mọi dự định đều suôn sẻ.'],
+  ['Bảo Ngọc', 'Bạn cấp 3 của Nhi', 'Chúc đôi uyên ương trăm năm hòa hợp, sớm đón thiên thần nhỏ về nhà.'],
+  ['Mạnh Cường', 'Bạn đại học của Trung', 'Chúc hai bạn một đời bình yên, có nhau trong mọi khoảnh khắc. Hạnh phúc nhé!'],
+];
 
 // ---------------------------------------------------------------------------
 // HTTP
@@ -48,6 +101,7 @@ function doGet(e) {
     var action = String(p.action || '');
     if (action === 'lookup') return json_(lookupGuest_(p.code));
     if (action === 'wishes') return json_(getWishes_());
+    if (action === 'settings') return json_(getSettings_());
     return json_({ success: false, message: 'Hành động không hợp lệ' });
   } catch (err) {
     return json_({ success: false, message: 'Lỗi máy chủ' });
@@ -142,6 +196,88 @@ function getWishes_() {
     /* dữ liệu quá 100KB thì bỏ qua cache */
   }
   return { success: true, data: data };
+}
+
+/** Giờ sự kiện + tài khoản mừng cưới từ sheet CauHinh (cột C là khóa). */
+function getSettings_() {
+  var cache = CacheService.getScriptCache();
+  var cached = cache.get(SETTINGS_CACHE_KEY);
+  if (cached) return { success: true, data: JSON.parse(cached) };
+
+  var sheet = getSheet_(SHEETS.config);
+  var last = sheet.getLastRow();
+  var tz = SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetTimeZone();
+  var events = {};
+  var banks = {};
+  if (last >= 1) {
+    sheet.getRange(1, 1, last, 3).getValues().forEach(function (r) {
+      var key = String(r[2] || '').trim();
+      var m = key.match(/^time:([a-z0-9-]+)$/);
+      if (m) {
+        var t = normalizeTime_(r[1], tz);
+        if (t !== null) events[m[1]] = { time: t };
+        return;
+      }
+      m = key.match(/^bank:(nha-trai|nha-gai):(bank|accountNo|accountName|qrImage)$/);
+      if (m) {
+        banks[m[1]] = banks[m[1]] || {};
+        banks[m[1]][m[2]] = String(r[1] == null ? '' : r[1]).trim();
+      }
+    });
+  }
+  var accounts = ['nha-trai', 'nha-gai'].filter(function (f) { return banks[f]; }).map(function (f) {
+    var b = banks[f];
+    var bank = resolveBank_(b.bank || '');
+    return {
+      family: f,
+      bankBin: bank.bin,
+      bankName: bank.name,
+      accountNo: String(b.accountNo || '').replace(/[^0-9A-Za-z]/g, '').slice(0, 30),
+      accountName: String(b.accountName || '').replace(/[^A-Za-z0-9 ]/g, '').toUpperCase().slice(0, 60),
+      qrImage: publicImageUrl_(b.qrImage || ''),
+    };
+  });
+  var data = { events: events, accounts: accounts };
+  try {
+    cache.put(SETTINGS_CACHE_KEY, JSON.stringify(data), WISHES_CACHE_SECONDS);
+  } catch (cacheErr) {
+    /* bỏ qua */
+  }
+  return { success: true, data: data };
+}
+
+/** "17:30" | "17h30" | "17h" | ô kiểu giờ của Sheet → "HH:mm"; ô trống → ""; viết sai → null (giữ giờ trong config). */
+function normalizeTime_(v, tz) {
+  if (v === '' || v == null) return '';
+  if (Object.prototype.toString.call(v) === '[object Date]') return Utilities.formatDate(v, tz, 'HH:mm');
+  var m = String(v).trim().toLowerCase().match(/^(\d{1,2})\s*(?::|h|g|\.|giờ)\s*(\d{2})?\s*(?:phút|p)?$/);
+  if (!m) return null;
+  var h = parseInt(m[1], 10);
+  var min = m[2] ? parseInt(m[2], 10) : 0;
+  if (h > 23 || min > 59) return null;
+  return (h < 10 ? '0' : '') + h + ':' + (min < 10 ? '0' : '') + min;
+}
+
+function resolveBank_(raw) {
+  var v = String(raw || '').trim();
+  if (!v) return { bin: '', name: '' };
+  var names = Object.keys(BANKS);
+  if (/^\d{6}$/.test(v)) {
+    var byBin = names.filter(function (n) { return BANKS[n] === v; })[0];
+    return { bin: v, name: byBin || '' };
+  }
+  var norm = function (s) { return s.toLowerCase().replace(/[^a-z0-9]/g, ''); };
+  var hit = names.filter(function (n) { return norm(n) === norm(v); })[0];
+  return hit ? { bin: BANKS[hit], name: hit } : { bin: v, name: v }; // VietQR cũng nhận mã viết tắt (vd "vcb")
+}
+
+/** Chỉ nhận link https; link Google Drive được đổi sang link ảnh xem trực tiếp. */
+function publicImageUrl_(raw) {
+  var v = String(raw || '').trim();
+  if (!/^https:\/\//i.test(v)) return '';
+  var m = v.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=)([\w-]{20,})/);
+  if (m) return 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w1000';
+  return v.slice(0, 500);
 }
 
 // ---------------------------------------------------------------------------
@@ -333,7 +469,9 @@ function setupCore_() {
   cfg.getRange(3, 1, 2, 1).setValues([['Link thiệp nhà trai'], ['Link thiệp nhà gái']]);
   cfg.getRange(3, 2).setFormula('=B1 & "/?ben=nha-trai"');
   cfg.getRange(4, 2).setFormula('=B1 & "/?ben=nha-gai"');
+  setupSettingRows_(cfg);
 
+  var guestsIsNew = !ss.getSheetByName(SHEETS.guests);
   var guests = ensureSheet_(ss, SHEETS.guests, GUEST_HEADERS);
   // Cột link tự ghép tên miền + ?to= + code cho mọi dòng
   var linkCol = GUEST_HEADERS.indexOf('link') + 1;
@@ -358,12 +496,67 @@ function setupCore_() {
   wishes.getRange(1, WISH_HEADERS.length).setNote('Bỏ tick để ẩn lời chúc khỏi thiệp (cập nhật sau tối đa 60 giây).');
   ensureSheet_(ss, SHEETS.opens, OPEN_HEADERS);
 
-  // Khách mẫu để thử link mời
-  if (guests.getLastRow() < 2) {
+  // Khách mẫu để thử link mời — chỉ khi vừa tạo sheet (xóa rồi thì không thêm lại)
+  if (guestsIsNew) {
     guests.getRange(2, 1, 2, 7).setValues([
       ['bac-hung-7k2', 'Hùng', 'Bác', 'nha-trai', 'gia-dinh', '', 'Khách mẫu — xóa khi dùng thật'],
       ['ban-lan-3x9', 'Lan', 'Bạn', 'nha-gai', 'ban-be', '', 'Khách mẫu — xóa khi dùng thật'],
     ]);
+  }
+}
+
+/** Thêm các dòng giờ sự kiện / mừng cưới vào CauHinh nếu chưa có (không ghi đè giá trị đã điền). */
+function setupSettingRows_(cfg) {
+  var last = cfg.getLastRow();
+  var keys = {};
+  if (last >= 1) cfg.getRange(1, 3, last, 1).getValues().forEach(function (r) { if (r[0]) keys[String(r[0]).trim()] = true; });
+  var fresh = !SETTING_ROWS.some(function (r) { return r[2] && keys[r[2]]; });
+  var rows = SETTING_ROWS.filter(function (r) { return r[2] ? !keys[r[2]] : fresh; });
+  if (!rows.length) return;
+  var start = last + 2;
+  cfg.getRange(start, 1, rows.length, 3).setNumberFormat('@').setValues(rows.map(function (r) {
+    return [r[0], r[1] === null ? '' : r[1], r[2] === null ? '' : r[2]];
+  }));
+  var bankRule = SpreadsheetApp.newDataValidation().requireValueInList(Object.keys(BANKS), true).setAllowInvalid(true).build();
+  rows.forEach(function (r, i) {
+    var row = start + i;
+    if (!r[2]) cfg.getRange(row, 1, 1, 2).setFontWeight('bold').setBackground('#e8f0ea');
+    else if (/:bank$/.test(r[2])) cfg.getRange(row, 2).setDataValidation(bankRule);
+  });
+  cfg.getRange(1, 3).setNote('Cột C là khóa để thiệp đọc cấu hình — đừng sửa. Chỉ sửa cột B.');
+  cfg.setColumnWidth(3, 200);
+}
+
+/** Thêm lời chúc mẫu (mã "mau") — chỉ thêm một lần. */
+function seedSampleWishes() {
+  var sheet = getSheet_(SHEETS.wishes);
+  var last = sheet.getLastRow();
+  if (last >= 2 && sheet.getRange(2, 2, last - 1, 1).getValues().some(function (r) { return r[0] === 'mau'; })) {
+    Logger.log('Đã có lời chúc mẫu — bỏ qua.');
+    return;
+  }
+  var now = Date.now();
+  var n = SAMPLE_WISHES.length;
+  SAMPLE_WISHES.forEach(function (w, i) {
+    // rải thời gian trong ~10 ngày gần đây, cũ nhất trước
+    var at = new Date(now - (n - i) * 17 * 3600 * 1000 - Math.floor(Math.random() * 3600 * 1000));
+    var row = appendRowSafe_(sheet, [at, 'mau', w[0], w[1], w[2], true]);
+    var cell = sheet.getRange(row, WISH_HEADERS.length);
+    cell.insertCheckboxes();
+    cell.check();
+  });
+  CacheService.getScriptCache().remove(WISHES_CACHE_KEY);
+  Logger.log('Đã thêm ' + n + ' lời chúc mẫu.');
+}
+
+/** Xóa 2 khách mẫu bac-hung-7k2 / ban-lan-3x9 khỏi KhachMoi. */
+function removeSampleGuests() {
+  var sheet = getSheet_(SHEETS.guests);
+  var last = sheet.getLastRow();
+  if (last < 2) return;
+  var codes = sheet.getRange(2, 1, last - 1, 1).getValues();
+  for (var i = codes.length - 1; i >= 0; i--) {
+    if (codes[i][0] === 'bac-hung-7k2' || codes[i][0] === 'ban-lan-3x9') sheet.deleteRow(i + 2);
   }
 }
 
@@ -410,6 +603,9 @@ function fillMissingCodes() {
 function onEdit(e) {
   try {
     var sheet = e.range.getSheet();
+    // Sửa CauHinh / LoiChuc: thiệp thấy thay đổi ngay, không phải chờ cache 60 giây
+    if (sheet.getName() === SHEETS.config) CacheService.getScriptCache().remove(SETTINGS_CACHE_KEY);
+    if (sheet.getName() === SHEETS.wishes) CacheService.getScriptCache().remove(WISHES_CACHE_KEY);
     if (sheet.getName() !== SHEETS.guests || e.range.getRow() < 2) return;
     var col = e.range.getColumn();
     if (col !== 2 && col !== 3) return;
@@ -424,5 +620,8 @@ function onOpen() {
     .createMenu('💌 Thiệp cưới')
     .addItem('Tạo / kiểm tra các sheet', 'setupDatabase')
     .addItem('Sinh code cho khách còn trống', 'fillMissingCodes')
+    .addSeparator()
+    .addItem('Thêm lời chúc mẫu', 'seedSampleWishes')
+    .addItem('Xóa 2 khách mẫu (bac-hung, ban-lan)', 'removeSampleGuests')
     .addToUi();
 }
