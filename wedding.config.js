@@ -156,11 +156,13 @@ export default {
   // 5. LỊCH TRÌNH NGÀY CƯỚI
   //  icon: "heart" | "rings" | "camera" | "cheers" | "car" | "music" | "home"
   // ---------------------------------------------------------------------------
-  // Lịch trình hai ngày cưới (day: ngày dương, hiện dưới giờ). TODO: chỉnh giờ khi chốt
+  // Lịch trình hai ngày cưới (day: ngày dương, hiện dưới giờ) — mục này đang tắt (xem `sections`);
+  // giờ thật của các sự kiện lấy từ Google Sheet (CauHinh), mục này chỉ dùng khi bật lại.
   schedule: [
-    { day: "12/12", time: "16:00", title: "Tiệc nhà gái", icon: "cheers" },
+    { day: "12/12", time: "15:00", title: "Bữa cơm nhà trai", icon: "cheers" },
+    { day: "12/12", time: "16:00", title: "Bữa cơm nhà gái", icon: "cheers" },
+    { day: "13/12", time: "06:00", title: "Lễ vu quy", icon: "car" },
     { day: "13/12", time: "10:00", title: "Lễ thành hôn", icon: "rings" },
-    { day: "13/12", time: "11:00", title: "Tiệc nhà trai", icon: "cheers" },
   ],
 
   // ---------------------------------------------------------------------------
