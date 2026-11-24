@@ -2,6 +2,7 @@
 // Hợp đồng API dùng chung với hướng A:
 //   GET  {url}?action=lookup&code=xxx → {success, found, data:{code,name,xungHo,side,groups:[...]}}
 //   GET  {url}?action=wishes          → {success, data:[{author,relation,text,createdAt}]}
+//   GET  {url}?action=settings        → {success, data:{events:{<id>:{time}}, accounts:[...]}}  (sheet CauHinh)
 //   POST (Content-Type: text/plain, thân là JSON) → {success, message?}
 //        {action:"rsvp", code, name, side, willAttend, guestCount, notes, hp}
 //        {action:"wish", code, author, relation, text, hp}
@@ -21,6 +22,45 @@ const DEMO_WISHES = [
     // Lời chúc minh họa cho chế độ demo (chưa nối Google Sheet) — không gắn tên người thật
     { author: 'Lời chúc mẫu', relation: 'Chế độ demo', text: 'Chúc hai bạn trăm năm hạnh phúc, sớm có tin vui nhé!', createdAt: '2026-11-01T09:00:00+07:00' },
 ];
+
+/**
+ * Ghép cấu hình từ Sheet vào config (sửa tại chỗ): giờ sự kiện theo id, tài khoản mừng cưới theo nhà.
+ * @param {object} cfg
+ * @param {object|null} data
+ * @returns {boolean} có thay đổi hay không
+ */
+export const applySettings = (cfg, data) => {
+    if (!data || typeof data !== 'object') {
+        return false;
+    }
+    let changed = false;
+    const times = data.events && typeof data.events === 'object' ? data.events : {};
+    for (const ev of cfg.events ?? []) {
+        const t = times[ev.id]?.time;
+        if (typeof t === 'string' && (t === '' || /^\d{2}:\d{2}$/.test(t)) && t !== (ev.time ?? '')) {
+            ev.time = t;
+            changed = true;
+        }
+    }
+    if (Array.isArray(data.accounts) && data.accounts.length && cfg.gifts) {
+        const base = cfg.gifts.accounts ?? [];
+        cfg.gifts.accounts = data.accounts.map((a) => {
+            const out = { ...(base.find((b) => b.family === a.family) ?? { family: a.family }) };
+            for (const k of ['bankBin', 'bankName', 'accountNo', 'accountName', 'qrImage']) {
+                if (a[k]) {
+                    out[k] = String(a[k]);
+                }
+            }
+            // Sheet để trống số tài khoản → coi như chưa có (mục mừng cưới tự ẩn)
+            if (!a.accountNo && !a.qrImage) {
+                out.accountNo = '';
+            }
+            return out;
+        });
+        changed = true;
+    }
+    return changed;
+};
 
 /**
  * @param {string} baseUrl
@@ -93,6 +133,14 @@ export const appsScript = (baseUrl) => {
         return get({ action: 'wishes' });
     };
 
+    /** Giờ sự kiện + tài khoản mừng cưới sửa trên Google Sheet. Demo → data null (dùng wedding.config.js). */
+    const settings = async () => {
+        if (isDemo) {
+            return { success: true, data: null };
+        }
+        return get({ action: 'settings' });
+    };
+
     const rsvp = async (payload) => {
         const body = { action: 'rsvp', ...payload };
         if (isDemo) {
@@ -133,6 +181,7 @@ export const appsScript = (baseUrl) => {
         isDemo,
         lookup,
         wishes,
+        settings,
         rsvp,
         wish,
         open,

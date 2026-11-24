@@ -6,6 +6,7 @@ import config from '../../../wedding.config.js';
 import { audio } from './audio.js';
 import { progress } from './progress.js';
 import { forms } from './forms.js';
+import { wishTicker } from './wish-ticker.js';
 import {
     renderCover, renderMain, renderNavbar, renderDesktopSide, guestDisplay, visibleEvents, mainEvent, ornament, sideFromParam,
 } from './render.js';
@@ -14,18 +15,35 @@ import { theme } from '../../common/theme.js';
 import { offline } from '../../common/offline.js';
 import { storage } from '../../common/storage.js';
 import { eventDate } from '../../common/format.js';
-import { appsScript } from '../../connection/apps-script.js';
+import { appsScript, applySettings } from '../../connection/apps-script.js';
 import { bs } from '../../libs/bootstrap.js';
 import { loader } from '../../libs/loader.js';
 import * as confetti from '../../libs/confetti.js';
 
 const LOOKUP_TIMEOUT_MS = 6000;
+const SETTINGS_TIMEOUT_MS = 4000;
 
 export const guest = (() => {
 
     const cfg = config;
     const client = appsScript(cfg.backend?.appsScriptUrl);
     const f = forms(client);
+    const ticker = wishTicker();
+    let wishesLoaded = Promise.resolve([]);
+
+    /** Giờ sự kiện / tài khoản mừng cưới trên Google Sheet; chậm hoặc lỗi → dùng wedding.config.js. */
+    const loadSettings = async () => {
+        try {
+            const res = await Promise.race([
+                client.settings(),
+                new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), SETTINGS_TIMEOUT_MS)),
+            ]);
+            return res?.success ? res.data : null;
+        } catch (e) {
+            console.warn('[thiệp] không tải được cấu hình từ Sheet:', e.message);
+            return null;
+        }
+    };
 
     /** @type {object} */
     let ctx = null;
@@ -234,6 +252,7 @@ export const guest = (() => {
             window.bootstrap.ScrollSpy.getOrCreateInstance(document.body, { target: '#navbar-menu', rootMargin: '0px 0px -40%' });
         }
         util.timeOut(() => window.AOS?.refreshHard?.(), 300);
+        wishesLoaded.then((list) => ticker.start(list));
     };
 
     const booting = async () => {
@@ -277,7 +296,8 @@ export const guest = (() => {
 
         loader({ aos: true, confetti: true }).then(() => progress.complete('libs'));
 
-        const g = await resolveGuest();
+        const [g, settings] = await Promise.all([resolveGuest(), loadSettings()]);
+        applySettings(cfg, settings);
         // Bên của khách: theo Google Sheet, hoặc link theo nhà ?ben=nha-trai / ?ben=nha-gai
         const side = sideFromParam(g.guest?.side) || sideFromParam(new URLSearchParams(window.location.search).get('ben'));
         const events = visibleEvents(cfg.events, g.guest ?? (side ? { side, groups: [] } : null));
@@ -305,7 +325,7 @@ export const guest = (() => {
         audio.init(cfg.music?.src);
         wireEvents();
         countDown();
-        f.loadWishes();
+        wishesLoaded = f.loadWishes();
 
         trackEagerImages();
         progress.complete('guest');
