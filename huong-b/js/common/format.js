@@ -71,7 +71,7 @@ export const relativeTime = (value) => {
 };
 
 /**
- * Link "Thêm vào Google Calendar". Thời lượng mặc định 3 giờ.
+ * Link "Thêm vào Google Calendar". Thời lượng mặc định 3 giờ; sự kiện chưa có giờ → cả ngày.
  * @param {object} ev sự kiện trong config
  * @param {string} title
  * @param {string} details
@@ -82,10 +82,12 @@ export const calendarUrl = (ev, title, details) => {
     if (!start) {
         return '#';
     }
-    const end = new Date(start.getTime() + 3 * 60 * 60 * 1000);
+    const allDay = !String(ev.time || '').trim();
+    const end = new Date(start.getTime() + (allDay ? 24 : 3) * 60 * 60 * 1000);
     const fmt = (d) => {
         const p = vnParts(d);
-        return `${p.y}${pad(p.m)}${pad(p.day)}T${pad(p.hh)}${pad(p.mm)}00`;
+        const day = `${p.y}${pad(p.m)}${pad(p.day)}`;
+        return allDay ? day : `${day}T${pad(p.hh)}${pad(p.mm)}00`;
     };
     const params = new URLSearchParams({
         action: 'TEMPLATE',
