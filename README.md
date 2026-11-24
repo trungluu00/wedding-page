@@ -125,6 +125,15 @@ Font là tên font trên [Google Fonts](https://fonts.google.com) (nên chọn f
 
 ## 4. Cài backend Google Sheet + Apps Script
 
+**Đã cài xong** cho Trung & Nhi:
+
+- Sheet: <https://docs.google.com/spreadsheets/d/1McYGSS9aSXYBzahcMkWl3GDR24vkHMZylKtDJGmz4_4/edit>
+  (menu **💌 Thiệp cưới** trong Sheet: tạo/kiểm tra sheet, sinh code cho khách còn trống)
+- Web App (đã điền vào `backend.appsScriptUrl` của cả A và B):
+  `https://script.google.com/macros/s/AKfycbweK_k5I16ouNV189PTuKVvl_dJfq5KNAK6ltCqHaCRxO78p8huvzEPG4_42DN8FZfjVg/exec`
+
+Các bước dưới đây chỉ cần khi cài lại từ đầu trên Sheet khác.
+
 1. Tạo một Google Sheet mới (vd "Thiệp cưới Trung Nhi").
 2. Menu **Tiện ích mở rộng → Apps Script**. Xóa code mẫu, dán toàn bộ nội dung [`apps-script/Code.gs`](apps-script/Code.gs), bấm Lưu.
 3. Chọn hàm `setupDatabase` ở thanh trên → **Chạy**. Lần đầu Google hỏi quyền: chọn tài khoản →
@@ -137,7 +146,10 @@ Font là tên font trên [Google Fonts](https://fonts.google.com) (nên chọn f
    - Người có quyền truy cập: **Bất kỳ ai** (Anyone)
    - Bấm Triển khai, sao chép **URL ứng dụng web** (dạng `https://script.google.com/macros/s/…/exec`).
 5. Dán URL vào `backend.appsScriptUrl` trong `wedding.config.js`, build và deploy lại.
-6. Kiểm tra: mở `URL/exec?action=lookup&code=bac-hung` trên trình duyệt phải thấy `"found":true`.
+6. Kiểm tra: mở `URL/exec?action=lookup&code=bac-hung-7k2` trên trình duyệt phải thấy `"found":true`.
+
+Script tự tạo lại sheet nếu bị xóa nhầm, và tự chọn dấu `,` hoặc `;` cho công thức theo ngôn ngữ của Sheet
+(Sheet tiếng Việt dùng `;`).
 
 Khi sửa `Code.gs` sau này: **Triển khai → Quản lý triển khai → sửa (bút chì) → Phiên bản: Mới → Triển khai**
 để giữ nguyên URL.
@@ -217,4 +229,5 @@ sửa tùy ý. Ngày âm lịch tính bằng `npm run lunar -- YYYY-MM-DD` (vd `
       số giữ chỗ (`0000000000`), mục Mừng cưới và nút quà tự ẩn để khách không quét nhầm QR
 - [x] Nhạc "Beautiful in White" (Shane Filan): `public/music/beautiful-in-white.mp3` (dùng chung cho A và B).
       Muốn có lời chạy theo nhạc thì tự đặt file `.lrc` và ghi vào `music.lyrics`.
-- [ ] `backend.appsScriptUrl` — URL Web App (mục 4); xóa 2 khách mẫu `bac-hung`, `ban-lan` trong sheet `KhachMoi`
+- [x] `backend.appsScriptUrl` — đã nối Web App (mục 4)
+- [ ] Xóa 2 khách mẫu `bac-hung-7k2`, `ban-lan-3x9` trong sheet `KhachMoi` trước khi gửi thiệp thật
