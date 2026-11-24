@@ -42,6 +42,21 @@ export const applySettings = (cfg, data) => {
             changed = true;
         }
     }
+    // Lời trên thiệp sửa trong Sheet (câu trích, giới thiệu cô dâu chú rể); ô trống → giữ lời mặc định
+    const texts = data.texts && typeof data.texts === 'object' ? data.texts : {};
+    const str = (v) => (typeof v === 'string' && v.trim() ? v.trim().slice(0, 600) : '');
+    if (str(texts.quote) && cfg.texts) {
+        cfg.texts.quote = str(texts.quote);
+        changed = true;
+    }
+    if (str(texts.groomBio) && cfg.couple?.groom) {
+        cfg.couple.groom.bio = str(texts.groomBio);
+        changed = true;
+    }
+    if (str(texts.brideBio) && cfg.couple?.bride) {
+        cfg.couple.bride.bio = str(texts.brideBio);
+        changed = true;
+    }
     if (Array.isArray(data.accounts) && data.accounts.length && cfg.gifts) {
         const base = cfg.gifts.accounts ?? [];
         cfg.gifts.accounts = data.accounts.map((a) => {
