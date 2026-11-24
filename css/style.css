@@ -3973,8 +3973,9 @@ html, body {
 }
 
 .stt-qr-box {
-  width: 170px;
-  height: 170px;
+  width: min(230px, 72vw);
+  min-height: min(230px, 72vw);
+  height: auto;
   margin: 0 auto 14px auto;
   border-radius: 8px;
   overflow: hidden;
@@ -3985,8 +3986,9 @@ html, body {
 }
 
 .stt-qr-box img {
+  display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
   object-fit: contain;
 }
 
@@ -6039,5 +6041,122 @@ body.side-nha-gai .stt-profile-grid > :first-child {
   .cl-sheet-form input[type="text"],
   .cl-sheet-form textarea {
     transition: none;
+  }
+}
+
+/* ==========================================================================
+   Nút nổi nhắc xác nhận tham dự (trên thanh công cụ dưới)
+   ========================================================================== */
+.rsvp-float {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: calc(62px + 10px);
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 8px 18px 8px 10px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--c-primary);
+  color: var(--c-on-primary);
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 10px 26px rgb(var(--c-primary-rgb) / 0.38), 0 0 0 1px rgb(var(--c-accent-rgb) / 0.35) inset;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.rsvp-float.is-in {
+  opacity: 1;
+  transform: none;
+}
+.rsvp-float[hidden] {
+  display: none;
+}
+.rsvp-float-icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.16);
+  font-size: 1.25rem;
+  animation: rsvp-float-wiggle 3.2s ease-in-out infinite;
+}
+.rsvp-float-label {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+  min-width: 0;
+}
+.rsvp-float-label strong {
+  font-size: 1rem;
+  font-weight: 700;
+}
+.rsvp-float-label small {
+  font-size: 0.78rem;
+  opacity: 0.85;
+}
+.rsvp-float::after {
+  content: '›';
+  margin-left: auto;
+  font-size: 1.6rem;
+  line-height: 1;
+  opacity: 0.85;
+}
+/* Vòng sáng lan ra định kỳ để gây chú ý */
+.rsvp-float-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: 0 0 0 0 rgb(var(--c-primary-rgb) / 0.45);
+  animation: rsvp-float-ring 2.6s ease-out infinite;
+}
+@keyframes rsvp-float-ring {
+  0% { box-shadow: 0 0 0 0 rgb(var(--c-primary-rgb) / 0.45); }
+  70%, 100% { box-shadow: 0 0 0 14px rgb(var(--c-primary-rgb) / 0); }
+}
+@keyframes rsvp-float-wiggle {
+  0%, 82%, 100% { transform: rotate(0); }
+  86% { transform: rotate(-12deg); }
+  90% { transform: rotate(10deg); }
+  94% { transform: rotate(-6deg); }
+}
+/* Nhường chỗ: lời chúc bay lên cao hơn khi nút nổi đang hiện */
+#blessing-box {
+  transition: bottom 0.35s ease;
+}
+.rsvp-float-on #blessing-box {
+  bottom: calc(62px + 10px + 56px + 10px);
+  height: 74px; /* chỉ một lời chúc một lúc để không che nội dung */
+}
+
+/* Nút trong mục Xác nhận tham dự: to, dễ thấy */
+.stt-pill-btn.rsvp-main-btn {
+  min-height: 50px;
+  padding: 12px 30px;
+  font-size: 1rem;
+  font-weight: 600;
+  box-shadow: 0 8px 22px rgb(var(--c-primary-rgb) / 0.32);
+}
+.rsvp-done-note {
+  margin: 10px 0 0;
+  font-size: 0.82rem;
+  color: var(--c-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rsvp-float,
+  #blessing-box {
+    transition: none;
+  }
+  .rsvp-float-ring,
+  .rsvp-float-icon {
+    animation: none;
   }
 }

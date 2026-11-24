@@ -343,10 +343,11 @@
           <div class="stt-section-tag">R.S.V.P.</div>
           <h2 class="stt-section-title">Xác nhận tham dự</h2>
           <p class="stt-rsvp-desc" id="rsvpDesc"></p>
-          <button type="button" class="stt-pill-btn primary" id="triggerRsvpModalBtn">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-            <span>Gửi xác nhận</span>
+          <button type="button" class="stt-pill-btn primary rsvp-main-btn" id="triggerRsvpModalBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <span id="rsvpMainBtnText">Gửi xác nhận tham dự</span>
           </button>
+          <p class="rsvp-done-note" id="rsvpDoneNote" hidden>Đã nhận xác nhận của bạn. Bấm nút trên nếu cần sửa lại.</p>
         </section>
 
         <!-- ẢNH KẾT & LỜI CẢM ƠN -->
@@ -367,6 +368,16 @@
 
       <!-- 3. LỜI CHÚC BAY -->
       <div id="blessing-box" class="cl-blessing-danmaku-container" data-section="wishes" aria-hidden="true"></div>
+
+      <!-- Nút nổi nhắc xác nhận tham dự (ẩn khi đã xác nhận / đang ở mục xác nhận) -->
+      <button type="button" class="rsvp-float" id="rsvpFloatBtn" data-section="rsvp" hidden>
+        <span class="rsvp-float-ring" aria-hidden="true"></span>
+        <span class="rsvp-float-icon" aria-hidden="true">💌</span>
+        <span class="rsvp-float-label">
+          <strong>Xác nhận tham dự</strong>
+          <small id="rsvpFloatSub">Giúp chúng tôi chuẩn bị chỗ ngồi</small>
+        </span>
+      </button>
 
       <!-- 4. THANH CÔNG CỤ DƯỚI -->
       <nav id="cinelove-toolbar" class="cl-bottom-toolbar" aria-label="Thanh công cụ tương tác">

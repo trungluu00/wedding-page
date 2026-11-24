@@ -1987,6 +1987,74 @@ document.addEventListener('DOMContentLoaded', () => {
   if (triggerRsvpModalBtn) triggerRsvpModalBtn.addEventListener('click', () => openSheet(rsvpModal));
   if (closeRsvpModalBtn) closeRsvpModalBtn.addEventListener('click', () => closeSheet(rsvpModal));
 
+  // --- NÚT NỔI "XÁC NHẬN THAM DỰ" ---
+  // Hiện sau khi mở thiệp; ẩn khi khách đang xem mục xác nhận, đang mở form, hoặc đã gửi xác nhận
+  // (nhớ trong trình duyệt). Mục đích: khách không quên xác nhận để nhà mình tính số người.
+  const rsvpFloatBtn = document.getElementById('rsvpFloatBtn');
+  const rsvpSectionEl = document.getElementById('rsvpSection');
+  const RSVP_DONE_KEY = 'wedding_rsvp_done';
+  const readRsvpDone = () => {
+    try {
+      return localStorage.getItem(RSVP_DONE_KEY) === '1';
+    } catch {
+      return false;
+    }
+  };
+  let rsvpDone = readRsvpDone();
+  let rsvpSectionInView = false;
+  let rsvpFloatArmed = false;
+
+  function updateRsvpFloat() {
+    if (!rsvpFloatBtn) return;
+    const sectionOn = rsvpSectionEl && !rsvpSectionEl.hidden && (config.sections || []).includes('rsvp');
+    const coverShown = weddingIntroCover && weddingIntroCover.style.display !== 'none';
+    const anySheetOpen = !!document.querySelector('.cl-bottom-sheet-backdrop.open, .alb-theater-modal.open, .lightbox-modal.open');
+    const show = sectionOn && rsvpFloatArmed && !rsvpDone && !coverShown && !rsvpSectionInView && !anySheetOpen;
+    rsvpFloatBtn.parentElement?.classList.toggle('rsvp-float-on', show);
+    if (show && rsvpFloatBtn.hidden) {
+      rsvpFloatBtn.hidden = false;
+      requestAnimationFrame(() => requestAnimationFrame(() => rsvpFloatBtn.classList.add('is-in')));
+    } else if (!show && !rsvpFloatBtn.hidden) {
+      rsvpFloatBtn.classList.remove('is-in');
+      rsvpFloatBtn.hidden = true;
+    }
+    const mainText = document.getElementById('rsvpMainBtnText');
+    if (mainText) mainText.textContent = rsvpDone ? 'Sửa lại xác nhận' : 'Gửi xác nhận tham dự';
+    document.getElementById('rsvpDoneNote')?.toggleAttribute('hidden', !rsvpDone);
+  }
+
+  if (rsvpFloatBtn) {
+    rsvpFloatBtn.addEventListener('click', () => {
+      openSheet(rsvpModal);
+      updateRsvpFloat();
+    });
+    if (rsvpSectionEl && 'IntersectionObserver' in window) {
+      new IntersectionObserver(
+        (entries) => {
+          rsvpSectionInView = entries.some((en) => en.isIntersecting);
+          updateRsvpFloat();
+        },
+        { root: document.getElementById('mainScrollContainer'), threshold: 0.35 }
+      ).observe(rsvpSectionEl);
+    }
+    // Mở / đóng bìa thiệp và các bảng trượt → cập nhật nút
+    const watch = new MutationObserver(() => {
+      if (weddingIntroCover && weddingIntroCover.style.display === 'none' && !rsvpFloatArmed) {
+        // đợi khách xem phần mở đầu một chút rồi mới nhắc
+        setTimeout(() => {
+          rsvpFloatArmed = true;
+          updateRsvpFloat();
+        }, 4000);
+      }
+      updateRsvpFloat();
+    });
+    if (weddingIntroCover) watch.observe(weddingIntroCover, { attributes: true, attributeFilter: ['style', 'class'] });
+    document.querySelectorAll('.cl-bottom-sheet-backdrop, .alb-theater-modal, .lightbox-modal').forEach((m) =>
+      watch.observe(m, { attributes: true, attributeFilter: ['class'] })
+    );
+    updateRsvpFloat();
+  }
+
   // Không đến thì ẩn phần số người
   rsvpForm?.querySelectorAll('input[name="willAttend"]').forEach((r) =>
     r.addEventListener('change', () => {
@@ -2018,7 +2086,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       launchConfetti();
+      rsvpDone = true;
+      try {
+        localStorage.setItem(RSVP_DONE_KEY, '1');
+      } catch {
+        /* chế độ riêng tư */
+      }
       closeSheet(rsvpModal);
+      updateRsvpFloat();
       const dateText = document.getElementById('heroCalloutDate')?.textContent || '';
       if (willAttend) {
         showToast(`Cảm ơn ${name}! Hẹn gặp bạn${dateText ? ` vào ngày ${dateText}` : ''} ❤️`);

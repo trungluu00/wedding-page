@@ -314,6 +314,7 @@ export function renderStatic(config) {
     '#rsvpDesc',
     `Vui lòng xác nhận${deadline ? ` trước ngày ${dotDate(deadline)}` : ' sớm'} để ${names} chuẩn bị đón tiếp chu đáo nhất.`
   );
+  if (deadline) setText('#rsvpFloatSub', `Bạn phản hồi giúp trước ${dotDate(deadline).slice(0, 5)} nhé`);
   if (deadline) setText('#rsvpDeadlineText', `Bạn phản hồi giúp trước ngày ${dotDate(deadline)} để chúng tôi chuẩn bị chu đáo nhé`);
   // Số người đến: các nút chọn 1…max (dễ bấm trên điện thoại hơn ô nhập số)
   const max = Math.max(1, Math.min(10, Number(config.backend?.maxGuestsPerInvite) || 4));
