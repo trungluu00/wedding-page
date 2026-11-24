@@ -72,7 +72,7 @@ export default {
       phone: "0334 395 967",
       father: "Ông Lưu Văn Phú",
       mother: "Bà Phạm Thị Lục",
-      address: "Thôn Phúc Hòa, Xã Thác Bà, Tỉnh Lào Cai",
+      address: "Thôn Phúc Hoà, Xã Thác Bà, Tỉnh Lào Cai",
       familyPhone: "0346 409 672", // (tùy chọn) SĐT đại diện nhà trai, để trống thì không hiện
     },
     bride: {
@@ -91,56 +91,64 @@ export default {
   },
 
   // ---------------------------------------------------------------------------
-  // 4. CÁC SỰ KIỆN — tổ chức tại tư gia hai nhà (không ở nhà hàng)
+  // 4. CÁC SỰ KIỆN — theo thiệp in (tổ chức tại tư gia hai nhà)
   //  audience: ai được thấy sự kiện này.
-  //   - "nha-trai" / "nha-gai" / "ban-chung": khớp cột "side" của khách trong Google Sheet
-  //   - "public": người mở link KHÔNG có mã khách (?to=) hoặc mã không có trong Sheet
-  //   - "all": mọi người
-  //   - tên nhóm bất kỳ (vd "gia-dinh"): khớp cột "groups" của khách
-  //  main: true → sự kiện dùng cho ngày lớn, lịch và đếm ngược (lấy sự kiện main đầu tiên khách thấy).
-  //  lunar: ghi sẵn bằng chữ. Đổi ngày thì tính lại bằng: npm run lunar -- 2026-12-12
-  //  Trên thiệp, sự kiện tự sắp theo thời gian.
+  //   - "nha-trai" / "nha-gai" / "ban-chung": khớp cột "side" của khách trong Google Sheet,
+  //     hoặc link theo nhà: ?ben=nha-trai / ?ben=nha-gai
+  //   - "public": người mở link không có mã khách và không có ?ben=
+  //   - "all": mọi người; tên nhóm khác (vd "gia-dinh") khớp cột "groups"
+  //  main: true → sự kiện dùng cho ngày lớn, lịch và đếm ngược.
+  //  time: để "" nếu chưa chốt giờ (thiệp in đang để trống giờ bữa cơm) — thiệp chỉ hiện ngày.
+  //  lunar: ghi sẵn bằng chữ (npm run lunar -- 2026-12-12). Trên thiệp, sự kiện tự sắp theo thời gian.
   // ---------------------------------------------------------------------------
   events: [
-    // ----- Ngày 12/12/2026 (04/11 âm) — tiệc nhà gái -----
+    // ----- Thứ Bảy 12/12/2026 (04/11 âm): bữa cơm thân mật tại hai nhà -----
     {
-      id: "tiec-nha-gai",
-      name: "Tiệc cưới nhà gái",
+      id: "tiec-nha-trai",
+      name: "Bữa cơm thân mật · Nhà trai",
       main: true,
       date: "2026-12-12",
-      time: "16:00", // (gợi ý) chiều ngày 4 — TODO: xác nhận giờ
-      endTime: "19:00",
-      lunar: "Nhằm ngày 04 tháng 11 năm Bính Ngọ",
-      venue: "Chùa Phăn",
-      address: "Xã Đại Sơn, TP. Hải Phòng",
-      mapsUrl: "https://www.google.com/maps/dir/?api=1&destination=Ch%C3%B9a%20Ph%C4%83n%2C%20%C4%90%E1%BA%A1i%20S%C6%A1n%2C%20H%E1%BA%A3i%20Ph%C3%B2ng", // chỉ đường tới Chùa Phăn (V9M4+99, Đại Sơn) — đã thử mở đúng địa điểm
+      time: "", // TODO: giờ bữa cơm (thiệp in để trống)
+      lunar: "Tức ngày 04 tháng 11 năm Bính Ngọ",
+      venue: "Tư gia nhà trai",
+      address: "Thôn Phúc Hoà, Xã Thác Bà, Tỉnh Lào Cai",
+      mapsUrl: "https://www.google.com/maps/dir/?api=1&destination=Th%C3%B4n%20Ph%C3%BAc%20H%C3%B2a%2C%20X%C3%A3%20Th%C3%A1c%20B%C3%A0%2C%20L%C3%A0o%20Cai", // chỉ đường tới thôn Phúc Hoà — TODO: tọa độ cổng nhà để chính xác hơn
+      audience: ["nha-trai", "ban-chung", "public"],
+    },
+    {
+      id: "tiec-nha-gai",
+      name: "Bữa cơm thân mật · Nhà gái",
+      main: true,
+      date: "2026-12-12",
+      time: "", // TODO: giờ bữa cơm (thiệp in để trống)
+      lunar: "Tức ngày 04 tháng 11 năm Bính Ngọ",
+      venue: "Tư gia nhà gái",
+      address: "Thôn Kỳ Sơn, Xã Đại Sơn, TP. Hải Phòng",
+      mapsUrl: "https://www.google.com/maps/dir/?api=1&destination=Ch%C3%B9a%20Ph%C4%83n%2C%20%C4%90%E1%BA%A1i%20S%C6%A1n%2C%20H%E1%BA%A3i%20Ph%C3%B2ng", // chỉ đường tới Chùa Phăn (mốc gần nhà gái, theo yêu cầu) — TODO: tọa độ cổng nhà nếu muốn chính xác
       audience: ["nha-gai", "ban-chung", "public"],
     },
-    // ----- Ngày 13/12/2026 (05/11 âm) -----
+    // ----- Chủ nhật 13/12/2026 (05/11 âm) -----
+    {
+      id: "le-vu-quy",
+      name: "Lễ Vu Quy",
+      date: "2026-12-13",
+      time: "06:00",
+      lunar: "Tức ngày 05 tháng 11 năm Bính Ngọ",
+      venue: "Tư gia nhà gái",
+      address: "Thôn Kỳ Sơn, Xã Đại Sơn, TP. Hải Phòng",
+      mapsUrl: "https://www.google.com/maps/dir/?api=1&destination=Ch%C3%B9a%20Ph%C4%83n%2C%20%C4%90%E1%BA%A1i%20S%C6%A1n%2C%20H%E1%BA%A3i%20Ph%C3%B2ng",
+      audience: ["nha-gai", "public"],
+    },
     {
       id: "le-thanh-hon",
       name: "Lễ Thành Hôn",
       date: "2026-12-13",
       time: "10:00",
-      endTime: "10:45", // (gợi ý)
-      lunar: "Nhằm ngày 05 tháng 11 năm Bính Ngọ",
+      lunar: "Tức ngày 05 tháng 11 năm Bính Ngọ",
       venue: "Tư gia nhà trai",
-      address: "Thôn Phúc Hòa, Xã Thác Bà, Tỉnh Lào Cai",
-      mapsUrl: "https://www.google.com/maps/dir/?api=1&destination=Th%C3%B4n%20Ph%C3%BAc%20H%C3%B2a%2C%20X%C3%A3%20Th%C3%A1c%20B%C3%A0%2C%20L%C3%A0o%20Cai", // chỉ đường tới thôn Phúc Hòa (Hán Đà, Thác Bà) — TODO: thay bằng tọa độ cổng nhà để chính xác hơn
+      address: "Thôn Phúc Hoà, Xã Thác Bà, Tỉnh Lào Cai",
+      mapsUrl: "https://www.google.com/maps/dir/?api=1&destination=Th%C3%B4n%20Ph%C3%BAc%20H%C3%B2a%2C%20X%C3%A3%20Th%C3%A1c%20B%C3%A0%2C%20L%C3%A0o%20Cai",
       audience: ["nha-trai", "public"],
-    },
-    {
-      id: "tiec-nha-trai",
-      name: "Tiệc cưới nhà trai",
-      main: true,
-      date: "2026-12-13",
-      time: "11:00", // (gợi ý) sáng ngày 5, sau lễ thành hôn — TODO: xác nhận giờ
-      endTime: "14:00",
-      lunar: "Nhằm ngày 05 tháng 11 năm Bính Ngọ",
-      venue: "Tư gia nhà trai",
-      address: "Thôn Phúc Hòa, Xã Thác Bà, Tỉnh Lào Cai",
-      mapsUrl: "https://www.google.com/maps/dir/?api=1&destination=Th%C3%B4n%20Ph%C3%BAc%20H%C3%B2a%2C%20X%C3%A3%20Th%C3%A1c%20B%C3%A0%2C%20L%C3%A0o%20Cai", // chỉ đường tới thôn Phúc Hòa (Hán Đà, Thác Bà) — TODO: thay bằng tọa độ cổng nhà để chính xác hơn
-      audience: ["nha-trai", "ban-chung", "public"],
     },
   ],
 
@@ -256,12 +264,24 @@ export default {
   // 10. CÂU CHỮ
   // ---------------------------------------------------------------------------
   texts: {
-    // (gợi ý) — sửa tùy ý, xuống dòng bằng \n
-    quote: "Từ một lời hẹn ngày dạm ngõ, thành một đời thương nhau.",
-    invitation:
-      "Trân trọng kính mời bạn đến dự\nlễ thành hôn của chúng tôi\nvà cùng chung vui, chia sẻ niềm hạnh phúc này.",
-    thankYou:
-      "Cảm ơn bạn đã dành thời gian mở tấm thiệp nhỏ này.\nSự hiện diện và lời chúc của bạn\nlà món quà ý nghĩa nhất với Trung & Nhi.",
+    // Lời trên thiệp, theo thiệp in. {khach} = cách xưng hô với khách (vd "Bác Hùng"); không có mã khách
+    // thì là "Quý vị". Xuống dòng bằng \n.
+    quote: "Từ một lời hẹn ngày dạm ngõ, thành một đời thương nhau.", // (gợi ý)
+    invitation: "Trân trọng kính mời {khach}\ntới dự bữa cơm thân mật\nmừng lễ thành hôn của chúng tôi",
+    announce: "LỄ THÀNH HÔN CỦA CHÚNG TÔI", // dòng dưới "TRÂN TRỌNG BÁO TIN"
+    thankYou: "Sự hiện diện của Quý vị\nlà niềm vinh hạnh cho gia đình chúng tôi!",
+    // Lời riêng theo từng nhà (khách nhà nào, hoặc link ?ben=nha-trai / ?ben=nha-gai).
+    // Thiệp nhà gái: tên cô dâu và bố mẹ nhà gái đứng trước (tự đảo thứ tự).
+    bySide: {
+      "nha-trai": {
+        invitation: "Trân trọng kính mời {khach}\ntới dự bữa cơm thân mật\nmừng lễ thành hôn của chúng tôi",
+        announce: "LỄ THÀNH HÔN CỦA CHÚNG TÔI",
+      },
+      "nha-gai": {
+        invitation: "Trân trọng kính mời {khach}\ntới dự bữa cơm thân mật\nmừng lễ vu quy của chúng tôi",
+        announce: "LỄ VU QUY CỦA CHÚNG TÔI",
+      },
+    },
   },
 
   // ---------------------------------------------------------------------------
@@ -278,7 +298,6 @@ export default {
     "invitation",
     "couple",
     "events",
-    "schedule",
     "countdown",
     "album",
     "music",
