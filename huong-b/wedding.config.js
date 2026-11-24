@@ -40,7 +40,7 @@ export default {
       fullName: "Lưu Viết Trung",
       displayName: "Viết Trung", // tên hiện ở phần giới thiệu, báo hỷ, liên hệ
       shortName: "Trung",
-      portrait: "p06-chu-re", // cắt từ ảnh cưới DUN00121 (chú rể đứng sau sofa)
+      portrait: "p35-chu-re", // cắt từ ảnh phóng DUN09455 (vest trắng dưới vòm hoa)
       bio: "Chàng trai hiền lành, chân thành, ít nói nhưng luôn chu đáo. Với Trung, Nhi là người khiến những ngày bình thường trở nên đặc biệt.", // (gợi ý)
       phone: "0334 395 967",
       father: "Ông Lưu Văn Phú",
@@ -51,7 +51,7 @@ export default {
       fullName: "Đoàn Phương Nhi",
       displayName: "Phương Nhi", // tên hiện ở phần giới thiệu, báo hỷ, liên hệ
       shortName: "Nhi",
-      portrait: "p28-co-dau", // cắt từ ảnh cưới DUN09825 (cô dâu váy trắng, cận mặt)
+      portrait: "p35-co-dau", // cắt từ ảnh phóng DUN09455 (váy trắng dưới vòm hoa)
       bio: "Cô gái dịu dàng, hay cười và luôn quan tâm mọi người xung quanh. Với Nhi, Trung là bến bình yên để trở về sau mỗi ngày dài.", // (gợi ý)
       phone: "0345 512 667",
       father: "Ông Đoàn Văn Hưng",
@@ -82,7 +82,7 @@ export default {
       lunar: "Tức ngày 04 tháng 11 năm Bính Ngọ",
       venue: "Tư gia nhà trai",
       address: "Thôn Phúc Hoà, Xã Thác Bà, Tỉnh Lào Cai",
-      mapsUrl: "https://www.google.com/maps/dir/?api=1&destination=Th%C3%B4n%20Ph%C3%BAc%20H%C3%B2a%2C%20X%C3%A3%20Th%C3%A1c%20B%C3%A0%2C%20L%C3%A0o%20Cai", // chỉ đường theo địa chỉ trên thiệp in
+      mapsUrl: "https://www.google.com/maps/dir/?api=1&destination=21.7124794,105.0643472", // chỉ đường tới nhà trai theo tọa độ (ghim trên Google Maps)
       audience: ["nha-trai", "ban-chung", "public"],
     },
     {
@@ -117,7 +117,7 @@ export default {
       lunar: "Tức ngày 05 tháng 11 năm Bính Ngọ",
       venue: "Tư gia nhà trai",
       address: "Thôn Phúc Hoà, Xã Thác Bà, Tỉnh Lào Cai",
-      mapsUrl: "https://www.google.com/maps/dir/?api=1&destination=Th%C3%B4n%20Ph%C3%BAc%20H%C3%B2a%2C%20X%C3%A3%20Th%C3%A1c%20B%C3%A0%2C%20L%C3%A0o%20Cai",
+      mapsUrl: "https://www.google.com/maps/dir/?api=1&destination=21.7124794,105.0643472", // chỉ đường tới nhà trai theo tọa độ (ghim trên Google Maps)
       audience: ["nha-trai", "public"],
     },
   ],
@@ -182,8 +182,9 @@ export default {
     desktop: ["p36", "p31", "p33", "p35", "p34", "p37", "p25"],
     // Ảnh cắt từ một vùng của ảnh gốc (left/top/width/height theo tỉ lệ 0..1 của ảnh gốc đã xoay đúng chiều).
     crops: {
-      "p06-chu-re": { from: "p06", left: 0, top: 0.02, width: 0.44, height: 0.367 }, // chú rể, khung dọc 4:5
-      "p28-co-dau": { from: "p28", left: 0.53, top: 0.1, width: 0.45, height: 0.375 }, // cô dâu, khung dọc 4:5
+      // Cả hai cắt từ DUN09455 (ảnh phóng, nhìn thẳng, rõ nét), mỗi khung ~1591x1988 px
+      "p35-chu-re": { from: "p35", left: 0.16, top: 0.31, width: 0.3, height: 0.25 }, // chú rể, khung dọc 4:5
+      "p35-co-dau": { from: "p35", left: 0.475, top: 0.345, width: 0.3, height: 0.25 }, // cô dâu, khung dọc 4:5
     },
   },
 
