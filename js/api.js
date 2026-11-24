@@ -122,6 +122,49 @@ export async function sendWish(data) {
   }
 }
 
+/**
+ * Cấu hình sửa được trên Google Sheet (sheet CauHinh): giờ sự kiện, tài khoản mừng cưới.
+ * Trả về {events:{id:{time}}, accounts:[...]} hoặc null (demo / lỗi mạng → dùng wedding.config.js).
+ */
+export async function fetchSettings() {
+  if (isDemo) return null;
+  try {
+    const json = await apiGet({ action: 'settings' });
+    return json && json.success && json.data && typeof json.data === 'object' ? json.data : null;
+  } catch (err) {
+    console.warn('[Thiệp cưới] Không tải được cấu hình từ Sheet:', err);
+    return null;
+  }
+}
+
+/** Ghép cấu hình từ Sheet vào config (sửa tại chỗ). Trả về true nếu có thay đổi cần vẽ lại. */
+export function applySettings(cfg, data) {
+  if (!data) return false;
+  let changed = false;
+  const times = data.events && typeof data.events === 'object' ? data.events : {};
+  (cfg.events || []).forEach((ev) => {
+    const t = times[ev.id] && times[ev.id].time;
+    if (typeof t === 'string' && (t === '' || /^\d{2}:\d{2}$/.test(t)) && t !== (ev.time || '')) {
+      ev.time = t;
+      changed = true;
+    }
+  });
+  if (Array.isArray(data.accounts) && data.accounts.length && cfg.gifts) {
+    const base = cfg.gifts.accounts || [];
+    cfg.gifts.accounts = data.accounts.map((a) => {
+      const out = { ...(base.find((b) => b.family === a.family) || { family: a.family }) };
+      ['bankBin', 'bankName', 'accountNo', 'accountName', 'qrImage'].forEach((k) => {
+        if (a[k]) out[k] = String(a[k]);
+      });
+      // Sheet để trống số tài khoản → coi như chưa có (mục mừng cưới tự ẩn)
+      if (!a.accountNo && !a.qrImage) out.accountNo = '';
+      return out;
+    });
+    changed = true;
+  }
+  return changed;
+}
+
 /** Ghi nhận khách đã mở thiệp (một lần mỗi phiên). */
 export function trackOpen(code) {
   if (!code || isDemo) return;

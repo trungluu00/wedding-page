@@ -1703,6 +1703,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   applyGuest();
 
+  // --- GIỜ SỰ KIỆN & TÀI KHOẢN MỪNG CƯỚI TỪ GOOGLE SHEET (sheet CauHinh) ---
+  // Vẽ ngay theo wedding.config.js, có dữ liệu Sheet thì vẽ lại phần phụ thuộc.
+  api.fetchSettings().then((settings) => {
+    if (!api.applySettings(config, settings)) return;
+    const who = currentGuest || sideGuest;
+    renderGifts(config, currentGuest);
+    const main = renderEvents(config, who);
+    renderCalendar(main, visibleEvents(config, who));
+    startCountdown(main);
+  });
+
   // --- INTRO ENVELOPE COVER ENGINE (MÀN HÌNH BÌA SONG HỶ XANH) ---
   const weddingIntroCover = document.getElementById('weddingIntroCover');
   const btnOpenInvitation = document.getElementById('btnOpenInvitation');
