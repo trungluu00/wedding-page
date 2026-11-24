@@ -42,6 +42,11 @@ export const visibleEvents = (events, guest) => (events ?? []).filter((ev) => {
 /** Sự kiện chính (cho bìa, đếm ngược): sự kiện "all" sớm nhất, nếu không có thì sự kiện thấy được sớm nhất. */
 export const mainEvent = (events, visible) => {
     const byTime = (a, b) => (eventDate(a)?.getTime() ?? 0) - (eventDate(b)?.getTime() ?? 0);
+    // Ưu tiên sự kiện đánh dấu main: true (ngày cưới chính) trong số khách được thấy
+    const mains = [...visible].filter((e) => e.main).sort(byTime);
+    if (mains.length) {
+        return mains[0];
+    }
     const all = [...visible].filter((e) => (e.audience ?? ['all']).includes('all')).sort(byTime);
     return all[0] ?? [...visible].sort(byTime)[0] ?? (events ?? [])[0] ?? null;
 };

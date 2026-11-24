@@ -76,7 +76,7 @@ export default {
     {
       id: "tiec-nha-trai",
       name: "Bữa cơm thân mật · Nhà trai",
-      main: true,
+      main: false,
       date: "2026-12-12",
       time: "", // TODO: giờ bữa cơm (thiệp in để trống)
       lunar: "Tức ngày 04 tháng 11 năm Bính Ngọ",
@@ -88,7 +88,7 @@ export default {
     {
       id: "tiec-nha-gai",
       name: "Bữa cơm thân mật · Nhà gái",
-      main: true,
+      main: false,
       date: "2026-12-12",
       time: "", // TODO: giờ bữa cơm (thiệp in để trống)
       lunar: "Tức ngày 04 tháng 11 năm Bính Ngọ",
@@ -100,6 +100,7 @@ export default {
     // ----- Chủ nhật 13/12/2026 (05/11 âm) -----
     {
       id: "le-vu-quy",
+      main: true, // ngày cưới chính 13/12 (bìa, đầu thiệp, đếm ngược)
       name: "Lễ Vu Quy",
       date: "2026-12-13",
       time: "06:00",
@@ -111,6 +112,7 @@ export default {
     },
     {
       id: "le-thanh-hon",
+      main: true, // ngày cưới chính 13/12 (bìa, đầu thiệp, đếm ngược)
       name: "Lễ Thành Hôn",
       date: "2026-12-13",
       time: "10:00",
