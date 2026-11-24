@@ -44,32 +44,32 @@ export const forms = (client) => {
         const deadline = cfg.backend?.rsvpDeadline;
         const prev = saved.get('last');
 
-        const name = h('input', { type: 'text', id: 'rsvp-name', class: 'form-control rounded-4', maxlength: '60', autocomplete: 'name', required: true, placeholder: 'Tên của bạn' });
+        const name = h('input', { type: 'text', id: 'rsvp-name', class: 'form-control rounded-4', maxlength: '60', autocomplete: 'name', required: true, placeholder: 'Họ và tên' });
         name.value = prev?.name ?? (ctx.guest ? ctx.khach : '');
 
         const countValue = String(Math.min(max, prev?.guestCount || 1));
         const count = chips('rsvp-count', Array.from({ length: max }, (_, i) => [String(i + 1), `${i + 1} người`]), countValue, 'choice-chips--count');
 
-        const notes = h('textarea', { id: 'rsvp-notes', class: 'form-control rounded-4', rows: '2', maxlength: '300', placeholder: 'VD: ăn chay, đi cùng em bé...' });
+        const notes = h('textarea', { id: 'rsvp-notes', class: 'form-control rounded-4', rows: '2', maxlength: '300', placeholder: 'Ví dụ: đi cùng gia đình, ăn chay...' });
         notes.value = prev?.notes ?? '';
 
         const side = prev?.side ?? ctx.guest?.side ?? ctx.side ?? '';
         const attend = prev ? (prev.willAttend ? 'yes' : 'no') : 'yes';
 
-        const countWrap = group('Số người đến (tính cả bạn)', count);
+        const countWrap = group('Số người tham dự (kể cả người xác nhận)', count);
         const button = h('button', { type: 'submit', class: 'btn btn-primary rounded-pill px-4 py-2 fw-semibold rsvp-submit', 'data-offline-disabled': 'false' },
             icon('fa-paper-plane', 'me-2'), 'Gửi xác nhận');
         const done = h('div', { class: 'alert rounded-4 small mb-3 d-none', id: 'rsvp-done', role: 'status', style: { backgroundColor: 'var(--c-soft)', color: 'var(--c-strong)', border: 0 } });
 
         const form = h('form', { class: 'card-c p-4', id: 'rsvp-form', novalidate: true },
-            field('rsvp-name', 'Họ tên', name),
-            group('Bạn là khách của', chips('rsvp-side', [['nha-trai', 'Nhà trai'], ['nha-gai', 'Nhà gái']], side)),
-            group('Bạn sẽ đến chứ?', chips('rsvp-attend', [
-                ['yes', 'Có, mình sẽ đến', 'fa-champagne-glasses'],
-                ['no', 'Tiếc quá, mình bận', 'fa-envelope-open-text'],
+            field('rsvp-name', 'Họ và tên', name),
+            group('Khách mời của', chips('rsvp-side', [['nha-trai', 'Nhà trai'], ['nha-gai', 'Nhà gái']], side)),
+            group('Tham dự', chips('rsvp-attend', [
+                ['yes', 'Tôi sẽ tham dự', 'fa-champagne-glasses'],
+                ['no', 'Rất tiếc, tôi không thể đến', 'fa-envelope-open-text'],
             ], attend, 'choice-chips--cards')),
             countWrap,
-            field('rsvp-notes', 'Lời nhắn (không bắt buộc)', notes),
+            field('rsvp-notes', 'Lời nhắn gửi cô dâu chú rể (không bắt buộc)', notes),
             honeypot(),
             done,
             h('div', { class: 'd-grid' }, button),
@@ -85,8 +85,8 @@ export const forms = (client) => {
         const showDone = (data) => {
             done.classList.remove('d-none');
             done.textContent = data.willAttend
-                ? `Cảm ơn ${data.name}! Chúng tôi đã ghi nhận ${data.guestCount} người sẽ tới. Bạn có thể gửi lại nếu thay đổi.`
-                : `Cảm ơn ${data.name} đã báo trước. Mong sớm gặp bạn dịp khác! Bạn có thể gửi lại nếu thay đổi.`;
+                ? `Xin cảm ơn ${data.name}! Chúng tôi đã ghi nhận ${data.guestCount} người tham dự. Nếu có thay đổi, xin vui lòng gửi lại xác nhận.`
+                : `Xin cảm ơn ${data.name} đã báo trước. Rất mong được gặp lại vào dịp khác! Nếu có thay đổi, xin vui lòng gửi lại xác nhận.`;
         };
         if (prev) {
             showDone(prev);
@@ -106,12 +106,12 @@ export const forms = (client) => {
                 hp: form.querySelector('.js-hp')?.value ?? '',
             };
             if (data.name.length < 2) {
-                util.notify('Bạn vui lòng nhập họ tên.').error();
+                util.notify('Xin vui lòng nhập họ và tên.').error();
                 name.focus();
                 return;
             }
             if (!data.side) {
-                util.notify('Bạn vui lòng chọn khách nhà trai hay nhà gái.').error();
+                util.notify('Xin vui lòng chọn khách mời nhà trai hay nhà gái.').error();
                 return;
             }
             const btn = util.disableButton(button);
@@ -123,9 +123,9 @@ export const forms = (client) => {
                 saved.set('last', data);
                 showDone(data);
                 document.dispatchEvent(new CustomEvent('rsvp:done', { detail: data }));
-                util.notify(res.message || 'Đã gửi xác nhận. Cảm ơn bạn!').success();
+                util.notify(res.message || 'Đã gửi xác nhận. Xin chân thành cảm ơn!').success();
             } catch (err) {
-                util.notify(`Chưa gửi được: ${err.message}. Bạn thử lại nhé.`).error();
+                util.notify(`Chưa gửi được (${err.message}). Xin vui lòng thử lại sau ít phút.`).error();
             } finally {
                 btn.restore();
             }
@@ -133,9 +133,9 @@ export const forms = (client) => {
 
         return h('section', { id: 'rsvp', class: 'bg-page text-center' },
             h('p', { class: 'section-kicker mb-1' }, 'Xác nhận tham dự'),
-            h('h2', { class: 'section-title mb-0' }, 'Bạn sẽ đến chứ?'),
+            h('h2', { class: 'section-title mb-0' }, 'Rất mong được đón tiếp'),
             h('div', { class: 'divider-ornament', 'aria-hidden': 'true' }, icon('fa-heart', 'fa-xs')),
-            deadline ? h('p', { class: 'small text-muted-c' }, `Bạn phản hồi giúp trước ngày ${plainDate(deadline)} để chúng tôi chuẩn bị chu đáo nhé.`) : null,
+            deadline ? h('p', { class: 'small text-muted-c' }, `Xin vui lòng phản hồi trước ngày ${plainDate(deadline)} để gia đình chúng tôi chuẩn bị chu đáo.`) : null,
             form,
         );
     };
@@ -161,7 +161,7 @@ export const forms = (client) => {
         countEl.textContent = sorted.length ? `${sorted.length} lời chúc` : '';
         listEl.replaceChildren(...(sorted.length
             ? sorted.map(wishItem)
-            : [h('p', { class: 'text-muted-c small m-0 wish-empty' }, 'Chưa có lời chúc nào. Bạn hãy là người đầu tiên nhé!')]));
+            : [h('p', { class: 'text-muted-c small m-0 wish-empty' }, 'Chưa có lời chúc nào. Rất mong nhận được lời chúc đầu tiên!')]));
     };
 
     let cache = [];
@@ -198,22 +198,22 @@ export const forms = (client) => {
             cache = Array.isArray(res?.data) ? res.data : [];
             setList(cache);
         } catch {
-            listEl.replaceChildren(h('p', { class: 'text-muted-c small m-0' }, 'Chưa tải được lời chúc, bạn tải lại trang sau nhé.'));
+            listEl.replaceChildren(h('p', { class: 'text-muted-c small m-0' }, 'Chưa tải được lời chúc, xin vui lòng tải lại trang sau.'));
         }
         return cache;
     };
 
     const wishes = (cfg, ctx) => {
-        const author = h('input', { type: 'text', id: 'wish-author', class: 'form-control rounded-4', maxlength: '60', autocomplete: 'name', required: true, placeholder: 'Tên của bạn' });
+        const author = h('input', { type: 'text', id: 'wish-author', class: 'form-control rounded-4', maxlength: '60', autocomplete: 'name', required: true, placeholder: 'Họ và tên' });
         author.value = ctx.guest ? ctx.khach : '';
-        const relation = h('input', { type: 'text', id: 'wish-relation', class: 'form-control rounded-4', maxlength: '60', placeholder: 'VD: Bạn đại học của Nhi' });
+        const relation = h('input', { type: 'text', id: 'wish-relation', class: 'form-control rounded-4', maxlength: '60', placeholder: 'Ví dụ: Đồng nghiệp của Trung' });
         const text = h('textarea', { id: 'wish-text', class: 'form-control rounded-4', rows: '4', maxlength: '500', required: true, placeholder: 'Viết lời chúc gửi cô dâu chú rể...' });
         const button = h('button', { type: 'submit', class: 'btn btn-primary rounded-pill px-4', 'data-offline-disabled': 'false' },
             icon('fa-heart', 'me-2'), 'Gửi lời chúc');
 
         const form = h('form', { class: 'card-c p-4 mb-4', id: 'wish-form', novalidate: true },
-            field('wish-author', 'Họ tên', author),
-            field('wish-relation', 'Bạn là (không bắt buộc)', relation),
+            field('wish-author', 'Họ và tên', author),
+            field('wish-relation', 'Mối quan hệ (không bắt buộc)', relation),
             field('wish-text', 'Lời chúc', text),
             honeypot(),
             h('div', { class: 'd-grid' }, button));
@@ -231,18 +231,18 @@ export const forms = (client) => {
                 hp: form.querySelector('.js-hp')?.value ?? '',
             };
             if (data.author.length < 2) {
-                util.notify('Bạn vui lòng nhập họ tên.').error();
+                util.notify('Xin vui lòng nhập họ và tên.').error();
                 author.focus();
                 return;
             }
             if (data.text.length < 2) {
-                util.notify('Bạn vui lòng viết lời chúc.').error();
+                util.notify('Xin vui lòng viết lời chúc.').error();
                 text.focus();
                 return;
             }
             const last = Number(wishState.get('lastAt') || 0);
             if (Date.now() - last < WISH_COOLDOWN_MS) {
-                util.notify('Bạn vừa gửi lời chúc, chờ một chút rồi gửi tiếp nhé.').info();
+                util.notify('Lời chúc vừa được gửi, xin chờ giây lát trước khi gửi tiếp.').info();
                 return;
             }
             const btn = util.disableButton(button);
@@ -254,9 +254,9 @@ export const forms = (client) => {
                 wishState.set('lastAt', Date.now());
                 text.value = '';
                 prependWish({ author: data.author, relation: data.relation, text: data.text, createdAt: new Date().toISOString() });
-                util.notify('Cảm ơn lời chúc của bạn!').success();
+                util.notify('Xin chân thành cảm ơn lời chúc!').success();
             } catch (err) {
-                util.notify(`Chưa gửi được: ${err.message}. Bạn thử lại nhé.`).error();
+                util.notify(`Chưa gửi được (${err.message}). Xin vui lòng thử lại sau ít phút.`).error();
             } finally {
                 btn.restore();
             }

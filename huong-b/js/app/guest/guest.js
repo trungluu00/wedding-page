@@ -95,7 +95,7 @@ export const guest = (() => {
             const distance = target.getTime() - Date.now();
             if (distance <= 0) {
                 const sameDay = Math.abs(distance) < 24 * 60 * 60 * 1000;
-                boxes.replaceChildren(util.h('p', { class: 'quote m-0' }, sameDay ? 'Hôm nay là ngày vui của chúng tôi!' : 'Cảm ơn mọi người đã chung vui cùng chúng tôi!'));
+                boxes.replaceChildren(util.h('p', { class: 'quote m-0' }, sameDay ? 'Hôm nay là ngày vui của chúng tôi!' : 'Xin chân thành cảm ơn anh chị và các bạn đã chung vui cùng chúng tôi!'));
                 return;
             }
             els[0].textContent = pad(Math.floor(distance / 86400000));
@@ -123,8 +123,8 @@ export const guest = (() => {
         let armed = false;
         const deadline = cfg.backend?.rsvpDeadline ? new Date(`${cfg.backend.rsvpDeadline}T00:00:00+07:00`) : null;
         const sub = deadline && !Number.isNaN(deadline.getTime())
-            ? `Bạn phản hồi giúp trước ${String(deadline.getUTCDate() + (deadline.getUTCHours() >= 17 ? 1 : 0)).padStart(2, '0')}/${String(deadline.getMonth() + 1).padStart(2, '0')} nhé`
-            : 'Giúp chúng tôi chuẩn bị chu đáo';
+            ? `Xin vui lòng phản hồi trước ${String(deadline.getUTCDate() + (deadline.getUTCHours() >= 17 ? 1 : 0)).padStart(2, '0')}/${String(deadline.getMonth() + 1).padStart(2, '0')}`
+            : 'Để chúng tôi chuẩn bị chu đáo';
         const btn = h('button', {
             type: 'button', class: 'rsvp-cta', id: 'rsvp-cta', hidden: true,
             onclick: () => {
@@ -192,7 +192,7 @@ export const guest = (() => {
         }
         try {
             await navigator.clipboard.writeText(url);
-            util.notify('Đã chép link thiệp, bạn dán để gửi nhé.').success();
+            util.notify('Đã sao chép đường dẫn thiệp.').success();
         } catch {
             util.notify(url).info();
         }

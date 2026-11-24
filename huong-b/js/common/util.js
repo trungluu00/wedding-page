@@ -210,7 +210,7 @@ export const util = (() => {
         const ok = await copyText(data);
         if (!ok) {
             button.disabled = false;
-            notify(`Không chép được, bạn hãy chép tay: ${data}`).error();
+            notify(`Không sao chép được, xin vui lòng chép thủ công: ${data}`).error();
             return;
         }
         const tmp = Array.from(button.childNodes);

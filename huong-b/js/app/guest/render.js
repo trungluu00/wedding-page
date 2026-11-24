@@ -258,7 +258,7 @@ const renderCountdown = (cfg, ctx) => {
     }
     const box = (id, label) => h('div', { class: 'col-3 px-1' },
         h('div', { class: 'countdown-box' }, h('div', { class: 'countdown-num', id }, '00'), h('div', { class: 'countdown-label' }, label)));
-    return sectionShell('countdown', { kicker: 'Đếm ngược', title: 'Còn bao lâu nữa?' },
+    return sectionShell('countdown', { kicker: 'Đếm ngược', title: 'Ngày vui đang đến gần' },
         h('div', { class: 'row justify-content-center mx-0', id: 'countdown-boxes' },
             box('day', 'Ngày'), box('hour', 'Giờ'), box('minute', 'Phút'), box('second', 'Giây')),
         h('p', { class: 'mt-3 mb-0 text-muted-c small', id: 'countdown-note' }, `đến ${ctx.main.name} · ${longDate(eventDate(ctx.main))}`),
@@ -333,7 +333,7 @@ const accountCard = (acc, ctx) => {
         acc.accountName ? h('p', { class: 'small text-muted-c mb-2' }, acc.accountName) : null,
         h('div', { class: 'text-center' },
             h('img', { 'data-qr': qrSrc, src: 'data:,', alt: `Mã QR chuyển khoản ${acc.bankName} ${acc.accountNo}`, class: 'qr-img js-zoom cursor-pointer', loading: 'lazy', onerror: onQrError }),
-            h('p', { class: 'small text-muted-c mt-1 mb-0' }, 'Quét bằng app ngân hàng bất kỳ')),
+            h('p', { class: 'small text-muted-c mt-1 mb-0' }, 'Quét mã bằng ứng dụng ngân hàng bất kỳ')),
     );
 };
 
@@ -359,8 +359,8 @@ const renderGifts = (cfg, ctx) => {
                     h('p', { class: 'section-kicker mb-2' }, FAMILY_LABEL[f] ?? f),
                     list.map((a) => accountCard(a, ctx)));
             })));
-    return sectionShell('gifts', { kicker: 'Mừng cưới', title: 'Gửi quà yêu thương', alt: true },
-        h('p', { class: 'px-2' }, 'Sự hiện diện của bạn là món quà quý nhất. Nếu muốn gửi quà mừng từ xa, bạn có thể chuyển khoản qua thông tin dưới đây.'),
+    return sectionShell('gifts', { kicker: 'Mừng cưới', title: 'Hộp mừng cưới', alt: true },
+        h('p', { class: 'px-2' }, 'Sự hiện diện của anh chị và các bạn là món quà quý giá nhất với chúng tôi. Trường hợp không thể đến dự, xin mời xem thông tin mừng cưới dưới đây.'),
         collapsed ? h('button', {
             type: 'button', class: 'btn btn-outline-auto rounded-pill px-3', 'data-bs-toggle': 'collapse', 'data-bs-target': '#gift-body',
             'aria-expanded': 'false', 'aria-controls': 'gift-body', id: 'gift-toggle',
