@@ -40,7 +40,7 @@ export default {
       fullName: "Lưu Viết Trung",
       displayName: "Viết Trung", // tên hiện ở phần giới thiệu, báo hỷ, liên hệ
       shortName: "Trung",
-      portrait: "p06-chu-re", // cắt từ ảnh cưới DUN00121 (chú rể đứng sau sofa)
+      portrait: "p04-chu-re", // cắt từ ảnh cưới DUN00081 (nhìn thẳng, trong vườn)
       bio: "Chàng trai hiền lành, chân thành, ít nói nhưng luôn chu đáo. Với Trung, Nhi là người khiến những ngày bình thường trở nên đặc biệt.", // (gợi ý)
       phone: "0334 395 967",
       father: "Ông Lưu Văn Phú",
@@ -51,7 +51,7 @@ export default {
       fullName: "Đoàn Phương Nhi",
       displayName: "Phương Nhi", // tên hiện ở phần giới thiệu, báo hỷ, liên hệ
       shortName: "Nhi",
-      portrait: "p28-co-dau", // cắt từ ảnh cưới DUN09825 (cô dâu váy trắng, cận mặt)
+      portrait: "p04-co-dau", // cắt từ ảnh cưới DUN00081 (nhìn thẳng, trong vườn)
       bio: "Cô gái dịu dàng, hay cười và luôn quan tâm mọi người xung quanh. Với Nhi, Trung là bến bình yên để trở về sau mỗi ngày dài.", // (gợi ý)
       phone: "0345 512 667",
       father: "Ông Đoàn Văn Hưng",
@@ -181,8 +181,9 @@ export default {
     desktop: ["p36", "p32", "p33", "p35", "p34", "p37", "p31"],
     // Ảnh cắt từ một vùng của ảnh gốc (left/top/width/height theo tỉ lệ 0..1 của ảnh gốc đã xoay đúng chiều).
     crops: {
-      "p06-chu-re": { from: "p06", left: 0, top: 0.02, width: 0.44, height: 0.367 }, // chú rể, khung dọc 4:5
-      "p28-co-dau": { from: "p28", left: 0.53, top: 0.1, width: 0.45, height: 0.375 }, // cô dâu, khung dọc 4:5
+      // Cả hai cùng cắt từ DUN00081 (ảnh ngang 3:2, hai bạn nhìn thẳng, rõ nét) để đồng bộ ánh sáng và nền
+      "p04-chu-re": { from: "p04", left: 0.2, top: 0.03, width: 0.26, height: 0.4875 }, // chú rể, khung dọc 4:5
+      "p04-co-dau": { from: "p04", left: 0.47, top: 0.16, width: 0.26, height: 0.4875 }, // cô dâu, khung dọc 4:5
     },
   },
 
