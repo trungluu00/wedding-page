@@ -25,12 +25,18 @@ export const forms = (client) => {
         h('label', { for: `hp-${Math.random().toString(36).slice(2, 7)}` }, 'Để trống ô này'),
         h('input', { type: 'text', name: 'website', tabindex: '-1', autocomplete: 'off', class: 'js-hp' }));
 
-    const radio = (name, value, label, checked) => {
-        const id = `${name}-${value}`;
-        return h('div', { class: 'form-check form-check-inline' },
-            h('input', { class: 'form-check-input', type: 'radio', name, id, value, checked: checked || null }),
-            h('label', { class: 'form-check-label', for: id }, label));
-    };
+    /** Nhóm nút chọn to, dễ bấm trên điện thoại: [[value, label, icon?], ...] */
+    const chips = (name, options, value, extra = '') => h('div', { class: `choice-chips ${extra}`.trim(), role: 'radiogroup' },
+        options.map(([v, label, ic]) => {
+            const id = `${name}-${v}`;
+            return h('label', { class: 'choice-chip', for: id },
+                h('input', { type: 'radio', name, id, value: v, checked: v === value || null }),
+                h('span', null, ic ? icon(ic, 'choice-chip-icon') : null, h('span', null, label)));
+        }));
+
+    const group = (label, body) => h('fieldset', { class: 'mb-3 text-start border-0 p-0' },
+        h('legend', { class: 'form-label small mb-2 fw-semibold' }, label),
+        body);
 
     // ------------------------------------------------------------------ RSVP
     const rsvp = (cfg, ctx) => {
@@ -41,9 +47,8 @@ export const forms = (client) => {
         const name = h('input', { type: 'text', id: 'rsvp-name', class: 'form-control rounded-4', maxlength: '60', autocomplete: 'name', required: true, placeholder: 'Tên của bạn' });
         name.value = prev?.name ?? (ctx.guest ? ctx.khach : '');
 
-        const count = h('select', { id: 'rsvp-count', class: 'form-select rounded-4' },
-            Array.from({ length: max }, (_, i) => h('option', { value: String(i + 1) }, i === 0 ? '1 người (chỉ mình tôi)' : `${i + 1} người`)));
-        count.value = String(Math.min(max, prev?.guestCount || 1));
+        const countValue = String(Math.min(max, prev?.guestCount || 1));
+        const count = chips('rsvp-count', Array.from({ length: max }, (_, i) => [String(i + 1), `${i + 1} người`]), countValue, 'choice-chips--count');
 
         const notes = h('textarea', { id: 'rsvp-notes', class: 'form-control rounded-4', rows: '2', maxlength: '300', placeholder: 'VD: ăn chay, đi cùng em bé...' });
         notes.value = prev?.notes ?? '';
@@ -51,23 +56,20 @@ export const forms = (client) => {
         const side = prev?.side ?? ctx.guest?.side ?? ctx.side ?? '';
         const attend = prev ? (prev.willAttend ? 'yes' : 'no') : 'yes';
 
-        const countWrap = field('rsvp-count', 'Số người tham dự (tính cả bạn)', count);
-        const button = h('button', { type: 'submit', class: 'btn btn-primary rounded-pill px-4', 'data-offline-disabled': 'false' },
+        const countWrap = group('Số người đến (tính cả bạn)', count);
+        const button = h('button', { type: 'submit', class: 'btn btn-primary rounded-pill px-4 py-2 fw-semibold rsvp-submit', 'data-offline-disabled': 'false' },
             icon('fa-paper-plane', 'me-2'), 'Gửi xác nhận');
         const done = h('div', { class: 'alert rounded-4 small mb-3 d-none', id: 'rsvp-done', role: 'status', style: { backgroundColor: 'var(--c-soft)', color: 'var(--c-strong)', border: 0 } });
 
         const form = h('form', { class: 'card-c p-4', id: 'rsvp-form', novalidate: true },
             field('rsvp-name', 'Họ tên', name),
-            h('div', { class: 'mb-3 text-start' },
-                h('div', { class: 'form-label small mb-1' }, 'Bạn là khách của'),
-                radio('rsvp-side', 'nha-trai', 'Nhà trai', side === 'nha-trai'),
-                radio('rsvp-side', 'nha-gai', 'Nhà gái', side === 'nha-gai')),
-            h('div', { class: 'mb-3 text-start' },
-                h('div', { class: 'form-label small mb-1' }, 'Bạn sẽ đến chứ?'),
-                h('div', null, radio('rsvp-attend', 'yes', 'Có, tôi sẽ đến', attend === 'yes')),
-                h('div', null, radio('rsvp-attend', 'no', 'Rất tiếc, tôi không đến được', attend === 'no'))),
+            group('Bạn là khách của', chips('rsvp-side', [['nha-trai', 'Nhà trai'], ['nha-gai', 'Nhà gái']], side)),
+            group('Bạn sẽ đến chứ?', chips('rsvp-attend', [
+                ['yes', 'Có, mình sẽ đến', 'fa-champagne-glasses'],
+                ['no', 'Tiếc quá, mình bận', 'fa-envelope-open-text'],
+            ], attend, 'choice-chips--cards')),
             countWrap,
-            field('rsvp-notes', 'Ghi chú (không bắt buộc)', notes),
+            field('rsvp-notes', 'Lời nhắn (không bắt buộc)', notes),
             honeypot(),
             done,
             h('div', { class: 'd-grid' }, button),
@@ -83,7 +85,7 @@ export const forms = (client) => {
         const showDone = (data) => {
             done.classList.remove('d-none');
             done.textContent = data.willAttend
-                ? `Cảm ơn ${data.name}! Chúng mình đã ghi nhận ${data.guestCount} người sẽ tới. Bạn có thể gửi lại nếu thay đổi.`
+                ? `Cảm ơn ${data.name}! Chúng tôi đã ghi nhận ${data.guestCount} người sẽ tới. Bạn có thể gửi lại nếu thay đổi.`
                 : `Cảm ơn ${data.name} đã báo trước. Mong sớm gặp bạn dịp khác! Bạn có thể gửi lại nếu thay đổi.`;
         };
         if (prev) {
@@ -99,7 +101,7 @@ export const forms = (client) => {
                 name: name.value.trim(),
                 side: sideVal,
                 willAttend,
-                guestCount: willAttend ? Number(count.value) : 0,
+                guestCount: willAttend ? Number(form.querySelector('input[name="rsvp-count"]:checked')?.value || 1) : 0,
                 notes: notes.value.trim(),
                 hp: form.querySelector('.js-hp')?.value ?? '',
             };
@@ -120,6 +122,7 @@ export const forms = (client) => {
                 }
                 saved.set('last', data);
                 showDone(data);
+                document.dispatchEvent(new CustomEvent('rsvp:done', { detail: data }));
                 util.notify(res.message || 'Đã gửi xác nhận. Cảm ơn bạn!').success();
             } catch (err) {
                 util.notify(`Chưa gửi được: ${err.message}. Bạn thử lại nhé.`).error();
@@ -132,7 +135,7 @@ export const forms = (client) => {
             h('p', { class: 'section-kicker mb-1' }, 'Xác nhận tham dự'),
             h('h2', { class: 'section-title mb-0' }, 'Bạn sẽ đến chứ?'),
             h('div', { class: 'divider-ornament', 'aria-hidden': 'true' }, icon('fa-heart', 'fa-xs')),
-            deadline ? h('p', { class: 'small text-muted-c' }, `Vui lòng phản hồi trước ngày ${plainDate(deadline)} để chúng mình chuẩn bị chu đáo.`) : null,
+            deadline ? h('p', { class: 'small text-muted-c' }, `Bạn phản hồi giúp trước ngày ${plainDate(deadline)} để chúng tôi chuẩn bị chu đáo nhé.`) : null,
             form,
         );
     };

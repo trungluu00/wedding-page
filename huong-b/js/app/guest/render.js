@@ -3,8 +3,7 @@
 // config.sections được dựng bằng util.h() (mọi chuỗi đi qua textContent, không dùng innerHTML).
 import { util } from '../../common/util.js';
 import {
-    eventDate, longDate, shortDate, timeText, weekday, dayNum, monthYear, calendarUrl, vietQrUrl, plainDate,
-} from '../../common/format.js';
+    eventDate, longDate, shortDate, timeText, weekday, dayNum, monthYear, calendarUrl, vietQrUrl, plainDate, icsFile } from '../../common/format.js';
 import { photoAttrs, COLUMN_SIZES } from '../../common/photo.js';
 
 const { h, icon } = util;
@@ -129,7 +128,7 @@ export const renderCover = (cfg, ctx) => {
             d ? h('p', { class: 'cover-date mb-3' }, shortDate(d)) : null,
             h('p', { class: 'cover-small mb-1' }, 'Kính mời'),
             h('p', { class: 'cover-guest mb-1', id: 'cover-guest' }, ctx.khach),
-            h('p', { class: 'cover-small mb-4' }, 'đến dự lễ cưới của chúng mình'),
+            h('p', { class: 'cover-small cover-line mb-4' }, text(cfg, ctx, 'coverLine') || 'tới dự lễ cưới của chúng tôi'),
             h('button', { type: 'button', class: 'btn btn-cover rounded-pill px-4 py-2', id: 'button-open' },
                 icon('fa-envelope-open', 'me-2'), 'Mở thiệp'),
         ),
@@ -139,17 +138,15 @@ export const renderCover = (cfg, ctx) => {
 const renderHero = (cfg, ctx) => {
     const d = ctx.main ? eventDate(ctx.main) : null;
     return h('section', { id: 'home', class: 'bg-page text-center pt-5' },
-        h('p', { class: 'section-kicker mb-2' }, 'Chúng mình cưới'),
+        h('p', { class: 'section-kicker mb-2' }, 'Chúng tôi kết hôn'),
         h('h1', { class: 'font-esthetic mb-4', style: { fontSize: '3.25rem', color: 'var(--c-strong)' } }, coupleNames(cfg)),
         h('div', { class: 'px-4' }, img(cfg.photos?.hero, `Ảnh cưới ${coupleNames(cfg)}`, 'hero-photo', { eager: true })),
         d ? h('p', { class: 'mt-4 mb-1 font-display', style: { fontSize: '1.15rem' } }, longDate(d)) : null,
         ctx.main?.lunar ? h('p', { class: 'text-muted-c small mb-3' }, `(${ctx.main.lunar})`) : null,
-        ctx.main ? h('a', {
-            class: 'btn btn-outline-auto btn-sm rounded-pill px-3 shadow-sm',
-            href: calendarUrl(ctx.main, `Đám cưới ${coupleNames(cfg)}`, fill(text(cfg, ctx, 'invitation'), ctx.khach)),
-            target: '_blank',
-            rel: 'noopener',
-        }, icon('fa-calendar-plus', 'me-2'), 'Lưu vào Google Calendar') : null,
+        h('div', { class: 'd-flex flex-wrap justify-content-center gap-2' },
+            ctx.main ? calendarLink(cfg, ctx, ctx.main, `Đám cưới ${coupleNames(cfg)}`, 'Lưu vào lịch', 'btn btn-outline-auto btn-sm rounded-pill px-3 shadow-sm') : null,
+            h('button', { type: 'button', class: 'btn btn-outline-auto btn-sm rounded-pill px-3 shadow-sm', id: 'button-share' },
+                icon('fa-share-nodes', 'me-2'), 'Chia sẻ thiệp')),
         h('div', { class: 'd-flex justify-content-center align-items-center mt-4 mb-1' },
             h('div', { class: 'mouse-animation border border-2 rounded-5 px-2 py-1 opacity-50', style: { borderColor: 'var(--c-muted)' } },
                 h('div', { class: 'scroll-animation rounded-4', style: { backgroundColor: 'var(--c-muted)' } }))),
@@ -186,7 +183,31 @@ const renderCouple = (cfg, ctx) => {
     const amp = h('p', { class: 'font-esthetic my-3', style: { fontSize: '3.5rem', color: 'var(--c-accent)' } }, '&');
     // Thiệp nhà gái: cô dâu và bố mẹ nhà gái đứng trước, như thiệp in
     const pair = ctx?.side === 'nha-gai' ? [bride, amp, groom] : [groom, amp, bride];
-    return sectionShell('couple', { kicker: 'Cô dâu & chú rể', title: 'Chúng mình' }, h('div', { class: 'overflow-hidden' }, ...pair));
+    return sectionShell('couple', { kicker: ctx?.side === 'nha-gai' ? 'Cô dâu & chú rể' : 'Chú rể & cô dâu', title: 'Đôi nét về chúng tôi' }, h('div', { class: 'overflow-hidden' }, ...pair));
+};
+
+/**
+ * Nút lưu lịch: iPhone / iPad / Safari trên Mac tải file .ics (mở thẳng app Lịch),
+ * máy khác (và trình duyệt trong Zalo/Messenger, không tải file được) mở Google Calendar.
+ */
+const calendarLink = (cfg, ctx, ev, title, label, cls) => {
+    const details = fill(text(cfg, ctx, 'invitation'), ctx.khach);
+    const ua = navigator.userAgent;
+    const inApp = /Zalo|FBAN|FBAV|FB_IAB|Instagram|Line\/|Messenger/i.test(ua);
+    const apple = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && (navigator.maxTouchPoints > 1 || (/Safari/.test(ua) && !/Chrome|Chromium|Edg|Firefox/.test(ua))));
+    const google = calendarUrl(ev, title, details);
+    const onclick = apple && !inApp ? (e) => {
+        const ics = icsFile(ev, title, details);
+        if (!ics) return;
+        e.preventDefault();
+        const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
+        const a = h('a', { href: url, download: `${ev.id || 'dam-cuoi'}.ics` });
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+    } : null;
+    return h('a', { class: cls, href: google, target: '_blank', rel: 'noopener', onclick }, icon('fa-calendar-plus', 'me-2'), label);
 };
 
 const eventCard = (cfg, ev, ctx) => {
@@ -204,12 +225,7 @@ const eventCard = (cfg, ev, ctx) => {
         h('div', { class: 'd-flex flex-wrap justify-content-center gap-2' },
             ev.mapsUrl ? h('a', { class: 'btn btn-primary btn-sm rounded-pill px-3', href: ev.mapsUrl, target: '_blank', rel: 'noopener' },
                 icon('fa-map-location-dot', 'me-2'), 'Chỉ đường') : null,
-            d ? h('a', {
-                class: 'btn btn-outline-auto btn-sm rounded-pill px-3',
-                href: calendarUrl(ev, `${ev.name} - ${coupleNames(cfg)}`, fill(text(cfg, ctx, 'invitation'), ctx.khach)),
-                target: '_blank',
-                rel: 'noopener',
-            }, icon('fa-calendar-plus', 'me-2'), 'Lưu lịch') : null,
+            d ? calendarLink(cfg, ctx, ev, `${ev.name} - ${coupleNames(cfg)}`, 'Lưu lịch', 'btn btn-outline-auto btn-sm rounded-pill px-3') : null,
         ),
     );
 };
@@ -225,7 +241,7 @@ const renderSchedule = (cfg) => {
     if (!items.length) {
         return null;
     }
-    return sectionShell('schedule', { kicker: 'Lịch trình', title: 'Ngày vui của chúng mình', alt: true },
+    return sectionShell('schedule', { kicker: 'Lịch trình', title: 'Ngày vui của chúng tôi', alt: true },
         h('div', { class: 'timeline text-start', 'data-aos': 'fade-up' },
             items.map((it) => h('div', { class: 'timeline-item' },
                 h('div', { class: 'timeline-time' }, it.time, it.day ? h('div', { class: 'small text-muted-c' }, it.day) : null),
@@ -280,7 +296,7 @@ const renderMusic = (cfg) => {
     if (!cfg.music?.src) {
         return null;
     }
-    return sectionShell('music', { kicker: 'Bài hát của chúng mình', title: null },
+    return sectionShell('music', { kicker: 'Bài hát của chúng tôi', title: null },
         h('div', { class: 'card-c d-flex align-items-center gap-3 p-3 text-start mt-2' },
             h('div', { class: 'music-disc spin-button flex-shrink-0', id: 'music-disc' }),
             h('div', { class: 'flex-grow-1' },
@@ -331,7 +347,7 @@ const renderGifts = (cfg, ctx) => {
     if (!accounts.length) {
         return null;
     }
-    const order = ctx.guest?.side === 'nha-gai' ? ['nha-gai', 'nha-trai'] : ['nha-trai', 'nha-gai'];
+    const order = (ctx.guest?.side ?? ctx.side) === 'nha-gai' ? ['nha-gai', 'nha-trai'] : ['nha-trai', 'nha-gai'];
     const families = [...new Set([...order, ...accounts.map((a) => a.family)])];
     const collapsed = cfg.gifts?.collapsed !== false;
     const body = h('div', { id: 'gift-body', class: collapsed ? 'collapse' : 'collapse show' },
@@ -367,7 +383,7 @@ const renderEnding = (cfg, ctx) => h('section', { id: 'ending', class: 'bg-page 
 
 const NAV = [
     ['hero', '#home', 'fa-house', 'Trang đầu'],
-    ['couple', '#couple', 'fa-user-group', 'Chúng mình'],
+    ['couple', '#couple', 'fa-user-group', 'Cặp đôi'],
     ['events', '#events', 'fa-calendar-check', 'Sự kiện'],
     ['album', '#album', 'fa-images', 'Album'],
     ['rsvp', '#rsvp', 'fa-envelope-circle-check', 'Xác nhận'],

@@ -95,7 +95,7 @@ export const guest = (() => {
             const distance = target.getTime() - Date.now();
             if (distance <= 0) {
                 const sameDay = Math.abs(distance) < 24 * 60 * 60 * 1000;
-                boxes.replaceChildren(util.h('p', { class: 'quote m-0' }, sameDay ? 'Hôm nay là ngày vui của chúng mình!' : 'Cảm ơn mọi người đã chung vui cùng chúng mình!'));
+                boxes.replaceChildren(util.h('p', { class: 'quote m-0' }, sameDay ? 'Hôm nay là ngày vui của chúng tôi!' : 'Cảm ơn mọi người đã chung vui cùng chúng tôi!'));
                 return;
             }
             els[0].textContent = pad(Math.floor(distance / 86400000));
@@ -105,6 +105,97 @@ export const guest = (() => {
             setTimeout(tick, 1000 - (Date.now() % 1000));
         };
         tick();
+    };
+
+    /**
+     * Nút nổi "Xác nhận tham dự" ngay trên thanh điều hướng + đánh dấu mục "Xác nhận" trên thanh.
+     * Hiện vài giây sau khi mở thiệp; ẩn khi đang xem mục xác nhận / mở ảnh; ẩn hẳn khi khách đã gửi.
+     */
+    const rsvpReminder = () => {
+        const section = document.getElementById('rsvp');
+        const col = document.getElementById('main')?.parentElement;
+        if (!section || !col || document.getElementById('rsvp-cta')) {
+            return;
+        }
+        const { h, icon } = util;
+        let done = !!storage('rsvp').get('last');
+        let inView = false;
+        let armed = false;
+        const deadline = cfg.backend?.rsvpDeadline ? new Date(`${cfg.backend.rsvpDeadline}T00:00:00+07:00`) : null;
+        const sub = deadline && !Number.isNaN(deadline.getTime())
+            ? `Bạn phản hồi giúp trước ${String(deadline.getUTCDate() + (deadline.getUTCHours() >= 17 ? 1 : 0)).padStart(2, '0')}/${String(deadline.getMonth() + 1).padStart(2, '0')} nhé`
+            : 'Giúp chúng tôi chuẩn bị chu đáo';
+        const btn = h('button', {
+            type: 'button', class: 'rsvp-cta', id: 'rsvp-cta', hidden: true,
+            onclick: () => {
+                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                setTimeout(() => document.getElementById('rsvp-name')?.focus({ preventScroll: true }), 700);
+            },
+        },
+        h('span', { class: 'rsvp-cta-ring', 'aria-hidden': 'true' }),
+        h('span', { class: 'rsvp-cta-icon', 'aria-hidden': 'true' }, icon('fa-envelope-open-text')),
+        h('span', { class: 'rsvp-cta-text' }, h('strong', null, 'Xác nhận tham dự'), h('small', null, sub)),
+        icon('fa-chevron-right', 'rsvp-cta-arrow'));
+        const zone = h('div', { class: 'rsvp-cta-zone' }, btn);
+        col.insertBefore(zone, document.getElementById('navbar-menu'));
+
+        const update = () => {
+            const show = armed && !done && !inView && !document.querySelector('.modal.show');
+            document.body.classList.toggle('rsvp-cta-on', show);
+            if (show && btn.hidden) {
+                btn.hidden = false;
+                requestAnimationFrame(() => requestAnimationFrame(() => btn.classList.add('is-in')));
+            } else if (!show && !btn.hidden) {
+                btn.classList.remove('is-in');
+                btn.hidden = true;
+            }
+            const link = document.querySelector('#navbar-list a[href="#rsvp"]');
+            if (link) {
+                link.classList.toggle('nav-rsvp-todo', !done);
+                link.classList.toggle('nav-rsvp-done', done);
+                const i = link.querySelector('i');
+                if (i) i.className = `fa-solid ${done ? 'fa-circle-check' : 'fa-envelope-circle-check'}`;
+                const label = link.querySelector('span');
+                if (label) label.textContent = done ? 'Đã xác nhận' : 'Xác nhận';
+            }
+        };
+        if ('IntersectionObserver' in window) {
+            new IntersectionObserver((entries) => {
+                inView = entries.some((en) => en.isIntersecting);
+                update();
+            }, { threshold: 0.12 }).observe(section);
+        }
+        document.addEventListener('rsvp:done', () => {
+            done = true;
+            update();
+        });
+        document.addEventListener('shown.bs.modal', update);
+        document.addEventListener('hidden.bs.modal', update);
+        setTimeout(() => {
+            armed = true;
+            update();
+        }, 4000);
+        update();
+    };
+
+    /** Chia sẻ thiệp: link chung theo nhà (không kèm mã khách riêng). */
+    const share = async () => {
+        const url = `${window.location.origin}${window.location.pathname}${ctx.side ? `?ben=${ctx.side}` : ''}`;
+        const title = `Thiệp cưới ${cfg.couple.groom.shortName} & ${cfg.couple.bride.shortName}`;
+        try {
+            if (navigator.share) {
+                await navigator.share({ title, text: cfg.site?.description || title, url });
+                return;
+            }
+        } catch (e) {
+            if (e?.name === 'AbortError') return;
+        }
+        try {
+            await navigator.clipboard.writeText(url);
+            util.notify('Đã chép link thiệp, bạn dán để gửi nhé.').success();
+        } catch {
+            util.notify(url).info();
+        }
     };
 
     const loadQr = () => document.querySelectorAll('img[data-qr]').forEach((img) => {
@@ -197,6 +288,8 @@ export const guest = (() => {
         });
         document.addEventListener('hide.bs.modal', () => document.activeElement?.blur());
 
+        document.getElementById('button-share')?.addEventListener('click', share);
+
         document.getElementById('album-more')?.addEventListener('click', (e) => {
             document.querySelectorAll('#album-grid .js-more').forEach((el) => el.classList.remove('d-none', 'js-more'));
             e.currentTarget.remove();
@@ -253,6 +346,7 @@ export const guest = (() => {
         }
         util.timeOut(() => window.AOS?.refreshHard?.(), 300);
         wishesLoaded.then((list) => ticker.start(list));
+        rsvpReminder();
     };
 
     const booting = async () => {

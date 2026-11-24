@@ -2,10 +2,10 @@
 // bấm vào để tới sổ lưu bút, bấm × để tắt. Tạm dừng khi tab ẩn, đang mở modal, hoặc đang xem sổ lưu bút.
 import { util } from '../../common/util.js';
 
-const FIRST_DELAY_MS = 2500;
-const SHOW_MS = 5500;
-const GAP_MS = 1800;
-const MAX_ITEMS = 12;
+const FIRST_DELAY_MS = 3000;
+const SHOW_MS = 5000;
+const GAP_MS = 6000; // nghỉ giữa hai lời chúc để không che tiêu đề các mục quá lâu
+const MAX_ITEMS = 8;
 
 export const wishTicker = () => {
     const { h, icon } = util;

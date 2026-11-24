@@ -630,3 +630,220 @@ section.bg-alt {
         transition: none !important;
     }
 }
+
+/* ===================== PoC: nút chọn, nút nổi xác nhận, thanh điều hướng ===================== */
+.choice-chips {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
+    gap: 0.5rem;
+}
+.choice-chips--count {
+    grid-template-columns: repeat(auto-fit, minmax(3.4rem, 1fr));
+}
+.choice-chips--cards {
+    grid-template-columns: 1fr 1fr;
+}
+.choice-chip {
+    position: relative;
+    margin: 0;
+    cursor: pointer;
+}
+.choice-chip input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+.choice-chip > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 2.75rem;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--c-line);
+    border-radius: 999px;
+    background-color: var(--c-surface);
+    color: var(--c-text);
+    font-size: 0.92rem;
+    font-weight: 500;
+    text-align: center;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+.choice-chips--cards .choice-chip > span {
+    flex-direction: column;
+    gap: 0.35rem;
+    min-height: 5.25rem;
+    border-radius: 1rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+.choice-chip-icon {
+    font-size: 1.05rem;
+    color: var(--c-accent);
+}
+.choice-chips--cards .choice-chip-icon {
+    font-size: 1.4rem;
+}
+.choice-chip:active > span {
+    transform: scale(0.97);
+}
+.choice-chip input:checked + span {
+    background-color: var(--c-primary);
+    border-color: var(--c-primary);
+    color: var(--c-on-primary);
+    box-shadow: 0 0.35rem 0.9rem rgba(var(--c-primary-rgb), 0.28);
+}
+.choice-chip input:checked + span .choice-chip-icon {
+    color: var(--c-on-primary);
+}
+.choice-chip input:focus-visible + span {
+    outline: 2px solid var(--c-accent);
+    outline-offset: 2px;
+}
+.rsvp-submit {
+    min-height: 3rem;
+    font-size: 1rem;
+}
+.cover-line {
+    max-width: 18rem;
+    line-height: 1.6;
+}
+
+/* Nút nổi "Xác nhận tham dự": neo ngay trên thanh điều hướng của cột thiệp */
+.rsvp-cta-zone {
+    position: sticky;
+    bottom: calc(3.6rem + env(safe-area-inset-bottom));
+    height: 0;
+    z-index: 1031;
+}
+.rsvp-cta {
+    position: absolute;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 0.65rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 3.5rem;
+    padding: 0.45rem 1rem 0.45rem 0.55rem;
+    border: 0;
+    border-radius: 999px;
+    background-color: var(--c-primary);
+    color: var(--c-on-primary);
+    text-align: left;
+    box-shadow: 0 0.7rem 1.6rem rgba(var(--c-primary-rgb), 0.4), inset 0 0 0 1px rgba(var(--c-accent-rgb), 0.45);
+    opacity: 0;
+    transform: translateY(1rem);
+    transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.rsvp-cta.is-in {
+    opacity: 1;
+    transform: none;
+}
+.rsvp-cta[hidden] {
+    display: none;
+}
+.rsvp-cta-icon {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background-color: var(--c-accent);
+    color: var(--c-on-primary);
+    font-size: 1rem;
+    animation: rsvp-cta-wiggle 3.2s ease-in-out infinite;
+}
+.rsvp-cta-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.25;
+}
+.rsvp-cta-text strong {
+    font-size: 1rem;
+}
+.rsvp-cta-text small {
+    font-size: 0.78rem;
+    opacity: 0.85;
+}
+.rsvp-cta-arrow {
+    margin-left: auto;
+    opacity: 0.8;
+}
+.rsvp-cta-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    animation: rsvp-cta-ring 2.6s ease-out infinite;
+}
+@keyframes rsvp-cta-ring {
+    0% { box-shadow: 0 0 0 0 rgba(var(--c-primary-rgb), 0.45); }
+    70%, 100% { box-shadow: 0 0 0 0.9rem rgba(var(--c-primary-rgb), 0); }
+}
+@keyframes rsvp-cta-wiggle {
+    0%, 82%, 100% { transform: rotate(0); }
+    86% { transform: rotate(-12deg); }
+    90% { transform: rotate(10deg); }
+    94% { transform: rotate(-6deg); }
+}
+/* Nút sáng/tối + nhạc nhích lên khi nút nổi đang hiện */
+#float-tools {
+    transition: bottom 0.35s ease;
+}
+.rsvp-cta-on #float-tools {
+    bottom: calc(12vh + 4.5rem) !important;
+}
+
+/* Mục "Xác nhận" trên thanh điều hướng: nổi bật cho tới khi khách đã gửi */
+.nav-link.nav-rsvp-todo {
+    position: relative;
+    color: var(--c-primary) !important;
+    font-weight: 600;
+}
+.nav-link.nav-rsvp-todo::after {
+    content: '';
+    position: absolute;
+    top: 0.45rem;
+    left: calc(50% + 0.55rem);
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background-color: #e0564c;
+    box-shadow: 0 0 0 2px rgba(var(--c-surface-rgb), 1);
+    animation: rsvp-dot 1.6s ease-in-out infinite;
+}
+@keyframes rsvp-dot {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.35); }
+}
+.nav-link.nav-rsvp-done {
+    color: var(--c-accent) !important;
+}
+
+/* QR mừng cưới to hơn; ảnh QR dọc của app ngân hàng hiện đủ chiều cao */
+.qr-img {
+    width: 16rem;
+    aspect-ratio: auto;
+    height: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rsvp-cta,
+    .choice-chip > span,
+    #float-tools {
+        transition: none;
+    }
+    .rsvp-cta-ring,
+    .rsvp-cta-icon,
+    .nav-link.nav-rsvp-todo::after {
+        animation: none;
+    }
+}
+.choice-chips--count .choice-chip > span {
+    white-space: nowrap;
+    font-size: 0.85rem;
+    padding: 0.4rem 0.2rem;
+}

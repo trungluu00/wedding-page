@@ -101,6 +101,39 @@ export const calendarUrl = (ev, title, details) => {
 };
 
 /**
+ * File lịch .ics (app Lịch trên iPhone / Mac / Outlook). Chưa có giờ → sự kiện cả ngày.
+ * Nhắc trước 3 tiếng.
+ * @returns {string|null}
+ */
+export const icsFile = (ev, title, details) => {
+    const start = eventDate(ev);
+    if (!start) {
+        return null;
+    }
+    const allDay = !String(ev.time || '').trim();
+    const end = new Date(start.getTime() + (allDay ? 24 : 3) * 60 * 60 * 1000);
+    const day = (d) => {
+        const p = vnParts(d);
+        return `${p.y}${pad(p.m)}${pad(p.day)}`;
+    };
+    const utc = (d) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    const esc = (s) => String(s ?? '').replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/([,;])/g, '\\$1');
+    return [
+        'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//thiep-cuoi//VI', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+        'BEGIN:VEVENT',
+        `UID:${ev.id || 'su-kien'}-${day(start)}@thiep-cuoi`,
+        `DTSTAMP:${utc(new Date())}`,
+        allDay ? `DTSTART;VALUE=DATE:${day(start)}` : `DTSTART:${utc(start)}`,
+        allDay ? `DTEND;VALUE=DATE:${day(end)}` : `DTEND:${utc(end)}`,
+        `SUMMARY:${esc(title)}`,
+        `DESCRIPTION:${esc(details)}`,
+        `LOCATION:${esc([ev.venue, ev.address].filter(Boolean).join(' - '))}`,
+        'BEGIN:VALARM', 'TRIGGER:-PT3H', 'ACTION:DISPLAY', `DESCRIPTION:${esc(title)}`, 'END:VALARM',
+        'END:VEVENT', 'END:VCALENDAR', '',
+    ].join('\r\n');
+};
+
+/**
  * Ảnh QR VietQR (compact2). addInfo tối đa 50 ký tự, không dấu.
  * @param {{bankBin: string, accountNo: string, accountName?: string}} acc
  * @param {string} addInfo
