@@ -285,6 +285,19 @@ function setupDatabase() {
   }
 }
 
+/**
+ * Đặt công thức không phụ thuộc ngôn ngữ của Sheet: Sheet tiếng Việt (và các nước dùng dấu phẩy thập phân)
+ * ngăn đối số bằng ";" thay vì ",". Thử "," trước, nếu Sheet báo lỗi cú pháp thì đổi sang ";".
+ */
+function setLocaleFormula_(range, formula) {
+  range.setFormula(formula);
+  SpreadsheetApp.flush();
+  if (String(range.getDisplayValue()).indexOf('#') === 0) {
+    // chỉ đổi dấu phẩy nằm ngoài chuỗi "..."
+    range.setFormula(formula.replace(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/g, ';'));
+  }
+}
+
 /** Tạo các sheet, tiêu đề, công thức link (chạy lại không mất dữ liệu). */
 function setupCore_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -300,10 +313,11 @@ function setupCore_() {
   var guests = ensureSheet_(ss, SHEETS.guests, GUEST_HEADERS);
   // Cột link tự ghép tên miền + ?to= + code cho mọi dòng
   var linkCol = GUEST_HEADERS.indexOf('link') + 1;
-  guests
-    .getRange(1, linkCol)
-    // Link mời = tên miền + ?to=mã + &n=tên có dấu (để thiệp hiện đúng tên ngay cả khi chưa tra được Sheet)
-    .setFormula('={"link"; ARRAYFORMULA(IF(A2:A="", "", ' + SHEETS.config + '!$B$1 & "/?to=" & A2:A & "&n=" & ENCODEURL(TRIM(C2:C & " " & B2:B))))}');
+  // Link mời = tên miền + ?to=mã + &n=tên có dấu (để thiệp hiện đúng tên ngay cả khi chưa tra được Sheet)
+  setLocaleFormula_(
+    guests.getRange(1, linkCol),
+    '={"link"; ARRAYFORMULA(IF(A2:A="", "", ' + SHEETS.config + '!$B$1 & "/?to=" & A2:A & "&n=" & ENCODEURL(TRIM(C2:C & " " & B2:B))))}'
+  );
   var sideRule = SpreadsheetApp.newDataValidation().requireValueInList(['nha-trai', 'nha-gai', 'ban-chung'], true).setAllowInvalid(true).build();
   guests.getRange(2, GUEST_HEADERS.indexOf('side') + 1, guests.getMaxRows() - 1, 1).setDataValidation(sideRule);
   guests.getRange(1, 1).setNote('Để trống code: tự sinh khi bạn nhập tên, dạng xưng-hô-tên + 3 ký tự ngẫu nhiên (vd bac-hung-7k2) để khó đoán.');
