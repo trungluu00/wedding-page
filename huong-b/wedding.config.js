@@ -40,7 +40,7 @@ export default {
       fullName: "Lưu Viết Trung",
       displayName: "Viết Trung", // tên hiện ở phần giới thiệu, báo hỷ, liên hệ
       shortName: "Trung",
-      portrait: "p38-chu-re", // cắt từ p38 (chưa có ảnh chú rể chụp riêng)
+      portrait: "p06-chu-re", // cắt từ ảnh cưới DUN00121 (chú rể đứng sau sofa)
       bio: "Chàng trai hiền lành, chân thành, ít nói nhưng luôn chu đáo. Với Trung, Nhi là người khiến những ngày bình thường trở nên đặc biệt.", // (gợi ý)
       phone: "0334 395 967",
       father: "Ông Lưu Văn Phú",
@@ -51,7 +51,7 @@ export default {
       fullName: "Đoàn Phương Nhi",
       displayName: "Phương Nhi", // tên hiện ở phần giới thiệu, báo hỷ, liên hệ
       shortName: "Nhi",
-      portrait: "p32", // cô dâu bên bảng tên lễ dạm ngõ
+      portrait: "p28-co-dau", // cắt từ ảnh cưới DUN09825 (cô dâu váy trắng, cận mặt)
       bio: "Cô gái dịu dàng, hay cười và luôn quan tâm mọi người xung quanh. Với Nhi, Trung là bến bình yên để trở về sau mỗi ngày dài.", // (gợi ý)
       phone: "0345 512 667",
       father: "Ông Đoàn Văn Hưng",
@@ -164,38 +164,49 @@ export default {
   // Vẫn có thể ghi đường dẫn thường, vd "photos/abc.jpg".
   photos: {
     // Thư mục ảnh gốc trên máy (chỉ dùng cho `npm run photos`; ảnh gốc không deploy, không commit).
-    // Có thể thay bằng biến môi trường PHOTO_SOURCE.
-    source: "C:/Users/Trung lv/Pictures/me/dam-ngo",
-    shareFrom: "p27", // ảnh chia sẻ Zalo/Facebook 1200x630 (photos/share-1200x630.jpg)
-    sharePosition: "center", // "center" = cắt giữa | "attention" = tự tìm vùng nổi bật
-    cover: "p29", // ảnh trong khung vòm ở bìa thư: hai bạn tựa vào nhau
-    hero: "p25", // ảnh lớn đầu thiệp sau khi mở
-    statement: "p16", // ảnh nền mờ phía sau lời mời: nắm tay đi tới
-    middle: ["p11", "p34"], // ảnh chèn giữa các phần: ở cổng nhà, cầu thang (đen trắng)
-    ending: "p26", // ảnh cuối thiệp
+    // Gồm 2 thư mục con: "Ảnh phóng" (7 ảnh lớn, dùng cho bìa / ảnh đầu / ảnh chèn / màn hình lớn)
+    // và "Ảnh con" (30 ảnh, dùng cho album + ảnh chân dung). Mã pNN theo thứ tự tên:
+    //   p01–p30 = Ảnh con DUN00001 … DUN09995, p31–p37 = Ảnh phóng DUN00013 … DUN09723
+    // (xem photos/manifest.json hoặc mở photos-contact-sheet.html để biết mã nào là ảnh nào).
+    source: "C:/Users/Trung lv/Pictures/me/anh-cuoi",
+    shareFrom: "p04", // ảnh chia sẻ Zalo/Facebook 1200x630: hai bạn tạo hình trái tim trong vườn (ảnh ngang)
+    sharePosition: "center",
+    cover: "p36", // bìa thư (khung vòm): vest trắng dưới vòm hoa, nhìn nhau
+    hero: "p32", // ảnh lớn đầu thiệp: trong vườn, vest đen + váy cưới
+    statement: "p01", // nền mờ sau lời mời: tà voan bay trong vườn (ảnh ngang)
+    // Ảnh phóng chèn xen giữa các phần tương tác (sau: cặp đôi, đếm ngược, mừng cưới, xác nhận)
+    middle: ["p33", "p35", "p34", "p37"],
+    ending: "p31", // ảnh cuối thiệp: trong vườn
+    // Màn hình máy tính: cột ảnh bên trái trình chiếu lần lượt các ảnh phóng
+    desktop: ["p36", "p32", "p33", "p35", "p34", "p37", "p31"],
     // Ảnh cắt từ một vùng của ảnh gốc (left/top/width/height theo tỉ lệ 0..1 của ảnh gốc đã xoay đúng chiều).
     crops: {
-      "p38-chu-re": { from: "p38", left: 0.2, top: 0.205, width: 0.27, height: 0.506 }, // chú rể bên trái p38, khung dọc 4:5
+      "p06-chu-re": { from: "p06", left: 0, top: 0.02, width: 0.44, height: 0.367 }, // chú rể, khung dọc 4:5
+      "p28-co-dau": { from: "p28", left: 0.53, top: 0.1, width: 0.45, height: 0.375 }, // cô dâu, khung dọc 4:5
     },
   },
 
   // --- Album (hướng B hiển thị thành lưới ảnh theo thứ tự front rồi back của từng "lá") ---
+  // 12 ảnh đầu hiện ngay (đủ các bối cảnh), còn lại sau nút "Xem thêm".
   album: {
-    kicker: "Khoảnh khắc", // dòng chữ nhỏ trên tiêu đề album
-    title: "Ngày dạm ngõ · 31.10.2026",
+    kicker: "Khoảnh khắc",
+    title: "Album ảnh cưới",
     leaves: [
-      { front: "p03", back: "p01", frontAlt: "Đoàn nhà trai sang nhà gái", backAlt: "Trao lễ dạm ngõ" },
-      { front: "p11", back: "p14", frontAlt: "Hai bạn ở cổng nhà", backAlt: "Hai bạn ở cổng nhà" },
-      { front: "p16", back: "p02", frontAlt: "Nắm tay đi tới", backAlt: "Bên bảng tên lễ dạm ngõ" },
-      { front: "p17", back: "p33", frontAlt: "Trong nhà gái", backAlt: "Thắp hương bàn thờ gia tiên" },
-      { front: "p23", back: "p26", frontAlt: "Hai bạn bên bảng tên", backAlt: "Hai bạn bên bảng tên" },
-      { front: "p27", back: "p29", frontAlt: "Hai bạn bên bảng tên", backAlt: "Hai bạn tựa vào nhau" },
-      { front: "p30", back: "p32", frontAlt: "Hai bạn bên bảng tên", backAlt: "Cô dâu bên bảng tên" },
-      { front: "p36", back: "p37", frontAlt: "Cô dâu cầm hoa", backAlt: "Cô dâu cầm hoa" },
-      { front: "p38", back: "p34", frontAlt: "Chú rể và cô dâu bên bảng tên", backAlt: "Khoảnh khắc trên cầu thang" },
-      { front: "p41", back: "p40", frontAlt: "Chú rể bên cô dâu", backAlt: "Cô dâu" },
-      { front: "p49", back: "p50", frontAlt: "Cô dâu bên bàn trà", backAlt: "Cô dâu soi gương" },
-      { front: "p54", back: "p42", frontAlt: "Cô dâu bên bàn trà", backAlt: "Hai gia đình" },
+      { front: "p04", back: "p15", frontAlt: "Trái tim trao nhau", backAlt: "Chạm trán" },
+      { front: "p25", back: "p19", frontAlt: "Dưới vòm hoa", backAlt: "Bên cây đàn piano" },
+      { front: "p01", back: "p22", frontAlt: "Tà voan bay trong vườn", backAlt: "Áo dài truyền thống" },
+      { front: "p05", back: "p27", frontAlt: "Bên sofa cổ điển", backAlt: "Ánh mắt nàng" },
+      { front: "p23", back: "p02", frontAlt: "Ôm nhau trên phố", backAlt: "Vẫy tay trong vườn" },
+      { front: "p20", back: "p28", frontAlt: "Bên đàn piano", backAlt: "Hai đứa mình" },
+      { front: "p03", back: "p06", frontAlt: "Niềm vui trong vườn", backAlt: "Khoảnh khắc trong sảnh" },
+      { front: "p07", back: "p08", frontAlt: "Bên bức tranh cổ", backAlt: "Ngồi cạnh nhau" },
+      { front: "p09", back: "p10", frontAlt: "Sảnh cổ điển", backAlt: "Đối diện nhau" },
+      { front: "p11", back: "p12", frontAlt: "Đợi nhau", backAlt: "Dắt tay cô dâu" },
+      { front: "p13", back: "p14", frontAlt: "Mời nàng một điệu nhảy", backAlt: "Dưới chùm đèn pha lê" },
+      { front: "p16", back: "p17", frontAlt: "Nhẫn cưới", backAlt: "Bó hoa và nhẫn" },
+      { front: "p18", back: "p21", frontAlt: "Khoe nhẫn cưới", backAlt: "Tựa vào nhau" },
+      { front: "p24", back: "p26", frontAlt: "Dạo phố", backAlt: "Căn phòng trắng" },
+      { front: "p29", back: "p30", frontAlt: "Trao hoa bên đài phun nước", backAlt: "Bên đài phun nước" },
     ],
   },
 
