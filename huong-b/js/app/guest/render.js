@@ -176,7 +176,7 @@ const personCard = (p, role, side, aos) => h('div', { class: 'py-2', 'data-aos':
     (p.father || p.mother) ? h('p', { class: 'mb-1 small' },
         h('span', { class: 'text-muted-c' }, `${FAMILY_LABEL[side]}: `),
         [p.father, p.mother].filter(Boolean).join(' & ')) : null,
-    p.address ? h('p', { class: 'mb-2 small text-muted-c' }, icon('fa-location-dot', 'me-1'), p.address) : null,
+    // Địa chỉ không hiện ở đây: tổ chức tại gia nên đã có trong mục Sự kiện
     p.bio ? h('p', { class: 'mb-2 px-3' }, p.bio) : null,
     p.phone ? h('a', { class: 'btn btn-outline-auto btn-sm rounded-pill px-3', href: `tel:${String(p.phone).replace(/[^\d+]/g, '')}` },
         icon('fa-phone', 'me-2'), `Gọi ${role.toLowerCase()}`) : null,
@@ -266,7 +266,8 @@ const renderCountdown = (cfg, ctx) => {
     return sectionShell('countdown', { kicker: 'Đếm ngược', title: 'Ngày vui đang đến gần' },
         h('div', { class: 'row justify-content-center mx-0', id: 'countdown-boxes' },
             box('day', 'Ngày'), box('hour', 'Giờ'), box('minute', 'Phút'), box('second', 'Giây')),
-        h('p', { class: 'mt-3 mb-0 text-muted-c small', id: 'countdown-note' }, `đến ${ctx.main.name} · ${longDate(eventDate(ctx.main))}`),
+        h('p', { class: 'mt-3 mb-0 text-muted-c small', id: 'countdown-note' },
+            [ctx.main.name, `${weekday(eventDate(ctx.main))} ${shortDate(eventDate(ctx.main))}`, ctx.main.time || null].filter(Boolean).join(' · ')),
     );
 };
 
