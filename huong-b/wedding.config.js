@@ -202,9 +202,8 @@ export default {
       { front: "p20", back: "p28", frontAlt: "Bên đàn piano", backAlt: "Hai đứa mình" },
       // phần "Xem thêm"
       { front: "p08", back: "p12", frontAlt: "Ngồi cạnh nhau", backAlt: "Dắt tay cô dâu" },
-      { front: "p16", back: "p17", frontAlt: "Nhẫn cưới", backAlt: "Bó hoa và nhẫn" },
-      { front: "p18", back: "p21", frontAlt: "Khoe nhẫn cưới", backAlt: "Tựa vào nhau" },
-      { front: "p26", frontAlt: "Căn phòng trắng" },
+      { front: "p17", back: "p18", frontAlt: "Bó hoa và nhẫn", backAlt: "Khoe nhẫn cưới" },
+      { front: "p21", back: "p26", frontAlt: "Tựa vào nhau", backAlt: "Căn phòng trắng" },
     ],
   },
 

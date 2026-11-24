@@ -335,32 +335,10 @@
     {
       "id": "p16",
       "original": "Ảnh con/DUN00383.JPG",
-      "used": true,
+      "used": false,
       "width": 5304,
       "height": 7952,
       "orientation": "doc",
-      "widths": [
-        {
-          "size": 2560,
-          "w": 1708,
-          "h": 2560
-        },
-        {
-          "size": 1600,
-          "w": 1067,
-          "h": 1600
-        },
-        {
-          "size": 900,
-          "w": 600,
-          "h": 900
-        },
-        {
-          "size": 400,
-          "w": 267,
-          "h": 400
-        }
-      ],
       "bytes": 7766016,
       "mtime": 1795522574443
     },
