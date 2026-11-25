@@ -55,10 +55,11 @@ export const guest = (() => {
         // Tên có dấu kèm trong link (&n=Bác%20Hùng, do Google Sheet tự sinh) — dùng khi không tra được khách
         const nameFromLink = (params.get('n') ?? '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim().slice(0, 60);
         if (!raw) {
-            return nameFromLink ? { guest: null, khach: nameFromLink, plain: nameFromLink } : { guest: null, khach: 'Quý vị', plain: '' };
+            return nameFromLink ? { guest: null, code: '', khach: nameFromLink, plain: nameFromLink } : { guest: null, code: '', khach: 'Quý vị', plain: '' };
         }
 
         let found = null;
+        let unanswered = false; // Sheet lỗi / quá chậm (khác với "không có mã này")
         try {
             const res = await Promise.race([
                 client.lookup(raw),
@@ -66,20 +67,25 @@ export const guest = (() => {
             ]);
             if (res?.success && res.found && res.data) {
                 found = res.data;
+            } else if (!res?.success) {
+                unanswered = true;
             }
         } catch (e) {
+            unanswered = true;
             console.warn('[thiệp] không tra được khách:', e.message);
         }
 
         if (found) {
             const khach = guestDisplay(found);
-            return { guest: found, khach, plain: khach };
+            return { guest: found, code: String(found.code ?? ''), khach, plain: khach };
         }
+        // Chưa tra được thì vẫn giữ mã trong link: xác nhận tham dự gửi kèm mã để Sheet tự đánh dấu đúng khách
+        const code = unanswered && /^[a-z0-9][a-z0-9-]{0,63}$/i.test(raw) ? raw.toLowerCase() : '';
         if (nameFromLink) {
-            return { guest: null, khach: nameFromLink, plain: nameFromLink };
+            return { guest: null, code, khach: nameFromLink, plain: nameFromLink };
         }
         const looksLikeName = /\s/.test(raw) || /[^a-z0-9_-]/i.test(raw);
-        return looksLikeName ? { guest: null, khach: raw, plain: raw } : { guest: null, khach: 'Quý vị', plain: '' };
+        return looksLikeName ? { guest: null, code: '', khach: raw, plain: raw } : { guest: null, code, khach: 'Quý vị', plain: '' };
     };
 
     const countDown = () => {
@@ -121,10 +127,9 @@ export const guest = (() => {
         let done = !!storage('rsvp').get('last');
         let inView = false;
         let armed = false;
-        const deadline = cfg.backend?.rsvpDeadline ? new Date(`${cfg.backend.rsvpDeadline}T00:00:00+07:00`) : null;
-        const sub = deadline && !Number.isNaN(deadline.getTime())
-            ? `Xin vui lòng phản hồi trước ${String(deadline.getUTCDate() + (deadline.getUTCHours() >= 17 ? 1 : 0)).padStart(2, '0')}/${String(deadline.getMonth() + 1).padStart(2, '0')}`
-            : 'Để chúng tôi chuẩn bị chu đáo';
+        // "2026-12-02" → "02/12" (đọc thẳng từ chuỗi, không qua Date nên không lệch múi giờ)
+        const dl = /^\d{4}-(\d{2})-(\d{2})$/.exec(String(cfg.backend?.rsvpDeadline ?? '').trim());
+        const sub = dl ? `Xin vui lòng phản hồi trước ${dl[2]}/${dl[1]}` : 'Để chúng tôi chuẩn bị chu đáo';
         const btn = h('button', {
             type: 'button', class: 'rsvp-cta', id: 'rsvp-cta', hidden: true,
             onclick: () => {
@@ -336,9 +341,9 @@ export const guest = (() => {
 
         // Báo Google Sheet khách đã mở thiệp (một lần mỗi phiên).
         const opened = storage('session');
-        if (ctx.guest?.code && !opened.get(`open:${ctx.guest.code}`)) {
-            opened.set(`open:${ctx.guest.code}`, Date.now());
-            client.open(ctx.guest.code);
+        if (ctx.code && !opened.get(`open:${ctx.code}`)) {
+            opened.set(`open:${ctx.code}`, Date.now());
+            client.open(ctx.code);
         }
 
         if (window.bootstrap?.ScrollSpy && document.getElementById('navbar-menu')) {
@@ -398,6 +403,7 @@ export const guest = (() => {
         ctx = {
             side,
             guest: g.guest,
+            code: g.code, // mã khách gửi kèm RSVP / lời chúc / lượt mở ('' = link chung)
             khach: g.khach,
             guestNamePlain: g.plain,
             events,

@@ -4,8 +4,13 @@ Trang thiệp cưới tĩnh, có **2 phương án giao diện** dùng chung mộ
 
 | Phương án | Giao diện | Thư mục / cấu hình |
 |---|---|---|
-| **A** (mặc định) | "Song Hỷ Xanh": bìa thư, album lật trang 3D, lời chúc bay, nhạc chạy lời, bắn tim | thư mục gốc · [`wedding.config.js`](wedding.config.js) |
-| **B** | dựa trên dewanakl/undangan (MIT): cuộn dọc, lưới ảnh, chế độ sáng/tối | [`huong-b/`](huong-b/) · [`huong-b/wedding.config.js`](huong-b/wedding.config.js) |
+| **A** | "Song Hỷ Xanh": bìa thư, album lật trang 3D, lời chúc bay, nhạc chạy lời, bắn tim | thư mục gốc · [`wedding.config.js`](wedding.config.js) |
+| **B** (**trang thật đang chạy**) | dựa trên dewanakl/undangan (MIT): cuộn dọc, lưới ảnh, chế độ sáng/tối | [`huong-b/`](huong-b/) · [`huong-b/wedding.config.js`](huong-b/wedding.config.js) |
+
+**Trang thật <https://trung-nhi.vercel.app> đang chạy phương án B** (`phuongAn: "b"` trong `wedding.config.js`)
+và khách mời đã dùng thiệp (đã có lời chúc thật). Mỗi lần push lên `main` là trang thật đổi theo — chạy thử
+trên máy trước khi push. Nội dung hay đổi (giờ sự kiện, tài khoản mừng cưới, câu trích, giới thiệu cô dâu chú rể)
+sửa trong Google Sheet, không cần build lại (mục 4).
 
 **Chọn phương án:** sửa `phuongAn: "a"` hoặc `"b"` ở đầu `wedding.config.js`, rồi `npm run dev` / `npm run build`.
 Hoặc chọn khi chạy: `npm run dev:a`, `npm run dev:b`, `npm run build:a`, `npm run build:b`
@@ -40,11 +45,16 @@ npm install
 npm run dev
 ```
 
-Phương án A mở ở http://localhost:5173 (phương án B: http://localhost:8080). Thử link mời mẫu: http://localhost:5173/?to=bac-hung (khách nhà trai) và
-http://localhost:5173/?to=ban-lan (khách nhà gái).
+Phương án A mở ở http://localhost:5173, phương án B ở http://localhost:8080. Thử thiệp theo nhà:
+`/?ben=nha-trai` và `/?ben=nha-gai` (lời mời, thứ tự cô dâu/chú rể và sự kiện đổi theo nhà).
 
-Khi `backend.appsScriptUrl` còn trống, trang chạy **chế độ demo**: không gọi mạng, RSVP và lời chúc chỉ lưu
-trong trình duyệt đang mở (Console có dòng thông báo "Chế độ demo"). Hai khách mẫu ở trên chỉ có trong chế độ demo.
+> **Lưu ý:** `backend.appsScriptUrl` đang nối **Google Sheet thật**. Khi chạy thử trên máy, bấm "Gửi xác nhận" hay
+> "Gửi lời chúc" là ghi thẳng vào Sheet (lời chúc hiện cho mọi khách), mở link `?to=<mã khách thật>` rồi bấm
+> "Mở thiệp" là ghi một dòng vào `LuotMo`. Muốn thử gửi form thì tạm xóa `appsScriptUrl` (đừng commit).
+
+Khi `backend.appsScriptUrl` để trống, trang chạy **chế độ demo**: không gọi mạng, RSVP và lời chúc chỉ lưu
+trong trình duyệt đang mở (Console có dòng thông báo "Chế độ demo"). Chế độ demo có hai khách mẫu:
+`/?to=bac-hung-7k2` (khách nhà trai) và `/?to=ban-lan-3x9` (khách nhà gái).
 
 ## 2. Sửa nội dung trong `wedding.config.js`
 
@@ -93,8 +103,16 @@ dùng bản 2560. Vẫn có thể ghi đường dẫn file trực tiếp (vd `ph
 **Sự kiện theo nhóm khách:** `audience: ["all"]` thì ai cũng thấy. `"nha-trai"` / `"nha-gai"` / `"ban-chung"`
 khớp cột `side` của khách trong Sheet; `"public"` là người mở link không có mã khách; tên nhóm khác
 (vd `"gia-dinh"`) khớp cột `groups`. Sự kiện có `main: true` dùng cho ngày lớn, lịch và đếm ngược.
-Hiện thiệp chia: khách nhà gái thấy tiệc nhà gái (chiều 12/12, Chùa Phăn); khách nhà trai thấy Lễ Thành Hôn
-và tiệc nhà trai (sáng 13/12); bạn chung thấy hai tiệc; link không có mã thấy cả ba sự kiện.
+Hiện thiệp chia (giống nhau ở A và B):
+
+| Ai mở thiệp | Thấy các sự kiện |
+|---|---|
+| Khách nhà trai (`side` = `nha-trai`, hoặc link `?ben=nha-trai`) | Bữa cơm nhà trai (12/12) · Lễ Thành Hôn (13/12, 10:00) |
+| Khách nhà gái (`side` = `nha-gai`, hoặc link `?ben=nha-gai`) | Bữa cơm nhà gái (12/12) · Lễ Vu Quy (13/12, 06:00) |
+| Bạn chung (`side` = `ban-chung`) | Hai bữa cơm 12/12 |
+| Link không có mã khách, hoặc khách trong Sheet chưa điền `side` (và `groups`) | Cả bốn sự kiện |
+
+Nhớ điền cột `side` cho mọi khách trong `KhachMoi`: khách chưa có `side` thấy cả bốn sự kiện như link chung.
 Mỗi sự kiện có thể thêm `note` (một dòng ghi chú in nghiêng), mỗi mốc lịch trình có thể thêm `day`.
 
 **Lời bài hát:** file `.lrc`, mỗi dòng `[phút:giây.xx]Lời`. Có thể tạo bằng các trang/ứng dụng "LRC editor".
@@ -128,7 +146,13 @@ Font là tên font trên [Google Fonts](https://fonts.google.com) (nên chọn f
 **Đã cài xong** cho Trung & Nhi:
 
 - Sheet: <https://docs.google.com/spreadsheets/d/1McYGSS9aSXYBzahcMkWl3GDR24vkHMZylKtDJGmz4_4/edit>
-  (menu **💌 Thiệp cưới** trong Sheet: tạo/kiểm tra sheet, sinh code cho khách còn trống)
+  (menu **💌 Thiệp cưới** trong Sheet: sinh code + link mời cho khách còn trống, thêm cột "Đã mời", tạo sheet
+  còn thiếu)
+
+> **Dữ liệu trong Sheet là thật** (khách mời, xác nhận, lời chúc). Script **chỉ thêm, không bao giờ sửa hay xóa**
+> ô đã có chữ: chỉ ghi vào ô trống (code, link của khách mới), thêm dòng mới (xác nhận, lời chúc, lượt mở) và cập
+> nhật `rsvpStatus` / `guestCount` khi chính khách đó gửi xác nhận. "Tạo sheet còn thiếu" chỉ tạo sheet bị mất,
+> sheet đã có giữ nguyên. Các hàm thêm lời chúc mẫu / xóa khách mẫu đã bỏ khỏi script.
 - Web App (đã điền vào `backend.appsScriptUrl` của cả A và B):
   `https://script.google.com/macros/s/AKfycbweK_k5I16ouNV189PTuKVvl_dJfq5KNAK6ltCqHaCRxO78p8huvzEPG4_42DN8FZfjVg/exec`
 
@@ -139,7 +163,9 @@ Các bước dưới đây chỉ cần khi cài lại từ đầu trên Sheet kh
 3. Chọn hàm `setupDatabase` ở thanh trên → **Chạy**. Lần đầu Google hỏi quyền: chọn tài khoản →
    "Advanced / Nâng cao" → "Go to … (unsafe)" → Cho phép. Script tạo các sheet:
    - `CauHinh`: ô **B1** điền tên miền thiệp, vd `https://trung-nhi.vercel.app` (không có `/` ở cuối).
-   - `KhachMoi`: danh sách khách (code, name, xungHo, side, groups, phone, notes, link, rsvpStatus, guestCount).
+   - `KhachMoi`: danh sách khách (code, name, xungHo, side, groups, phone, notes, link, rsvpStatus, guestCount;
+     tùy chọn thêm cột ô tick **Đã mời** ở đầu — mục 5). Script tìm cột theo **chữ ở dòng tiêu đề**, nên chèn /
+     đổi chỗ cột không sao, nhưng đừng sửa chữ tiêu đề.
    - `RSVP`, `LoiChuc` (cột **Hiện**: bỏ tick để ẩn một lời chúc), `LuotMo` (ai đã mở thiệp).
 4. **Triển khai → Tùy chọn triển khai mới** → biểu tượng bánh răng → **Ứng dụng web**:
    - Thực thi với tư cách: **Tôi**
@@ -148,11 +174,13 @@ Các bước dưới đây chỉ cần khi cài lại từ đầu trên Sheet kh
 5. Dán URL vào `backend.appsScriptUrl` trong `wedding.config.js`, build và deploy lại.
 6. Kiểm tra: mở `URL/exec?action=lookup&code=bac-hung-7k2` trên trình duyệt phải thấy `"found":true`.
 
-Script tự tạo lại sheet nếu bị xóa nhầm, và tự chọn dấu `,` hoặc `;` cho công thức theo ngôn ngữ của Sheet
-(Sheet tiếng Việt dùng `;`).
+Script tự tạo lại sheet nếu bị xóa nhầm (sheet còn lại giữ nguyên), và tự chọn dấu `,` hoặc `;` cho công thức
+theo ngôn ngữ của Sheet (Sheet tiếng Việt dùng `;`).
 
-Khi sửa `Code.gs` sau này: **Triển khai → Quản lý triển khai → sửa (bút chì) → Phiên bản: Mới → Triển khai**
-để giữ nguyên URL.
+Khi sửa `Code.gs` sau này: dán bản mới vào trình soạn Apps Script, **Lưu**, rồi **Triển khai → Quản lý triển
+khai → sửa (bút chì) → Phiên bản: Mới → Triển khai** để giữ nguyên URL. Không cần chạy lại `setupDatabase`.
+Menu và việc tự sinh code / link dùng bản vừa Lưu ngay; còn thiệp (tra khách, gửi xác nhận, lời chúc) chỉ dùng
+bản mới sau khi Triển khai.
 
 **Bảo mật mức cơ bản:** lookup chỉ trả về đúng một khách theo mã; dữ liệu khách nhập được giới hạn độ dài
 (tên ≤ 80, lời chúc ≤ 500, số người 0–10), có ô bẫy bot, khóa ghi đồng thời, và chặn chuỗi bắt đầu bằng `=`
@@ -165,14 +193,28 @@ cho thiệp cưới. Muốn ẩn lời chúc không phù hợp: bỏ tick cột 
    - `name`: tên gọi (vd `Hùng`), `xungHo`: cách xưng (vd `Bác`) → bìa thiệp hiện "Kính mời Bác Hùng".
    - `side`: `nha-trai` / `nha-gai` / `ban-chung` (chọn từ danh sách).
    - `groups`: nhóm, cách nhau dấu phẩy (vd `gia-dinh`), dùng để hiện các sự kiện riêng.
-   - `code`: để trống, script tự sinh từ xưng hô + tên (vd `bac-hung`), tự thêm số nếu trùng.
-     Hoặc dùng menu **💌 Thiệp cưới → Sinh code cho khách còn trống**.
+   - `code`: để trống, script tự sinh từ xưng hô + tên (vd `bac-hung-7k2`) khi bạn nhập tên / xưng hô.
+     Hoặc dùng menu **💌 Thiệp cưới → Sinh code + link mời cho khách còn trống**.
 2. Cột `link` tự ghép thành `https://tên-miền/?to=bac-hung&n=B%C3%A1c%20H%C3%B9ng` — sao chép gửi qua
    Zalo/Messenger. Phần `n=` là **tên có dấu** (xưng hô + tên, lấy nguyên văn từ Sheet): thiệp hiện
    "Kính mời Bác Hùng" đúng dấu ngay khi mở, kể cả khi chưa nối được Sheet. Khi tra được mã `to` trong
    Sheet thì thiệp dùng dữ liệu Sheet (nhà trai/nhà gái, nhóm) để chọn sự kiện hiển thị.
    Tên hiển thị không bao giờ bị "đoán" từ mã không dấu.
+   Link chỉ có khi dòng đó đã có `code`. Ban đầu cột `link` do công thức ở ô tiêu đề cột tự ghép; công thức này
+   báo `#REF!` nếu trong cột link đã có chữ (vd dán cả khối khách kèm link đã sao chép, hay gõ ghi chú).
+   **Sheet hiện tại đang như vậy** (link dạng chữ ở dòng 100–203 và ghi chú ở H29), nên script chuyển sang
+   **ghi link vào ô link còn trống** của từng khách có code — mỗi khi bạn sửa sheet `KhachMoi`, hoặc bằng menu
+   **💌 Thiệp cưới → Sinh code + link mời cho khách còn trống**. Link y hệt công thức; ô đã có chữ giữ nguyên.
+   Ô tiêu đề cột link vẫn hiện `#REF!` — không sao. Khi chép khách từ chỗ khác, chỉ cần dán từ cột `code` tới `notes`.
+   **Đánh dấu đã gửi thiệp:** menu **💌 Thiệp cưới → Thêm cột "Đã mời"** chèn một cột ô tick mới ở đầu sheet
+   (các cột khác dịch sang phải, dữ liệu giữ nguyên); tick vào ô của khách đã gửi link thì chữ cả dòng chuyển xám
+   nhạt, dễ thấy ai còn chưa mời. Chỉ chạy menu này **sau khi đã Triển khai phiên bản mới** của `Code.gs` (mục 4)
+   — bản cũ đọc cột theo vị trí nên sẽ không tra được khách. Không muốn chạy script thì tự làm bằng tay cũng được:
+   chuột phải cột A → *Chèn 1 cột bên trái*, gõ tiêu đề `Đã mời`, chọn cột → *Chèn → Hộp kiểm*, rồi *Định dạng →
+   Định dạng có điều kiện* cho vùng dữ liệu với công thức tùy chỉnh `=$A2`, màu chữ xám.
 3. Khi khách xác nhận tham dự, cột `rsvpStatus` / `guestCount` tự cập nhật; chi tiết ở sheet `RSVP`.
+   Ở phương án B, ô Họ và tên của phần Xác nhận và Lời chúc được điền sẵn tên khách trong link (khách sửa được),
+   và xác nhận vẫn gửi kèm mã khách khi Sheet chậm lúc mở thiệp.
 
 Link không có `?to=` vẫn xem được thiệp, thấy các sự kiện có `"public"` hoặc `"all"` trong `audience`.
 
@@ -194,10 +236,10 @@ trong Sheet (cột link mời tự dùng tên miền này). Đổi sang tên mi�
 Project → Settings → Domains, rồi cập nhật hai chỗ trên. Facebook giữ cache ảnh xem trước; dùng
 [Sharing Debugger](https://developers.facebook.com/tools/debug/) để làm mới.
 
-## 7. Danh sách TODO cần điền
+## 7. Tình trạng nội dung và việc còn lại
 
-Trong `wedding.config.js`: `// TODO` là thông tin thật cần điền/xác nhận; `// (gợi ý)` là câu chữ đã viết sẵn,
-sửa tùy ý. Ngày âm lịch tính bằng `npm run lunar -- YYYY-MM-DD` (vd `npm run lunar -- 2026-12-13`).
+Cập nhật 25/11/2026. Trong `wedding.config.js`: `// TODO` là thông tin còn cần điền/xác nhận; `// (gợi ý)` là
+câu chữ đã viết sẵn, sửa tùy ý. Ngày âm lịch tính bằng `npm run lunar -- YYYY-MM-DD` (vd `npm run lunar -- 2026-12-13`).
 
 **Đã có (bạn điền hoặc đã soạn sẵn)**
 - [x] Tên, bố mẹ, địa chỉ, số điện thoại hai bên
@@ -213,19 +255,31 @@ sửa tùy ý. Ngày âm lịch tính bằng `npm run lunar -- YYYY-MM-DD` (vd `
 - [ ] `couple.bride.familyPhone` — đang trùng số cô dâu nên mục Liên hệ tự ẩn dòng này; điền số bố/mẹ nếu muốn hiện
 - [x] Lịch theo thiệp in: bữa cơm thân mật hai nhà Thứ Bảy 12/12 (04/11 âm), Lễ Vu Quy 06:00 và Lễ Thành Hôn
       10:00 Chủ nhật 13/12 (05/11 âm). Nút Chỉ đường: nhà trai theo địa chỉ trên thiệp, nhà gái tới Chùa Phăn
-- [ ] **Giờ bữa cơm hai nhà** — điền trong Google Sheet, sheet `CauHinh`, nhóm *GIỜ SỰ KIỆN* (gõ `17:30` hoặc
-      `17h30`). Thiệp đọc giờ từ Sheet mỗi lần mở (sửa xong khoảng vài giây là thấy), không cần build lại.
-      Ô để trống thì thiệp chỉ hiện ngày. Giờ trong `wedding.config.js` chỉ là dự phòng khi không nối được Sheet
-- [ ] **Mừng cưới** — điền trong sheet `CauHinh`, nhóm *MỪNG CƯỚI*: chọn ngân hàng, gõ số tài khoản, tên chủ
-      tài khoản. Thiệp tự tạo mã QR VietQR (quét được bằng mọi app ngân hàng). Có sẵn ảnh QR từ app ngân hàng thì
-      tải lên Google Drive, chia sẻ "Bất kỳ ai có đường liên kết", dán link vào ô *Link ảnh QR riêng*; hoặc chép ảnh
-      vào `public/images/` rồi ghi `qrImage: "images/ten-anh.jpg"` trong `gifts.accounts`. Để trống số tài khoản
-      thì mục Mừng cưới tự ẩn
+- [x] **Giờ bữa cơm hai nhà** — đã điền trong Google Sheet (`CauHinh`, nhóm *GIỜ SỰ KIỆN*): nhà trai 15:00,
+      nhà gái 16:00. Thiệp đọc giờ từ Sheet mỗi lần mở (sửa xong vài giây là thấy, gõ `17:30` hoặc `17h30`),
+      không cần build lại. Giờ trong hai file `wedding.config.js` đã chép theo, chỉ dùng khi không nối được Sheet
+      (Sheet chậm quá 4 giây) — đổi giờ trong Sheet thì nhớ sửa luôn ở đây
+- [x] **Mừng cưới** — đã điền trong sheet `CauHinh`, nhóm *MỪNG CƯỚI*: chú rể TPBank (có ảnh QR riêng trên
+      Google Drive), cô dâu MB Bank. Thiệp tự tạo mã QR VietQR (quét được bằng mọi app ngân hàng) khi không có
+      ảnh QR riêng hoặc ảnh đó không tải được. Ảnh QR riêng phải chia sẻ "Bất kỳ ai có đường liên kết".
+      Không nối được Sheet thì mục Mừng cưới tự ẩn (config chỉ có số giữ chỗ, để không bao giờ hiện QR sai)
+- [ ] **Ảnh QR riêng của cô dâu không tải được** (kiểm tra 25/11): link Google Drive trong ô *Cô dâu · Link ảnh
+      QR riêng* trả lỗi, thiệp đang tự dùng mã VietQR thay thế (vẫn quét được). Muốn hiện đúng ảnh: mở file trên
+      Drive → Chia sẻ → "Bất kỳ ai có đường liên kết"; hoặc xóa link trong ô đó để chỉ dùng VietQR
 - [x] **Câu trích & giới thiệu Cặp đôi** — sửa trong sheet `CauHinh`, nhóm *LỜI TRÊN THIỆP* (phương án B đọc
       trực tiếp; ô trống thì dùng lời mặc định trong `huong-b/wedding.config.js`)
 - [ ] Kiểm tra `audience` từng sự kiện (ai được thấy) cho đúng thực tế
 - [x] Nhạc "Beautiful in White" (Shane Filan): `public/music/beautiful-in-white.mp3` (dùng chung cho A và B).
       Muốn có lời chạy theo nhạc thì tự đặt file `.lrc` và ghi vào `music.lyrics`.
 - [x] `backend.appsScriptUrl` — đã nối Web App (mục 4)
-- [x] Đã xóa 2 khách mẫu; sổ lưu bút có 14 lời chúc mẫu (mã `mau` trong sheet `LoiChuc`) để thiệp không trống —
-      khi đã có lời chúc thật, bỏ tick cột **Hiện** hoặc xóa các dòng `mau`
+- [x] Đã xóa 2 khách mẫu. Sổ lưu bút đã có lời chúc thật; 14 lời chúc mẫu (mã `mau` trong sheet `LoiChuc`)
+      không còn hiện trên thiệp. Script không còn hàm thêm lời chúc mẫu (dữ liệu giờ là thật)
+
+**Phương án A (đang tắt) — cần biết nếu bật lại**
+- A chưa đọc câu trích và lời giới thiệu cô dâu chú rể từ Sheet (chỉ đọc giờ và tài khoản); lời lấy từ
+  `wedding.config.js`.
+- Nếu trong Sheet ô *Ngân hàng* để trống mà có số tài khoản, A dùng `bankBin` trong config (`970436`,
+  Vietcombank) → QR sai ngân hàng. B đã chặn trường hợp này.
+- Khi trình duyệt chặn tự phát nhạc, nút nhạc của A vẫn hiện "Đang phát" dù không có tiếng.
+- A gói nguyên `wedding.config.js` vào JS công khai, gồm cả `photos.source` (đường dẫn thư mục ảnh trên máy).
+  B đã bỏ trường này khi build.

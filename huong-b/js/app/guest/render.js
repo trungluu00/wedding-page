@@ -26,18 +26,22 @@ export const guestDisplay = (guest) => {
 /**
  * Sự kiện khách được thấy: audience có "all", hoặc trùng side/groups của khách.
  * Người mở link không có mã khách (hoặc mã không có trong Sheet) mang nhãn "public".
+ * Khách có trong Sheet nhưng chưa điền side/groups cũng tính là "public" (thấy đủ sự kiện chung),
+ * thay vì không thấy sự kiện nào.
  */
-export const visibleEvents = (events, guest) => (events ?? []).filter((ev) => {
-    const aud = Array.isArray(ev.audience) && ev.audience.length ? ev.audience : ['all'];
-    if (aud.includes('all')) {
-        return true;
-    }
-    if (!guest) {
-        return aud.includes('public');
-    }
-    const tags = [guest.side, ...(Array.isArray(guest.groups) ? guest.groups : [])].filter(Boolean);
-    return aud.some((a) => tags.includes(a));
-});
+export const visibleEvents = (events, guest) => {
+    const tags = guest ? [guest.side, ...(Array.isArray(guest.groups) ? guest.groups : [])].filter(Boolean) : [];
+    return (events ?? []).filter((ev) => {
+        const aud = Array.isArray(ev.audience) && ev.audience.length ? ev.audience : ['all'];
+        if (aud.includes('all')) {
+            return true;
+        }
+        if (!tags.length) {
+            return aud.includes('public');
+        }
+        return aud.some((a) => tags.includes(a));
+    });
+};
 
 /** Sự kiện chính (cho bìa, đếm ngược): sự kiện "all" sớm nhất, nếu không có thì sự kiện thấy được sớm nhất. */
 export const mainEvent = (events, visible) => {
@@ -343,9 +347,12 @@ const accountCard = (acc, ctx) => {
     );
 };
 
-/** Tài khoản đã điền thật: có ảnh QR riêng, hoặc số tài khoản không phải số giữ chỗ (toàn số 0 / TODO). */
+/**
+ * Tài khoản đã điền thật: có ảnh QR riêng, hoặc có ngân hàng và số tài khoản không phải số giữ chỗ
+ * (toàn số 0 / TODO). Thiếu ngân hàng thì không tạo được QR VietQR đúng nên không hiện.
+ */
 const isRealAccount = (a) =>
-    !!a && (!!a.qrImage || (/\d/.test(a.accountNo ?? '') && !/^0+$/.test(String(a.accountNo).replace(/\s/g, '')) && !/TODO/i.test(`${a.accountNo}${a.bankBin}`)));
+    !!a && (!!a.qrImage || (!!String(a.bankBin ?? '').trim() && /\d/.test(a.accountNo ?? '') && !/^0+$/.test(String(a.accountNo).replace(/\s/g, '')) && !/TODO/i.test(`${a.accountNo}${a.bankBin}`)));
 
 const renderGifts = (cfg, ctx) => {
     // Chưa có tài khoản thật thì ẩn mục mừng cưới (tránh khách quét nhầm QR giữ chỗ)

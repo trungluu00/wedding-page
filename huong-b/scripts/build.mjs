@@ -116,8 +116,26 @@ export const copyStatic = async () => {
   await fs.copyFile(path.join(ROOT, 'src', '_headers'), path.join(OUT, '_headers'));
 };
 
+/**
+ * Khi gói JS, thay wedding.config.js bằng bản JSON đã bỏ photos.source (đường dẫn thư mục ảnh gốc
+ * trên máy, chỉ dùng cho `npm run photos`) để đường dẫn đó không lộ trong file JS công khai.
+ */
+const configPlugin = {
+  name: 'wedding-config',
+  setup(b) {
+    b.onLoad({ filter: /[\\/]wedding\.config\.js$/ }, async (args) => {
+      const cfg = structuredClone(await loadConfig());
+      if (cfg.photos) {
+        delete cfg.photos.source;
+      }
+      return { contents: `export default ${JSON.stringify(cfg)};`, loader: 'js', watchFiles: [args.path] };
+    });
+  },
+};
+
 export const esbuildOptions = (dev = false) => ({
   absWorkingDir: ROOT,
+  plugins: [configPlugin],
   entryPoints: ['js/guest.js', 'css/guest.css'],
   entryNames: '[name]',
   bundle: true,

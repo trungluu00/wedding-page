@@ -32,6 +32,9 @@ var SHEETS = {
 };
 
 var GUEST_HEADERS = ['code', 'name', 'xungHo', 'side', 'groups', 'phone', 'notes', 'link', 'rsvpStatus', 'guestCount'];
+// Cột ô tick "Đã mời" (menu 💌 Thiệp cưới → Thêm cột "Đã mời"), chèn ở đầu sheet KhachMoi. Script tìm mọi cột
+// theo chữ tiêu đề (guestCols_), nên đừng đổi chữ ở dòng 1.
+var INVITED_HEADER = 'Đã mời';
 var RSVP_HEADERS = ['createdAt', 'code', 'name', 'side', 'willAttend', 'guestCount', 'notes'];
 var WISH_HEADERS = ['createdAt', 'code', 'author', 'relation', 'text', 'Hiện'];
 var OPEN_HEADERS = ['createdAt', 'code', 'name'];
@@ -77,24 +80,6 @@ var BANKS = {
   'PVcomBank': '970412', 'Bac A Bank': '970409', 'ABBANK': '970425', 'Kienlongbank': '970452',
   'NCB': '970419', 'VietABank': '970427', 'BVBank': '970454', 'Cake by VPBank': '546034',
 };
-
-/** Lời chúc mẫu (tên giả, mã "mau") để sổ lưu bút không trống khi mới gửi thiệp. Xóa / bỏ tick "Hiện" khi đã có lời chúc thật. */
-var SAMPLE_WISHES = [
-  ['Minh Anh', 'Bạn đại học của Nhi', 'Trăm năm một chữ đồng lòng, chúc hai bạn mãi thuận dòng yêu thương. Dù mưa nắng, dẫu gió sương, tay trong tay bước con đường bình yên.'],
-  ['Hoàng Long', 'Đồng nghiệp của Trung', 'Cuối năm trời đất se duyên, Trung – Nhi về một mái hiên chung nhà. Chúc cho hạnh phúc đậm đà, sớm hôm vui vẻ, cửa nhà ấm êm.'],
-  ['Thu Trang', 'Bạn thân của Nhi', 'Từ nay hai đứa thành đôi, chung mâm cơm tối, chung lời ước mơ. Chúc cho tình mãi như thơ, bạc đầu vẫn nhớ ngày chờ ngày mong.'],
-  ['Đức Huy', 'Bạn cấp 3 của Trung', 'Chúc hai bạn giữ mãi ánh mắt của ngày hôm nay — ánh mắt nhìn nhau như thể cả thế giới chỉ còn hai người. Trăm năm hạnh phúc nhé!'],
-  ['Ngọc Ánh', 'Đồng nghiệp của Nhi', 'Hoa cau thơm ngát hiên nhà, trầu cau đã ngỏ, mẹ cha vui mừng. Chúc anh chị trăm năm hòa hợp, sớm đón tin vui!'],
-  ['Quang Vinh', 'Đồng nghiệp của Trung', 'Gió đưa duyên thắm về đây, hai bờ thương nhớ nay xây một nhà. Chúc cho tình mãi mặn mà, như trăng mười sáu, như hoa đầu mùa.'],
-  ['Phương Thảo', 'Bạn đại học của Nhi', 'Lào Cai đến với Hải Phòng, núi xanh tìm biển, đúng lòng mong nhau. Chúc cho nghĩa nặng tình sâu, trăm năm vẫn giữ trước sau một lòng.'],
-  ['Tuấn Anh', 'Bạn đại học của Trung', 'Ngày vui pháo đỏ rợp đường, cô dâu e ấp, chàng thương ngập lòng. Chúc hai bạn thuận vợ chồng, biển Đông cũng cạn, mặn nồng sớm hôm.'],
-  ['Hải Yến', 'Đồng nghiệp của Nhi', 'Có những người đi cùng nhau một đoạn, và có những người chọn đi cùng nhau cả đời. Mừng vì hai bạn đã tìm thấy nhau — chúc mái nhà nhỏ luôn đầy tiếng cười.'],
-  ['Văn Nam', 'Bạn của Trung', 'Mùa đông mà ấm như xuân, bởi vì có một người thân bên mình. Chúc hai bạn trọn chữ tình, sớm mai thức dậy, bình minh có nhau.'],
-  ['Khánh Linh', 'Bạn thân của Nhi', 'Chúc hai bạn: giận thì nói, thương thì ôm, mệt thì tựa vào nhau. Hôn nhân không cần hoàn hảo, chỉ cần hai người luôn chọn nhau mỗi ngày.'],
-  ['Thanh Tùng', 'Đồng nghiệp của Trung', 'Ngõ quê rộn tiếng cười vui, đón cô dâu mới, ngọt bùi chia nhau. Chúc cho son sắt trước sau, đầu xanh đến lúc bạc màu vẫn thương.'],
-  ['Bảo Ngọc', 'Bạn cấp 3 của Nhi', 'Chúc tình yêu của hai bạn như bếp lửa ngày đông: không cần rực rỡ, chỉ cần ấm áp và bền lâu. Trăm năm hạnh phúc!'],
-  ['Mạnh Cường', 'Bạn đại học của Trung', 'Đôi chim về đậu chung cành, đôi tim chung một nhịp lành yêu thương. Chúc hai bạn vững con đường, trăm năm như thuở mới vương tơ hồng.'],
-];
 
 // ---------------------------------------------------------------------------
 // HTTP
@@ -152,17 +137,16 @@ function lookupGuest_(rawCode) {
   if (!code) return { success: true, found: false };
   var found = findGuestRow_(code);
   if (!found) return { success: true, found: false };
-  var r = found.values;
-  var col = headerIndex_(GUEST_HEADERS);
+  var v = function (key) { return found.values[found.cols[key] - 1]; };
   return {
     success: true,
     found: true,
     data: {
-      code: String(r[col.code]),
-      name: String(r[col.name] || ''),
-      xungHo: String(r[col.xungHo] || ''),
-      side: generateSlug(r[col.side] || ''),
-      groups: String(r[col.groups] || '')
+      code: String(v('code')),
+      name: String(v('name') || ''),
+      xungHo: String(v('xungHo') || ''),
+      side: generateSlug(v('side') || ''),
+      groups: String(v('groups') || '')
         .split(',')
         .map(function (g) { return generateSlug(g); })
         .filter(function (g) { return g; }),
@@ -314,10 +298,8 @@ function saveRsvp_(b) {
   if (code) {
     var found = findGuestRow_(code);
     if (found) {
-      var col = headerIndex_(GUEST_HEADERS);
-      var sheet = getSheet_(SHEETS.guests);
-      sheet.getRange(found.row, col.rsvpStatus + 1).setValue(willAttend ? 'Có' : 'Không');
-      sheet.getRange(found.row, col.guestCount + 1).setValue(count);
+      found.sheet.getRange(found.row, found.cols.rsvpStatus).setValue(willAttend ? 'Có' : 'Không');
+      found.sheet.getRange(found.row, found.cols.guestCount).setValue(count);
     }
   }
   return { success: true };
@@ -346,8 +328,7 @@ function saveOpen_(b) {
   if (!code) return { success: false, message: 'Thiếu mã khách' };
   var found = findGuestRow_(code);
   if (!found) return { success: false, message: 'Không tìm thấy khách' };
-  var col = headerIndex_(GUEST_HEADERS);
-  appendRowSafe_(getSheet_(SHEETS.opens), [new Date(), code, safeCell_(String(found.values[col.name] || ''))]);
+  appendRowSafe_(getSheet_(SHEETS.opens), [new Date(), code, safeCell_(String(found.values[found.cols.name - 1] || ''))]);
   return { success: true };
 }
 
@@ -393,10 +374,44 @@ function generateSlug(text) {
     .slice(0, 60);
 }
 
-function headerIndex_(headers) {
-  var idx = {};
-  headers.forEach(function (h, i) { idx[h] = i; });
-  return idx;
+/**
+ * Vị trí các cột của sheet KhachMoi (đếm từ 1), tìm theo chữ ở dòng tiêu đề — nên chèn thêm cột (vd cột "Đã mời"
+ * ở đầu) hay đổi chỗ cột không làm hỏng script. Cột link nhận ra bằng công thức của nó (ô tiêu đề có thể đang báo
+ * #REF!). Tiêu đề nào không tìm thấy thì coi như các cột nằm liền nhau theo thứ tự GUEST_HEADERS, bắt đầu từ cột code.
+ * cols.invited = vị trí cột "Đã mời" (0 = chưa có); cols.width = số cột cần đọc cho một dòng khách.
+ */
+function guestCols_(sheet) {
+  var width = Math.max(sheet.getLastColumn(), GUEST_HEADERS.length);
+  var head = sheet.getRange(1, 1, 1, width);
+  var names = head.getDisplayValues()[0].map(function (s) { return String(s || '').trim().toLowerCase(); });
+  var formulas = head.getFormulas()[0];
+  var invited = names.indexOf(INVITED_HEADER.toLowerCase());
+  var base = names.indexOf('code');
+  if (base === -1) base = invited === 0 ? 1 : 0;
+  var cols = { width: width, invited: invited + 1 };
+  GUEST_HEADERS.forEach(function (h, i) {
+    var at = -1;
+    if (h === 'link') {
+      for (var j = 0; j < width; j++) {
+        if (String(formulas[j]).indexOf('/?to=') !== -1) { at = j; break; }
+      }
+    }
+    if (at === -1) at = names.indexOf(h.toLowerCase());
+    cols[h] = (at === -1 ? base + i : at) + 1;
+  });
+  cols.width = Math.max(width, cols.guestCount, cols.link);
+  return cols;
+}
+
+/** 1 → "A", 27 → "AA". */
+function colLetter_(n) {
+  var s = '';
+  while (n > 0) {
+    var m = (n - 1) % 26;
+    s = String.fromCharCode(65 + m) + s;
+    n = Math.floor((n - 1) / 26);
+  }
+  return s;
 }
 
 /**
@@ -431,13 +446,18 @@ function getSheet_(name) {
   return sheet;
 }
 
+/** Tìm khách theo mã → {sheet, row, cols, values: cả dòng (values[cols.xxx - 1])} hoặc null. */
 function findGuestRow_(code) {
   var sheet = getSheet_(SHEETS.guests);
   var last = sheet.getLastRow();
   if (last < 2) return null;
-  var rows = sheet.getRange(2, 1, last - 1, GUEST_HEADERS.length).getValues();
-  for (var i = 0; i < rows.length; i++) {
-    if (String(rows[i][0]).trim().toLowerCase() === code) return { row: i + 2, values: rows[i] };
+  var cols = guestCols_(sheet);
+  var codes = sheet.getRange(2, cols.code, last - 1, 1).getValues();
+  for (var i = 0; i < codes.length; i++) {
+    if (String(codes[i][0]).trim().toLowerCase() === code) {
+      var row = i + 2;
+      return { sheet: sheet, row: row, cols: cols, values: sheet.getRange(row, 1, 1, cols.width).getValues()[0] };
+    }
   }
   return null;
 }
@@ -445,10 +465,10 @@ function findGuestRow_(code) {
 // ---------------------------------------------------------------------------
 // Khởi tạo & tiện ích cho người quản lý Sheet
 // ---------------------------------------------------------------------------
-/** Chạy MỘT LẦN để tạo các sheet và tiêu đề cột. Chạy lại không làm mất dữ liệu. */
+/** Tạo các sheet còn thiếu (lần cài đầu). Sheet đã có thì không ghi đè gì — xem setupCore_. */
 function setupDatabase() {
   setupCore_();
-  var msg = 'Đã tạo xong các sheet. Nhớ điền tên miền vào CauHinh!B1 rồi triển khai Web App.';
+  var msg = 'Đã tạo các sheet còn thiếu (sheet đã có giữ nguyên). Lần cài đầu: điền tên miền vào CauHinh!B1 rồi triển khai Web App.';
   try {
     SpreadsheetApp.getUi().alert(msg); // chỉ có khi chạy từ menu trong Google Sheet
   } catch (uiErr) {
@@ -469,50 +489,115 @@ function setLocaleFormula_(range, formula) {
   }
 }
 
-/** Tạo các sheet, tiêu đề, công thức link (chạy lại không mất dữ liệu). */
+/**
+ * Tạo các sheet còn thiếu. Sheet đã có thì KHÔNG ghi đè gì (giá trị, công thức, ô tick, định dạng) — chỉ thêm
+ * các dòng cấu hình còn thiếu ở cuối CauHinh. Dữ liệu thật đang dùng nên script không bao giờ sửa / xóa ô đã có.
+ */
 function setupCore_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
 
+  var cfgIsNew = !ss.getSheetByName(SHEETS.config);
   var cfg = ensureSheet_(ss, SHEETS.config, ['Tên miền thiệp (không có / ở cuối)', 'https://TODO.pages.dev']);
-  cfg.setColumnWidth(1, 280);
-  cfg.setColumnWidth(2, 420);
-  // Link theo nhà: gửi chung cho bạn bè / đồng nghiệp của mỗi bên (không cần mã khách)
-  cfg.getRange(3, 1, 2, 1).setValues([['Link thiệp nhà trai'], ['Link thiệp nhà gái']]);
-  cfg.getRange(3, 2).setFormula('=B1 & "/?ben=nha-trai"');
-  cfg.getRange(4, 2).setFormula('=B1 & "/?ben=nha-gai"');
-  setupSettingRows_(cfg);
+  if (cfgIsNew) {
+    cfg.setColumnWidth(1, 280);
+    cfg.setColumnWidth(2, 420);
+    // Link theo nhà: gửi chung cho bạn bè / đồng nghiệp của mỗi bên (không cần mã khách)
+    cfg.getRange(3, 1, 2, 1).setValues([['Link thiệp nhà trai'], ['Link thiệp nhà gái']]);
+    cfg.getRange(3, 2).setFormula('=B1 & "/?ben=nha-trai"');
+    cfg.getRange(4, 2).setFormula('=B1 & "/?ben=nha-gai"');
+  }
+  setupSettingRows_(cfg); // chỉ thêm dòng còn thiếu, không đụng dòng đã có
 
   var guestsIsNew = !ss.getSheetByName(SHEETS.guests);
   var guests = ensureSheet_(ss, SHEETS.guests, GUEST_HEADERS);
-  // Cột link tự ghép tên miền + ?to= + code cho mọi dòng
-  var linkCol = GUEST_HEADERS.indexOf('link') + 1;
-  // Link mời = tên miền + ?to=mã + &n=tên có dấu (để thiệp hiện đúng tên ngay cả khi chưa tra được Sheet)
-  setLocaleFormula_(
-    guests.getRange(1, linkCol),
-    '={"link"; ARRAYFORMULA(IF(A2:A="", "", ' + SHEETS.config + '!$B$1 & "/?to=" & A2:A & "&n=" & ENCODEURL(TRIM(C2:C & " " & B2:B))))}'
-  );
-  var sideRule = SpreadsheetApp.newDataValidation().requireValueInList(['nha-trai', 'nha-gai', 'ban-chung'], true).setAllowInvalid(true).build();
-  guests.getRange(2, GUEST_HEADERS.indexOf('side') + 1, guests.getMaxRows() - 1, 1).setDataValidation(sideRule);
-  guests.getRange(1, 1).setNote('Để trống code: tự sinh khi bạn nhập tên, dạng xưng-hô-tên + 3 ký tự ngẫu nhiên (vd bac-hung-7k2) để khó đoán.');
-  guests.getRange(1, GUEST_HEADERS.indexOf('groups') + 1).setNote('Các nhóm cách nhau dấu phẩy, vd: gia-dinh, ban-be. Khớp với audience trong wedding.config.js');
-
-  ensureSheet_(ss, SHEETS.rsvp, RSVP_HEADERS);
-  var wishes = ensureSheet_(ss, SHEETS.wishes, WISH_HEADERS);
-  // Checkbox "Hiện" được thêm khi ghi lời chúc; xóa checkbox trống bên dưới (bản cũ tạo sẵn cả cột).
-  // Không insertCheckboxes() ở dòng cũ: hàm đó đặt mọi ô về FALSE → ẩn hết lời chúc
-  var firstEmpty = nextEmptyRow_(wishes);
-  if (wishes.getMaxRows() >= firstEmpty) {
-    wishes.getRange(firstEmpty, WISH_HEADERS.length, wishes.getMaxRows() - firstEmpty + 1, 1).removeCheckboxes();
-  }
-  wishes.getRange(1, WISH_HEADERS.length).setNote('Bỏ tick để ẩn lời chúc khỏi thiệp (cập nhật sau tối đa 60 giây).');
-  ensureSheet_(ss, SHEETS.opens, OPEN_HEADERS);
-
-  // Khách mẫu để thử link mời — chỉ khi vừa tạo sheet (xóa rồi thì không thêm lại)
   if (guestsIsNew) {
-    guests.getRange(2, 1, 2, 7).setValues([
+    var gc = guestCols_(guests);
+    // Cột link tự ghép tên miền + ?to= + code cho mọi dòng
+    setLinkFormula_(guests, gc);
+    var sideRule = SpreadsheetApp.newDataValidation().requireValueInList(['nha-trai', 'nha-gai', 'ban-chung'], true).setAllowInvalid(true).build();
+    guests.getRange(2, gc.side, guests.getMaxRows() - 1, 1).setDataValidation(sideRule);
+    guests.getRange(1, gc.code).setNote('Để trống code: tự sinh khi bạn nhập tên, dạng xưng-hô-tên + 3 ký tự ngẫu nhiên (vd bac-hung-7k2) để khó đoán.');
+    guests.getRange(1, gc.link).setNote('Cột tự ghép link mời — đừng gõ hay dán gì vào cột này.');
+    guests.getRange(1, gc.groups).setNote('Các nhóm cách nhau dấu phẩy, vd: gia-dinh, ban-be. Khớp với audience trong wedding.config.js');
+    // Khách mẫu để thử link mời — chỉ khi vừa tạo sheet
+    guests.getRange(2, gc.code, 2, 7).setValues([
       ['bac-hung-7k2', 'Hùng', 'Bác', 'nha-trai', 'gia-dinh', '', 'Khách mẫu — xóa khi dùng thật'],
       ['ban-lan-3x9', 'Lan', 'Bạn', 'nha-gai', 'ban-be', '', 'Khách mẫu — xóa khi dùng thật'],
     ]);
+  }
+
+  ensureSheet_(ss, SHEETS.rsvp, RSVP_HEADERS);
+  var wishesIsNew = !ss.getSheetByName(SHEETS.wishes);
+  var wishes = ensureSheet_(ss, SHEETS.wishes, WISH_HEADERS);
+  if (wishesIsNew) wishes.getRange(1, WISH_HEADERS.length).setNote('Bỏ tick để ẩn lời chúc khỏi thiệp (cập nhật sau tối đa 60 giây).');
+  ensureSheet_(ss, SHEETS.opens, OPEN_HEADERS);
+}
+
+/**
+ * Công thức ở ô tiêu đề cột link: link mời = tên miền + ?to=mã + &n=tên có dấu (thiệp hiện đúng tên ngay cả khi
+ * chưa tra được Sheet). Chữ cột (A/B/C…) lấy theo vị trí thật của cột code, name, xungHo.
+ */
+function linkFormula_(cols) {
+  var c = colLetter_(cols.code), n = colLetter_(cols.name), x = colLetter_(cols.xungHo);
+  var r = function (L) { return L + '2:' + L; };
+  return '={"link"; ARRAYFORMULA(IF(' + r(c) + '="", "", ' + SHEETS.config + '!$B$1 & "/?to=" & ' + r(c) +
+    ' & "&n=" & ENCODEURL(TRIM(' + r(x) + ' & " " & ' + r(n) + '))))}';
+}
+
+function setLinkFormula_(guests, cols) {
+  cols = cols || guestCols_(guests);
+  setLocaleFormula_(guests.getRange(1, cols.link), linkFormula_(cols));
+}
+
+/** Công thức ở ô tiêu đề cột link đang chạy bình thường (tự ghép link cho mọi dòng)? */
+function linkFormulaWorks_(guests, cols) {
+  var head = guests.getRange(1, cols.link);
+  return !!head.getFormula() && String(head.getDisplayValue()).trim().indexOf('#') !== 0;
+}
+
+/**
+ * CHỈ THÊM: ghi link mời vào những ô link CÒN TRỐNG của các dòng đã có code — dùng khi công thức ở ô tiêu đề
+ * cột link không chạy được (vd báo #REF! vì trong cột đã có link dán dạng chữ / ghi chú). Không sửa, không xóa
+ * ô nào đã có chữ. Công thức đang chạy bình thường thì không làm gì (công thức tự ghép link).
+ * Link giống hệt công thức: tên miền (CauHinh!B1) + /?to=code + &n=xưng hô + tên (có dấu, mã hóa URL).
+ * @returns {number} số link đã thêm
+ */
+function fillMissingLinks_(guests) {
+  var cols = guestCols_(guests);
+  if (linkFormulaWorks_(guests, cols)) return 0;
+  var domain = String(getSheet_(SHEETS.config).getRange(1, 2).getDisplayValue()).trim().replace(/\/+$/, '');
+  if (!/^https?:\/\//i.test(domain) || /TODO/i.test(domain)) return 0; // chưa có tên miền thật → không ghi link sai
+  var last = guests.getLastRow();
+  if (last < 2) return 0;
+  var n = last - 1;
+  var codes = guests.getRange(2, cols.code, n, 1).getValues();
+  var names = guests.getRange(2, cols.name, n, 1).getValues();
+  var xungHo = guests.getRange(2, cols.xungHo, n, 1).getValues();
+  var links = guests.getRange(2, cols.link, n, 1).getValues();
+  var added = 0;
+  for (var i = 0; i < n; i++) {
+    var code = String(codes[i][0] == null ? '' : codes[i][0]).trim();
+    var current = String(links[i][0] == null ? '' : links[i][0]).trim();
+    if (!code || current) continue; // chưa có code, hoặc ô link đã có chữ → không đụng
+    var who = (String(xungHo[i][0] || '') + ' ' + String(names[i][0] || '')).replace(/\s+/g, ' ').trim();
+    guests.getRange(i + 2, cols.link).setValue(domain + '/?to=' + code + '&n=' + encodeURIComponent(who));
+    added++;
+  }
+  return added;
+}
+
+/** Menu: sinh code + link mời cho khách còn thiếu (chỉ ghi vào ô trống). */
+function addMissingInviteLinks() {
+  var guests = getSheet_(SHEETS.guests);
+  fillMissingCodes();
+  var added = fillMissingLinks_(guests);
+  var msg = linkFormulaWorks_(guests, guestCols_(guests))
+    ? 'Cột link đang tự ghép link cho mọi khách có code — không cần thêm gì.'
+    : 'Đã thêm link mời cho ' + added + ' khách còn trống ô link (các ô đã có chữ giữ nguyên).';
+  try {
+    SpreadsheetApp.getUi().alert(msg);
+  } catch (uiErr) {
+    Logger.log(msg);
   }
 }
 
@@ -550,53 +635,6 @@ function setupSettingRows_(cfg) {
   cfg.setColumnWidth(3, 200);
 }
 
-/**
- * Thêm lời chúc mẫu (mã "mau"). Đã có rồi thì chỉ cập nhật nội dung lời chúc theo SAMPLE_WISHES
- * (giữ nguyên tên người chúc và "bạn là" mà bạn đã sửa trong Sheet).
- */
-function seedSampleWishes() {
-  var sheet = getSheet_(SHEETS.wishes);
-  var last = sheet.getLastRow();
-  if (last >= 2) {
-    var rows = sheet.getRange(2, 1, last - 1, WISH_HEADERS.length).getValues();
-    var mau = [];
-    rows.forEach(function (r, i) { if (r[1] === 'mau') mau.push({ row: i + 2, at: r[0] }); });
-    if (mau.length) {
-      // cũ nhất trước = thứ tự lúc thêm
-      mau.sort(function (a, b) { return new Date(a.at).getTime() - new Date(b.at).getTime(); });
-      mau.forEach(function (m, i) {
-        if (SAMPLE_WISHES[i]) sheet.getRange(m.row, WISH_HEADERS.indexOf('text') + 1).setValue(SAMPLE_WISHES[i][2]);
-      });
-      CacheService.getScriptCache().remove(WISHES_CACHE_KEY);
-      Logger.log('Đã cập nhật nội dung ' + Math.min(mau.length, SAMPLE_WISHES.length) + ' lời chúc mẫu.');
-      return;
-    }
-  }
-  var now = Date.now();
-  var n = SAMPLE_WISHES.length;
-  SAMPLE_WISHES.forEach(function (w, i) {
-    // rải thời gian trong ~10 ngày gần đây, cũ nhất trước
-    var at = new Date(now - (n - i) * 17 * 3600 * 1000 - Math.floor(Math.random() * 3600 * 1000));
-    var row = appendRowSafe_(sheet, [at, 'mau', w[0], w[1], w[2], true]);
-    var cell = sheet.getRange(row, WISH_HEADERS.length);
-    cell.insertCheckboxes();
-    cell.check();
-  });
-  CacheService.getScriptCache().remove(WISHES_CACHE_KEY);
-  Logger.log('Đã thêm ' + n + ' lời chúc mẫu.');
-}
-
-/** Xóa 2 khách mẫu bac-hung-7k2 / ban-lan-3x9 khỏi KhachMoi. */
-function removeSampleGuests() {
-  var sheet = getSheet_(SHEETS.guests);
-  var last = sheet.getLastRow();
-  if (last < 2) return;
-  var codes = sheet.getRange(2, 1, last - 1, 1).getValues();
-  for (var i = codes.length - 1; i >= 0; i--) {
-    if (codes[i][0] === 'bac-hung-7k2' || codes[i][0] === 'ban-lan-3x9') sheet.deleteRow(i + 2);
-  }
-}
-
 function ensureSheet_(ss, name, headers) {
   var sheet = ss.getSheetByName(name) || ss.insertSheet(name);
   if (sheet.getLastRow() === 0) {
@@ -622,43 +660,104 @@ function fillMissingCodes() {
   var sheet = getSheet_(SHEETS.guests);
   var last = sheet.getLastRow();
   if (last < 2) return;
-  var range = sheet.getRange(2, 1, last - 1, 3);
-  var rows = range.getValues();
+  var cols = guestCols_(sheet);
+  var codes = sheet.getRange(2, cols.code, last - 1, 1).getValues();
+  var names = sheet.getRange(2, cols.name, last - 1, 1).getValues();
+  var xungHo = sheet.getRange(2, cols.xungHo, last - 1, 1).getValues();
   var used = {};
-  rows.forEach(function (r) { if (r[0]) used[String(r[0]).toLowerCase()] = true; });
-  rows.forEach(function (r, i) {
-    if (r[0] || !r[1]) return;
-    var base = (generateSlug((r[2] ? r[2] + ' ' : '') + r[1]) || 'khach').slice(0, 50);
+  codes.forEach(function (r) { if (r[0]) used[String(r[0]).toLowerCase()] = true; });
+  codes.forEach(function (r, i) {
+    var name = names[i][0], xh = xungHo[i][0];
+    if (r[0] || !name) return;
+    var base = (generateSlug((xh ? xh + ' ' : '') + name) || 'khach').slice(0, 50);
     var code = base + '-' + randomSuffix_(3);
     while (used[code]) code = base + '-' + randomSuffix_(3);
     used[code] = true;
-    sheet.getRange(i + 2, 1).setValue(code);
+    sheet.getRange(i + 2, cols.code).setValue(code);
   });
 }
 
-/** Tự sinh code khi nhập tên/xưng hô vào sheet KhachMoi (trigger đơn giản). */
+/**
+ * Menu: THÊM cột "Đã mời" (ô tick) vào đầu sheet KhachMoi; dòng nào đã tick thì chữ cả dòng mờ đi.
+ * Chỉ thêm: cột mới chèn vào (các cột khác dịch sang phải, dữ liệu giữ nguyên), ô tick đặt vào cột mới trống,
+ * cộng một quy tắc định dạng. Cột đã có thì không đụng tới ô nào, chỉ thêm quy tắc làm mờ nếu còn thiếu.
+ */
+function addInvitedColumn() {
+  var ui = SpreadsheetApp.getUi();
+  var guests = getSheet_(SHEETS.guests);
+  var cols = guestCols_(guests);
+  if (!cols.invited) {
+    var ok = ui.alert(
+      'Thêm cột "' + INVITED_HEADER + '"',
+      'Một cột ô tick mới được chèn vào đầu sheet KhachMoi; các cột khác dịch sang phải, dữ liệu giữ nguyên.\n\n' +
+      'CHỈ làm bước này SAU KHI đã triển khai phiên bản mới của Apps Script (Triển khai → Quản lý triển khai → ' +
+      'bút chì → Phiên bản: Mới → Triển khai). Nếu chưa, thiệp sẽ không tra được tên khách cho tới khi triển khai.\n\n' +
+      'Tiếp tục?',
+      ui.ButtonSet.YES_NO);
+    if (ok !== ui.Button.YES) return;
+    guests.insertColumnBefore(1);
+    guests.getRange(1, 1).setValue(INVITED_HEADER).setFontWeight('bold').setHorizontalAlignment('center');
+    guests.setColumnWidth(1, 70);
+    cols = guestCols_(guests);
+    // Cột vừa chèn còn trống hoàn toàn → đặt ô tick (chưa tick) cho mọi dòng
+    guests.getRange(2, cols.invited, guests.getMaxRows() - 1, 1).insertCheckboxes().setHorizontalAlignment('center');
+  }
+  addInvitedRule_(guests, cols);
+  ui.alert('Cột "' + INVITED_HEADER + '" nằm ở cột ' + colLetter_(cols.invited) +
+    '. Tick vào ô của khách đã gửi thiệp — chữ cả dòng sẽ mờ đi.');
+}
+
+/** Thêm (nếu chưa có) quy tắc định dạng có điều kiện: dòng có ô "Đã mời" được tick → chữ xám nhạt. */
+function addInvitedRule_(guests, cols) {
+  var n = guests.getMaxRows() - 1;
+  if (n < 1 || !cols.invited) return;
+  var formula = '=$' + colLetter_(cols.invited) + '2';
+  var rules = guests.getConditionalFormatRules();
+  var exists = rules.some(function (rule) {
+    var c = rule.getBooleanCondition();
+    var v = c && c.getCriteriaValues();
+    return !!(v && v.length === 1 && String(v[0]) === formula);
+  });
+  if (exists) return;
+  rules.push(SpreadsheetApp.newConditionalFormatRule()
+    .whenFormulaSatisfied(formula)
+    .setFontColor('#a3a8ad')
+    .setRanges([guests.getRange(2, 1, n, Math.max(guests.getLastColumn(), cols.width))])
+    .build());
+  guests.setConditionalFormatRules(rules);
+}
+
+/**
+ * Sheet KhachMoi (trigger đơn giản), CHỈ THÊM vào ô trống:
+ *  - nhập/dán tên hoặc xưng hô (kể cả dán nhiều cột / cả dòng) → sinh code cho dòng chưa có code;
+ *  - công thức cột link không chạy được → ghi link mời vào ô link còn trống của dòng đã có code.
+ * Không bao giờ sửa hay xóa ô đã có chữ.
+ */
 function onEdit(e) {
   try {
     var sheet = e.range.getSheet();
     // Sửa CauHinh / LoiChuc: thiệp thấy thay đổi ngay, không phải chờ cache 60 giây
     if (sheet.getName() === SHEETS.config) CacheService.getScriptCache().remove(SETTINGS_CACHE_KEY);
     if (sheet.getName() === SHEETS.wishes) CacheService.getScriptCache().remove(WISHES_CACHE_KEY);
-    if (sheet.getName() !== SHEETS.guests || e.range.getRow() < 2) return;
-    var col = e.range.getColumn();
-    if (col !== 2 && col !== 3) return;
-    fillMissingCodes();
+    if (sheet.getName() !== SHEETS.guests || e.range.getLastRow() < 2) return;
+    var cols = guestCols_(sheet);
+    var a = e.range.getColumn(), b = e.range.getLastColumn();
+    var touches = function (c) { return a <= c && c <= b; };
+    if (touches(cols.name) || touches(cols.xungHo)) fillMissingCodes();
+    var added = fillMissingLinks_(sheet);
+    if (added) e.source.toast('Đã thêm link mời cho ' + added + ' khách.', '💌 Link mời', 5);
   } catch (err) {
-    /* bỏ qua */
+    Logger.log('onEdit lỗi: ' + err); // xem ở Apps Script → Lần thực thi
   }
 }
 
 function onOpen() {
+  // Không có mục nào sửa / xóa dữ liệu đã có (dữ liệu khách và lời chúc là thật).
   SpreadsheetApp.getUi()
     .createMenu('💌 Thiệp cưới')
-    .addItem('Tạo / kiểm tra các sheet', 'setupDatabase')
-    .addItem('Sinh code cho khách còn trống', 'fillMissingCodes')
+    .addItem('Sinh code + link mời cho khách còn trống', 'addMissingInviteLinks')
+    .addItem('Thêm cột "Đã mời" (ô tick đầu dòng)', 'addInvitedColumn')
     .addSeparator()
-    .addItem('Thêm / cập nhật lời chúc mẫu', 'seedSampleWishes')
-    .addItem('Xóa 2 khách mẫu (bac-hung, ban-lan)', 'removeSampleGuests')
+    .addItem('Tạo sheet còn thiếu (không sửa sheet đã có)', 'setupDatabase')
     .addToUi();
 }

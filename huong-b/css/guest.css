@@ -746,6 +746,10 @@ section.bg-alt {
 .rsvp-cta[hidden] {
     display: none;
 }
+/* Khi nút nổi đang hiện: chừa chỗ cuối trang để nút không che lời cảm ơn / chân trang */
+body.rsvp-cta-on #main {
+    padding-bottom: 4.75rem;
+}
 .rsvp-cta-icon {
     flex: 0 0 auto;
     display: grid;

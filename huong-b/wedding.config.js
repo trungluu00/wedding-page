@@ -2,7 +2,8 @@
 //  CẤU HÌNH THIỆP CƯỚI — Lưu Viết Trung & Đoàn Phương Nhi (hướng B)
 //  Mọi nội dung, ảnh, màu sắc của thiệp đều sửa ở file này.
 //  Khung (schema) dùng chung với hướng A: đừng đổi tên khóa, chỉ đổi giá trị.
-//  Các dòng có "TODO" là thông tin thật cần điền/xác nhận; "(gợi ý)" là câu chữ soạn sẵn, sửa tùy ý.
+//  "(gợi ý)" là câu chữ soạn sẵn, sửa tùy ý. Giờ sự kiện, tài khoản mừng cưới, câu trích và lời giới thiệu
+//  cô dâu chú rể sửa trong Google Sheet (sheet CauHinh) — thiệp đọc Sheet mỗi lần mở, giá trị ở đây chỉ là dự phòng.
 //  Thông tin thật (tên, bố mẹ, địa chỉ, SĐT, ngày cưới) đồng bộ với wedding.config.js ở thư mục gốc
 //  (phương án A) — khi sửa một bên, nhớ sửa bên kia.
 //  Sửa xong chạy `npm run build` (hoặc để `npm run dev` tự tải lại).
@@ -68,7 +69,8 @@ export default {
   //   - "public": người mở link không có mã khách và không có ?ben=
   //   - "all": mọi người; tên nhóm khác (vd "gia-dinh") khớp cột "groups"
   //  main: true → sự kiện dùng cho ngày lớn, lịch và đếm ngược.
-  //  time: để "" nếu chưa chốt giờ (thiệp in đang để trống giờ bữa cơm) — thiệp chỉ hiện ngày.
+  //  time: giờ dự phòng. Thiệp đọc giờ thật từ Google Sheet (CauHinh, nhóm GIỜ SỰ KIỆN) mỗi lần mở;
+  //        ô trong Sheet để trống thì thiệp chỉ hiện ngày.
   //  lunar: ghi sẵn bằng chữ (npm run lunar -- 2026-12-12). Trên thiệp, sự kiện tự sắp theo thời gian.
   // ---------------------------------------------------------------------------
   events: [
@@ -78,7 +80,7 @@ export default {
       name: "Bữa cơm thân mật · Nhà trai",
       main: true, // ngày mời (12/12): bìa, đầu thiệp, đếm ngược, lưu lịch
       date: "2026-12-12",
-      time: "", // TODO: giờ bữa cơm (thiệp in để trống)
+      time: "15:00", // giờ thật sửa trong Google Sheet (CauHinh); đây là giờ dự phòng khi không nối được Sheet
       lunar: "Tức ngày 04 tháng 11 năm Bính Ngọ",
       venue: "Tư gia nhà trai",
       address: "Thôn Phúc Hoà, Xã Thác Bà, Tỉnh Lào Cai",
@@ -90,7 +92,7 @@ export default {
       name: "Bữa cơm thân mật · Nhà gái",
       main: true, // ngày mời (12/12): bìa, đầu thiệp, đếm ngược, lưu lịch
       date: "2026-12-12",
-      time: "", // TODO: giờ bữa cơm (thiệp in để trống)
+      time: "16:00", // giờ thật sửa trong Google Sheet (CauHinh); đây là giờ dự phòng khi không nối được Sheet
       lunar: "Tức ngày 04 tháng 11 năm Bính Ngọ",
       venue: "Tư gia nhà gái",
       address: "Thôn Kỳ Sơn, Xã Đại Sơn, TP. Hải Phòng",
@@ -123,14 +125,18 @@ export default {
   ],
 
   // --- Lịch trình ngày cưới (icon: tên icon Font Awesome 6, vd "fa-ring") ---
-  // Lịch trình hai ngày cưới (day: ngày dương, hiện dưới giờ). TODO: chỉnh giờ khi chốt
+  // Lịch trình hai ngày cưới (day: ngày dương, hiện dưới giờ), khớp với mục events.
+  // Mục này đang tắt (không có "schedule" trong `sections`); giờ ở đây không đọc từ Sheet.
   schedule: [
-    { day: "12/12", time: "16:00", title: "Tiệc nhà gái", icon: "fa-utensils" },
+    { day: "12/12", time: "15:00", title: "Bữa cơm nhà trai", icon: "fa-utensils" },
+    { day: "12/12", time: "16:00", title: "Bữa cơm nhà gái", icon: "fa-utensils" },
+    { day: "13/12", time: "06:00", title: "Lễ vu quy", icon: "fa-car" },
     { day: "13/12", time: "10:00", title: "Lễ thành hôn", icon: "fa-ring" },
-    { day: "13/12", time: "11:00", title: "Tiệc nhà trai", icon: "fa-champagne-glasses" },
   ],
 
   // --- Mừng cưới (QR chuyển khoản qua VietQR) ---
+  // Tài khoản thật điền trong Google Sheet (CauHinh, nhóm MỪNG CƯỚI) và được dùng thay cho mục dưới đây.
+  // Số tài khoản ở đây cố ý để số giữ chỗ: không nối được Sheet thì mục Mừng cưới tự ẩn (không hiện QR sai).
   // bankBin: mã BIN ngân hàng 6 số (vd Vietcombank 970436, Techcombank 970407, MB 970422, VPBank 970432).
   // qrImage: null = tự tạo QR từ img.vietqr.io; hoặc đường dẫn ảnh QR có sẵn, vd "photos/qr-trung.png".
   gifts: {
@@ -139,19 +145,19 @@ export default {
       {
         family: "nha-trai",
         owner: "Chú rể Lưu Viết Trung",
-        bankBin: "970436", // TODO
-        bankName: "Vietcombank", // TODO
-        accountNo: "0000000000", // TODO
-        accountName: "LUU VIET TRUNG", // TODO: tên chủ tài khoản, IN HOA không dấu
+        bankBin: "", // để trống: ô Ngân hàng trong Sheet bị xóa thì không tự hiểu thành ngân hàng khác
+        bankName: "",
+        accountNo: "0000000000", // số giữ chỗ (số thật nằm trong Sheet)
+        accountName: "LUU VIET TRUNG", // IN HOA không dấu
         qrImage: null,
       },
       {
         family: "nha-gai",
         owner: "Cô dâu Đoàn Phương Nhi",
-        bankBin: "970436", // TODO
-        bankName: "Vietcombank", // TODO
-        accountNo: "0000000000", // TODO
-        accountName: "DOAN PHUONG NHI", // TODO
+        bankBin: "",
+        bankName: "",
+        accountNo: "0000000000", // số giữ chỗ (số thật nằm trong Sheet)
+        accountName: "DOAN PHUONG NHI",
         qrImage: null,
       },
     ],

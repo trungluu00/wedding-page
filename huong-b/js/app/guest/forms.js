@@ -16,6 +16,26 @@ export const forms = (client) => {
     const saved = storage('rsvp');
     const wishState = storage('wish');
 
+    /**
+     * Tên khách đã tự gõ ở form xác nhận / lời chúc trên máy này — chỉ dùng lại cho cùng link mời
+     * (cùng mã khách), để mở link của người khác trên cùng điện thoại không bị điền nhầm tên.
+     */
+    const typedName = (code) => {
+        const r = saved.get('last');
+        if (r?.name && (r.code ?? '') === code) {
+            return r.name;
+        }
+        const w = wishState.get('author');
+        return w?.name && (w.code ?? '') === code ? w.name : '';
+    };
+
+    /** Điền tên vào ô còn trống (khách vừa gửi ở form kia). */
+    const fillIfEmpty = (input, value) => {
+        if (input && !input.value.trim() && value) {
+            input.value = value;
+        }
+    };
+
     const field = (id, label, input, hint = null) => h('div', { class: 'mb-3 text-start' },
         h('label', { class: 'form-label small mb-1', for: id }, label),
         input,
@@ -45,7 +65,9 @@ export const forms = (client) => {
         const prev = saved.get('last');
 
         const name = h('input', { type: 'text', id: 'rsvp-name', class: 'form-control rounded-4', maxlength: '60', autocomplete: 'name', required: true, placeholder: 'Họ và tên' });
-        name.value = prev?.name ?? (ctx.guest ? ctx.khach : '');
+        // Điền sẵn: lần gửi trước → tên đã gõ ở form lời chúc → tên khách trong link mời (vd "Bác Hùng")
+        name.value = prev?.name ?? (typedName(ctx.code ?? '') || ctx.guestNamePlain || '');
+        document.addEventListener('wish:done', (e) => fillIfEmpty(name, e.detail?.author));
 
         const countValue = String(Math.min(max, prev?.guestCount || 1));
         const count = chips('rsvp-count', Array.from({ length: max }, (_, i) => [String(i + 1), `${i + 1} người`]), countValue, 'choice-chips--count');
@@ -97,7 +119,7 @@ export const forms = (client) => {
             const willAttend = form.querySelector('input[name="rsvp-attend"]:checked')?.value !== 'no';
             const sideVal = form.querySelector('input[name="rsvp-side"]:checked')?.value ?? '';
             const data = {
-                code: ctx.guest?.code ?? '',
+                code: ctx.code ?? '',
                 name: name.value.trim(),
                 side: sideVal,
                 willAttend,
@@ -205,7 +227,9 @@ export const forms = (client) => {
 
     const wishes = (cfg, ctx) => {
         const author = h('input', { type: 'text', id: 'wish-author', class: 'form-control rounded-4', maxlength: '60', autocomplete: 'name', required: true, placeholder: 'Họ và tên' });
-        author.value = ctx.guest ? ctx.khach : '';
+        // Điền sẵn: tên đã gõ trước đó trên link này → tên khách trong link mời
+        author.value = typedName(ctx.code ?? '') || ctx.guestNamePlain || '';
+        document.addEventListener('rsvp:done', (e) => fillIfEmpty(author, e.detail?.name));
         const relation = h('input', { type: 'text', id: 'wish-relation', class: 'form-control rounded-4', maxlength: '60', placeholder: 'Ví dụ: Đồng nghiệp của Trung' });
         const text = h('textarea', { id: 'wish-text', class: 'form-control rounded-4', rows: '4', maxlength: '500', required: true, placeholder: 'Viết lời chúc gửi cô dâu chú rể...' });
         const button = h('button', { type: 'submit', class: 'btn btn-primary rounded-pill px-4', 'data-offline-disabled': 'false' },
@@ -224,7 +248,7 @@ export const forms = (client) => {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const data = {
-                code: ctx.guest?.code ?? '',
+                code: ctx.code ?? '',
                 author: author.value.trim(),
                 relation: relation.value.trim(),
                 text: text.value.trim(),
@@ -252,6 +276,8 @@ export const forms = (client) => {
                     throw new Error(res?.message || 'Gửi không thành công');
                 }
                 wishState.set('lastAt', Date.now());
+                wishState.set('author', { name: data.author, code: data.code });
+                document.dispatchEvent(new CustomEvent('wish:done', { detail: data }));
                 text.value = '';
                 prependWish({ author: data.author, relation: data.relation, text: data.text, createdAt: new Date().toISOString() });
                 util.notify('Xin chân thành cảm ơn lời chúc!').success();

@@ -98,7 +98,8 @@ export default {
   //   - "public": người mở link không có mã khách và không có ?ben=
   //   - "all": mọi người; tên nhóm khác (vd "gia-dinh") khớp cột "groups"
   //  main: true → sự kiện dùng cho ngày lớn, lịch và đếm ngược.
-  //  time: để "" nếu chưa chốt giờ (thiệp in đang để trống giờ bữa cơm) — thiệp chỉ hiện ngày.
+  //  time: giờ dự phòng. Thiệp đọc giờ thật từ Google Sheet (CauHinh, nhóm GIỜ SỰ KIỆN) mỗi lần mở;
+  //        ô trong Sheet để trống thì thiệp chỉ hiện ngày.
   //  lunar: ghi sẵn bằng chữ (npm run lunar -- 2026-12-12). Trên thiệp, sự kiện tự sắp theo thời gian.
   // ---------------------------------------------------------------------------
   events: [
@@ -108,7 +109,7 @@ export default {
       name: "Bữa cơm thân mật · Nhà trai",
       main: true,
       date: "2026-12-12",
-      time: "", // TODO: giờ bữa cơm (thiệp in để trống)
+      time: "15:00", // giờ thật sửa trong Google Sheet (CauHinh); đây là giờ dự phòng khi không nối được Sheet
       lunar: "Tức ngày 04 tháng 11 năm Bính Ngọ",
       venue: "Tư gia nhà trai",
       address: "Thôn Phúc Hoà, Xã Thác Bà, Tỉnh Lào Cai",
@@ -120,7 +121,7 @@ export default {
       name: "Bữa cơm thân mật · Nhà gái",
       main: true,
       date: "2026-12-12",
-      time: "", // TODO: giờ bữa cơm (thiệp in để trống)
+      time: "16:00", // giờ thật sửa trong Google Sheet (CauHinh); đây là giờ dự phòng khi không nối được Sheet
       lunar: "Tức ngày 04 tháng 11 năm Bính Ngọ",
       venue: "Tư gia nhà gái",
       address: "Thôn Kỳ Sơn, Xã Đại Sơn, TP. Hải Phòng",
@@ -252,8 +253,8 @@ export default {
   //  lyrics: file .lrc (định dạng [mm:ss.xx] Lời bài hát), để "" nếu không có.
   // ---------------------------------------------------------------------------
   music: {
-    // TODO: chép file nhạc vào public/music/beautiful-in-white.mp3 (dùng chung cho cả phương án A và B).
-    // Chưa có file thì thiệp tự ẩn phần nhạc.
+    // File nhạc: public/music/beautiful-in-white.mp3 (dùng chung cho cả phương án A và B).
+    // Không có file thì thiệp tự ẩn phần nhạc.
     src: "music/beautiful-in-white.mp3",
     title: "Beautiful in White",
     artist: "Shane Filan",
