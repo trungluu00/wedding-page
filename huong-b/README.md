@@ -21,8 +21,9 @@ npm run dev
 
 (hoặc từ thư mục gốc: `npm run dev:b`). Mở http://localhost:8080. Thử thêm:
 
-- http://localhost:8080/?ben=nha-trai → thiệp nhà trai (lời mời "lễ thành hôn", thấy bữa cơm nhà trai + Lễ Thành Hôn)
-- http://localhost:8080/?ben=nha-gai → thiệp nhà gái (lời mời "lễ vu quy", cô dâu đứng trước, thấy bữa cơm nhà gái + Lễ Vu Quy)
+- http://localhost:8080/?t → thiệp nhà trai (lời mời "lễ thành hôn", thấy bữa cơm nhà trai + Lễ Thành Hôn)
+- http://localhost:8080/?g → thiệp nhà gái (lời mời "lễ vu quy", cô dâu đứng trước, thấy bữa cơm nhà gái + Lễ Vu Quy)
+  (dạng cũ `?ben=nha-trai` / `?ben=nha-gai` vẫn dùng được)
 - http://localhost:8080/?to=Anh%20Nam → mã không có trong danh sách nhưng trông như tên người thì hiện đúng chữ đó
 
 > **Lưu ý:** `backend.appsScriptUrl` đang nối **Google Sheet thật**. Khi chạy thử, bấm "Gửi xác nhận" hay
@@ -88,9 +89,9 @@ huong-b/
 Mở `wedding.config.js`, sửa giá trị (đừng đổi tên khóa — khung này dùng chung với hướng A). Một số lưu ý:
 
 - **Sự kiện** (`events`): `date` dạng `YYYY-MM-DD`, `time` dạng `HH:mm` theo giờ Việt Nam. `lunar` là chữ ghi sẵn (không tự tính âm lịch; tính bằng `npm run lunar -- YYYY-MM-DD` ở thư mục gốc).
-  **Giờ thật đọc từ Google Sheet** (`CauHinh`, nhóm *GIỜ SỰ KIỆN*) mỗi lần mở thiệp; `time` trong config chỉ là dự phòng khi Sheet không trả lời trong 4 giây.
-  `audience` quyết định ai thấy sự kiện: `"all"` = mọi người; `"nha-trai"`, `"nha-gai"`, `"ban-chung"` hoặc tên nhóm bất kỳ khớp với cột `side`/`groups` của khách trong Sheet (link `?ben=nha-trai` / `?ben=nha-gai` tính như khách nhà đó);
-  `"public"` = người mở link không có mã khách (hoặc mã không có trong Sheet) và không có `?ben=`.
+  **Giờ thật đọc từ Google Sheet** (`CauHinh`, nhóm *GIỜ SỰ KIỆN*) mỗi lần mở thiệp; `time` trong config chỉ là dự phòng khi Sheet không trả lời trong 6 giây và máy chưa lưu bản từ lần mở trước.
+  `audience` quyết định ai thấy sự kiện: `"all"` = mọi người; `"nha-trai"`, `"nha-gai"`, `"ban-chung"` hoặc tên nhóm bất kỳ khớp với cột `side`/`groups` của khách trong Sheet (link chung `?t` / `?g`, dạng cũ `?ben=nha-trai` / `?ben=nha-gai`, tính như khách nhà đó);
+  `"public"` = người mở link không có mã khách (hoặc mã không có trong Sheet) và không theo nhà nào.
   Đếm ngược, ngày trên bìa và nút "Lưu vào lịch" lấy sự kiện `main: true` sớm nhất trong số khách được thấy.
 - **Lời văn** (`texts`): `{khach}` được thay bằng cách xưng hô, vd "Bác Hùng"; không có mã khách thì là "Quý vị".
   `texts.bySide["nha-trai" | "nha-gai"]` ghi đè lời mời / dòng trên bìa cho thiệp từng nhà.

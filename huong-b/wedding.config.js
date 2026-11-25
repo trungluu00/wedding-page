@@ -65,8 +65,8 @@ export default {
   // 4. CÁC SỰ KIỆN — theo thiệp in (tổ chức tại tư gia hai nhà)
   //  audience: ai được thấy sự kiện này.
   //   - "nha-trai" / "nha-gai" / "ban-chung": khớp cột "side" của khách trong Google Sheet,
-  //     hoặc link theo nhà: ?ben=nha-trai / ?ben=nha-gai
-  //   - "public": người mở link không có mã khách và không có ?ben=
+  //     hoặc link theo nhà: ?t / ?g (dạng cũ ?ben=nha-trai / ?ben=nha-gai)
+  //   - "public": người mở link không có mã khách và không theo nhà nào
   //   - "all": mọi người; tên nhóm khác (vd "gia-dinh") khớp cột "groups"
   //  main: true → sự kiện dùng cho ngày lớn, lịch và đếm ngược.
   //  time: giờ dự phòng. Thiệp đọc giờ thật từ Google Sheet (CauHinh, nhóm GIỜ SỰ KIỆN) mỗi lần mở;
@@ -229,7 +229,7 @@ export default {
     invitation: "Trân trọng kính mời {khach} tới dự bữa cơm thân mật mừng lễ thành hôn của chúng tôi.",
     coverLine: "tới dự bữa cơm thân mật mừng lễ thành hôn của chúng tôi", // dòng dưới tên khách trên bìa
     thankYou: "Sự hiện diện của Quý vị là niềm vinh hạnh cho gia đình chúng tôi!",
-    // Lời riêng theo từng nhà (khách nhà nào, hoặc link ?ben=nha-trai / ?ben=nha-gai).
+    // Lời riêng theo từng nhà (khách nhà nào, hoặc link ?t / ?g).
     // Thiệp nhà gái: cô dâu đứng trước (tự đảo thứ tự).
     bySide: {
       "nha-trai": {

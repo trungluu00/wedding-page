@@ -40,7 +40,7 @@ for (const p of ['wedding.config.js', 'src', 'photos', 'music', 'assets']) {
   }
 }
 
-console.log(`🌸 Thiệp đang chạy: http://localhost:${port}   (thử thiệp nhà gái: http://localhost:${port}/?ben=nha-gai)`);
+console.log(`🌸 Thiệp đang chạy: http://localhost:${port}   (thử thiệp nhà gái: http://localhost:${port}/?g)`);
 const backendUrl = String((await loadConfig()).backend?.appsScriptUrl ?? '').trim();
 if (/script\.google(usercontent)?\.com/.test(backendUrl)) {
   console.log('⚠️  Đang nối Google Sheet thật: gửi form xác nhận / lời chúc khi chạy thử là ghi vào Sheet.');

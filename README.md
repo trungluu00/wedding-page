@@ -46,7 +46,8 @@ npm run dev
 ```
 
 Phương án A mở ở http://localhost:5173, phương án B ở http://localhost:8080. Thử thiệp theo nhà:
-`/?ben=nha-trai` và `/?ben=nha-gai` (lời mời, thứ tự cô dâu/chú rể và sự kiện đổi theo nhà).
+`/?ben=nha-trai` và `/?ben=nha-gai` (lời mời, thứ tự cô dâu/chú rể và sự kiện đổi theo nhà). B hiểu thêm dạng ngắn
+`/?t` và `/?g` — đây là link chung đang ghi ở ô B3/B4 của sheet `CauHinh`.
 
 > **Lưu ý:** `backend.appsScriptUrl` đang nối **Google Sheet thật**. Khi chạy thử trên máy, bấm "Gửi xác nhận" hay
 > "Gửi lời chúc" là ghi thẳng vào Sheet (lời chúc hiện cho mọi khách), mở link `?to=<mã khách thật>` rồi bấm
@@ -107,8 +108,8 @@ Hiện thiệp chia (giống nhau ở A và B):
 
 | Ai mở thiệp | Thấy các sự kiện |
 |---|---|
-| Khách nhà trai (`side` = `nha-trai`, hoặc link `?ben=nha-trai`) | Bữa cơm nhà trai (12/12) · Lễ Thành Hôn (13/12, 10:00) |
-| Khách nhà gái (`side` = `nha-gai`, hoặc link `?ben=nha-gai`) | Bữa cơm nhà gái (12/12) · Lễ Vu Quy (13/12, 06:00) |
+| Khách nhà trai (`side` = `nha-trai`, hoặc link `?ben=nha-trai`; ở B cả `?t`) | Bữa cơm nhà trai (12/12) · Lễ Thành Hôn (13/12, 10:00) |
+| Khách nhà gái (`side` = `nha-gai`, hoặc link `?ben=nha-gai`; ở B cả `?g`) | Bữa cơm nhà gái (12/12) · Lễ Vu Quy (13/12, 06:00) |
 | Bạn chung (`side` = `ban-chung`) | Hai bữa cơm 12/12 |
 | Link không có mã khách, hoặc khách trong Sheet chưa điền `side` (và `groups`) | Cả bốn sự kiện |
 
@@ -275,7 +276,7 @@ câu chữ đã viết sẵn, sửa tùy ý. Ngày âm lịch tính bằng `npm 
 - [x] **Giờ bữa cơm hai nhà** — đã điền trong Google Sheet (`CauHinh`, nhóm *GIỜ SỰ KIỆN*): nhà trai 15:00,
       nhà gái 16:00. Thiệp đọc giờ từ Sheet mỗi lần mở (sửa xong vài giây là thấy, gõ `17:30` hoặc `17h30`),
       không cần build lại. Giờ trong hai file `wedding.config.js` đã chép theo, chỉ dùng khi không nối được Sheet
-      (Sheet chậm quá 4 giây) — đổi giờ trong Sheet thì nhớ sửa luôn ở đây
+      (Sheet không trả lời kịp và máy chưa lưu bản từ lần mở trước) — đổi giờ trong Sheet thì nhớ sửa luôn ở đây
 - [x] **Mừng cưới** — đã điền trong sheet `CauHinh`, nhóm *MỪNG CƯỚI*: chú rể TPBank (có ảnh QR riêng trên
       Google Drive), cô dâu MB Bank. Thiệp tự tạo mã QR VietQR (quét được bằng mọi app ngân hàng) khi không có
       ảnh QR riêng hoặc ảnh đó không tải được. Ảnh QR riêng phải chia sẻ "Bất kỳ ai có đường liên kết".
