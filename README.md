@@ -146,8 +146,8 @@ Font là tên font trên [Google Fonts](https://fonts.google.com) (nên chọn f
 **Đã cài xong** cho Trung & Nhi:
 
 - Sheet: <https://docs.google.com/spreadsheets/d/1McYGSS9aSXYBzahcMkWl3GDR24vkHMZylKtDJGmz4_4/edit>
-  (menu **💌 Thiệp cưới** trong Sheet: sinh code + link mời cho khách còn trống, thêm cột "Đã mời", tạo sheet
-  còn thiếu)
+  (menu **💌 Thiệp cưới** trong Sheet: sinh code + link mời cho khách còn trống, thêm cột ô tick "Đã mời" /
+  "Mời offline", tạo sheet còn thiếu)
 
 > **Dữ liệu trong Sheet là thật** (khách mời, xác nhận, lời chúc). Script **chỉ thêm, không bao giờ sửa hay xóa**
 > ô đã có chữ: chỉ ghi vào ô trống (code, link của khách mới), thêm dòng mới (xác nhận, lời chúc, lượt mở) và cập
@@ -164,7 +164,7 @@ Các bước dưới đây chỉ cần khi cài lại từ đầu trên Sheet kh
    "Advanced / Nâng cao" → "Go to … (unsafe)" → Cho phép. Script tạo các sheet:
    - `CauHinh`: ô **B1** điền tên miền thiệp, vd `https://trung-nhi.vercel.app` (không có `/` ở cuối).
    - `KhachMoi`: danh sách khách (code, name, xungHo, side, groups, phone, notes, link, rsvpStatus, guestCount;
-     tùy chọn thêm cột ô tick **Đã mời** ở đầu — mục 5). Script tìm cột theo **chữ ở dòng tiêu đề**, nên chèn /
+     tùy chọn thêm hai cột ô tick **Đã mời**, **Mời offline** ở đầu — mục 5). Script tìm cột theo **chữ ở dòng tiêu đề**, nên chèn /
      đổi chỗ cột không sao, nhưng đừng sửa chữ tiêu đề.
    - `RSVP`, `LoiChuc` (cột **Hiện**: bỏ tick để ẩn một lời chúc), `LuotMo` (ai đã mở thiệp).
 4. **Triển khai → Tùy chọn triển khai mới** → biểu tượng bánh răng → **Ứng dụng web**:
@@ -206,12 +206,21 @@ cho thiệp cưới. Muốn ẩn lời chúc không phù hợp: bỏ tick cột 
    **ghi link vào ô link còn trống** của từng khách có code — mỗi khi bạn sửa sheet `KhachMoi`, hoặc bằng menu
    **💌 Thiệp cưới → Sinh code + link mời cho khách còn trống**. Link y hệt công thức; ô đã có chữ giữ nguyên.
    Ô tiêu đề cột link vẫn hiện `#REF!` — không sao. Khi chép khách từ chỗ khác, chỉ cần dán từ cột `code` tới `notes`.
-   **Đánh dấu đã gửi thiệp:** menu **💌 Thiệp cưới → Thêm cột "Đã mời"** chèn một cột ô tick mới ở đầu sheet
-   (các cột khác dịch sang phải, dữ liệu giữ nguyên); tick vào ô của khách đã gửi link thì chữ cả dòng chuyển xám
-   nhạt, dễ thấy ai còn chưa mời. Chỉ chạy menu này **sau khi đã Triển khai phiên bản mới** của `Code.gs` (mục 4)
-   — bản cũ đọc cột theo vị trí nên sẽ không tra được khách. Không muốn chạy script thì tự làm bằng tay cũng được:
-   chuột phải cột A → *Chèn 1 cột bên trái*, gõ tiêu đề `Đã mời`, chọn cột → *Chèn → Hộp kiểm*, rồi *Định dạng →
-   Định dạng có điều kiện* cho vùng dữ liệu với công thức tùy chỉnh `=$A2`, màu chữ xám.
+   **Đánh dấu đã mời / mời offline:** menu **💌 Thiệp cưới → Thêm cột ô tick "Đã mời" / "Mời offline"** chèn
+   hai cột ô tick mới ở đầu sheet (cột nào đã có thì bỏ qua; các cột khác dịch sang phải, dữ liệu giữ nguyên):
+
+   | Cột | Tick nghĩa là | Cả dòng hiện |
+   |---|---|---|
+   | A `Đã mời` | đã gửi thiệp cho khách này | chữ xám nhạt |
+   | B `Mời offline` | mời trực tiếp / thiệp giấy (để trống = mời online qua link) | nền xanh xám nhạt |
+   | cả hai | | chữ xám nhạt trên nền xanh xám nhạt |
+
+   Chỉ chạy menu này **sau khi đã Triển khai phiên bản mới** của `Code.gs` (mục 4) — bản cũ đọc cột theo vị trí
+   nên sẽ không tra được khách. Chạy lại menu không đụng tới ô đã tick; quy tắc định dạng bạn tự tạo giữ nguyên.
+   Không muốn chạy script thì tự làm bằng tay: chèn 2 cột bên trái cột A, gõ tiêu đề `Đã mời` và `Mời offline`,
+   chọn hai cột → *Chèn → Hộp kiểm*, rồi *Định dạng → Định dạng có điều kiện* cho vùng dữ liệu, theo đúng thứ tự:
+   `=($A2+$B2)=2` (chữ xám + nền xanh xám), `=$A2` (chữ xám), `=$B2` (nền xanh xám) — Google Sheets chỉ áp quy
+   tắc đầu tiên khớp với mỗi ô.
 3. Khi khách xác nhận tham dự, cột `rsvpStatus` / `guestCount` tự cập nhật; chi tiết ở sheet `RSVP`.
    Ở phương án B, ô Họ và tên của phần Xác nhận và Lời chúc được điền sẵn tên khách trong link (khách sửa được),
    và xác nhận vẫn gửi kèm mã khách khi Sheet chậm lúc mở thiệp.

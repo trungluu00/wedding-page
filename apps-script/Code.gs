@@ -32,9 +32,13 @@ var SHEETS = {
 };
 
 var GUEST_HEADERS = ['code', 'name', 'xungHo', 'side', 'groups', 'phone', 'notes', 'link', 'rsvpStatus', 'guestCount'];
-// Cột ô tick "Đã mời" (menu 💌 Thiệp cưới → Thêm cột "Đã mời"), chèn ở đầu sheet KhachMoi. Script tìm mọi cột
-// theo chữ tiêu đề (guestCols_), nên đừng đổi chữ ở dòng 1.
+// Hai cột ô tick ở đầu sheet KhachMoi (menu 💌 Thiệp cưới → Thêm cột ô tick): "Đã mời" (đã gửi thiệp) và
+// "Mời offline" (tick = mời trực tiếp / thiệp giấy, để trống = mời online qua link). Script tìm mọi cột theo chữ
+// tiêu đề (guestCols_), nên đừng đổi chữ ở dòng 1.
 var INVITED_HEADER = 'Đã mời';
+var OFFLINE_HEADER = 'Mời offline';
+var FADED_TEXT = '#a3a8ad'; // chữ xám nhạt: dòng đã mời
+var OFFLINE_FILL = '#e3eaf3'; // nền xanh xám nhạt: dòng mời offline
 var RSVP_HEADERS = ['createdAt', 'code', 'name', 'side', 'willAttend', 'guestCount', 'notes'];
 var WISH_HEADERS = ['createdAt', 'code', 'author', 'relation', 'text', 'Hiện'];
 var OPEN_HEADERS = ['createdAt', 'code', 'name'];
@@ -378,7 +382,8 @@ function generateSlug(text) {
  * Vị trí các cột của sheet KhachMoi (đếm từ 1), tìm theo chữ ở dòng tiêu đề — nên chèn thêm cột (vd cột "Đã mời"
  * ở đầu) hay đổi chỗ cột không làm hỏng script. Cột link nhận ra bằng công thức của nó (ô tiêu đề có thể đang báo
  * #REF!). Tiêu đề nào không tìm thấy thì coi như các cột nằm liền nhau theo thứ tự GUEST_HEADERS, bắt đầu từ cột code.
- * cols.invited = vị trí cột "Đã mời" (0 = chưa có); cols.width = số cột cần đọc cho một dòng khách.
+ * cols.invited / cols.offline = vị trí cột ô tick "Đã mời" / "Mời offline" (0 = chưa có);
+ * cols.width = số cột cần đọc cho một dòng khách.
  */
 function guestCols_(sheet) {
   var width = Math.max(sheet.getLastColumn(), GUEST_HEADERS.length);
@@ -386,9 +391,14 @@ function guestCols_(sheet) {
   var names = head.getDisplayValues()[0].map(function (s) { return String(s || '').trim().toLowerCase(); });
   var formulas = head.getFormulas()[0];
   var invited = names.indexOf(INVITED_HEADER.toLowerCase());
+  var offline = names.indexOf(OFFLINE_HEADER.toLowerCase());
   var base = names.indexOf('code');
-  if (base === -1) base = invited === 0 ? 1 : 0;
-  var cols = { width: width, invited: invited + 1 };
+  if (base === -1) {
+    // Không thấy tiêu đề "code": cột code nằm ngay sau các cột ô tick ở đầu (nếu có)
+    base = 0;
+    while (base === invited || base === offline) base++;
+  }
+  var cols = { width: width, invited: invited + 1, offline: offline + 1 };
   GUEST_HEADERS.forEach(function (h, i) {
     var at = -1;
     if (h === 'link') {
@@ -678,53 +688,88 @@ function fillMissingCodes() {
 }
 
 /**
- * Menu: THÊM cột "Đã mời" (ô tick) vào đầu sheet KhachMoi; dòng nào đã tick thì chữ cả dòng mờ đi.
+ * Menu: THÊM hai cột ô tick vào đầu sheet KhachMoi (cột nào đã có thì bỏ qua):
+ *  - "Đã mời": tick khi đã gửi thiệp → chữ cả dòng xám nhạt;
+ *  - "Mời offline": tick = mời trực tiếp / thiệp giấy, để trống = mời online qua link → nền dòng xanh xám nhạt.
  * Chỉ thêm: cột mới chèn vào (các cột khác dịch sang phải, dữ liệu giữ nguyên), ô tick đặt vào cột mới trống,
- * cộng một quy tắc định dạng. Cột đã có thì không đụng tới ô nào, chỉ thêm quy tắc làm mờ nếu còn thiếu.
+ * cộng các quy tắc định dạng có điều kiện. Không sửa / xóa ô nào đã có.
  */
-function addInvitedColumn() {
+function addTickColumns() {
   var ui = SpreadsheetApp.getUi();
   var guests = getSheet_(SHEETS.guests);
   var cols = guestCols_(guests);
-  if (!cols.invited) {
+  var missing = [];
+  if (!cols.invited) missing.push('"' + INVITED_HEADER + '"');
+  if (!cols.offline) missing.push('"' + OFFLINE_HEADER + '"');
+  if (missing.length) {
     var ok = ui.alert(
-      'Thêm cột "' + INVITED_HEADER + '"',
-      'Một cột ô tick mới được chèn vào đầu sheet KhachMoi; các cột khác dịch sang phải, dữ liệu giữ nguyên.\n\n' +
+      'Thêm cột ô tick ' + missing.join(' và '),
+      'Cột ô tick mới được chèn vào đầu sheet KhachMoi; các cột khác dịch sang phải, dữ liệu giữ nguyên.\n\n' +
       'CHỈ làm bước này SAU KHI đã triển khai phiên bản mới của Apps Script (Triển khai → Quản lý triển khai → ' +
       'bút chì → Phiên bản: Mới → Triển khai). Nếu chưa, thiệp sẽ không tra được tên khách cho tới khi triển khai.\n\n' +
       'Tiếp tục?',
       ui.ButtonSet.YES_NO);
     if (ok !== ui.Button.YES) return;
-    guests.insertColumnBefore(1);
-    guests.getRange(1, 1).setValue(INVITED_HEADER).setFontWeight('bold').setHorizontalAlignment('center');
-    guests.setColumnWidth(1, 70);
-    cols = guestCols_(guests);
-    // Cột vừa chèn còn trống hoàn toàn → đặt ô tick (chưa tick) cho mọi dòng
-    guests.getRange(2, cols.invited, guests.getMaxRows() - 1, 1).insertCheckboxes().setHorizontalAlignment('center');
+    if (!cols.invited) {
+      var at = cols.offline || 1; // đứng trước cột "Mời offline" nếu đã có, không thì đầu sheet
+      guests.insertColumnBefore(at);
+      newTickColumn_(guests, at, INVITED_HEADER, 'Tick khi đã gửi thiệp cho khách này — chữ cả dòng sẽ mờ đi.');
+      cols = guestCols_(guests);
+    }
+    if (!cols.offline) {
+      guests.insertColumnAfter(cols.invited);
+      newTickColumn_(guests, cols.invited + 1, OFFLINE_HEADER,
+        'Tick = mời offline (trực tiếp / thiệp giấy) — nền dòng chuyển xanh xám nhạt. Để trống = mời online qua link.');
+      cols = guestCols_(guests);
+    }
   }
-  addInvitedRule_(guests, cols);
-  ui.alert('Cột "' + INVITED_HEADER + '" nằm ở cột ' + colLetter_(cols.invited) +
-    '. Tick vào ô của khách đã gửi thiệp — chữ cả dòng sẽ mờ đi.');
+  applyTickRules_(guests, cols);
+  ui.alert('"' + INVITED_HEADER + '" ở cột ' + colLetter_(cols.invited) + ', "' + OFFLINE_HEADER + '" ở cột ' +
+    colLetter_(cols.offline) + '.\n\nTick "' + INVITED_HEADER + '": chữ cả dòng mờ đi.\nTick "' + OFFLINE_HEADER +
+    '": nền dòng xanh xám nhạt (để trống = mời online qua link).');
 }
 
-/** Thêm (nếu chưa có) quy tắc định dạng có điều kiện: dòng có ô "Đã mời" được tick → chữ xám nhạt. */
-function addInvitedRule_(guests, cols) {
+/** Tên cũ của menu (Sheet đang mở từ trước khi cập nhật script vẫn gọi tên này). */
+function addInvitedColumn() {
+  addTickColumns();
+}
+
+/** Cột vừa chèn (còn trống hoàn toàn): tiêu đề + ô tick chưa tick cho mọi dòng. */
+function newTickColumn_(guests, col, header, note) {
+  guests.getRange(1, col).setValue(header).setFontWeight('bold').setHorizontalAlignment('center').setNote(note);
+  guests.setColumnWidth(col, 80);
+  guests.getRange(2, col, guests.getMaxRows() - 1, 1).insertCheckboxes().setHorizontalAlignment('center');
+}
+
+/**
+ * Quy tắc định dạng có điều kiện cho hai cột ô tick. Google Sheets chỉ áp quy tắc ĐẦU TIÊN khớp với một ô,
+ * nên dòng vừa "Đã mời" vừa "Mời offline" có quy tắc riêng đứng trước (chữ mờ + nền nhạt).
+ * Công thức không dùng dấu phẩy/chấm phẩy nên chạy được với Sheet tiếng Việt lẫn tiếng Anh.
+ * Chỉ thay các quy tắc do script này tạo; quy tắc bạn tự thêm giữ nguyên (đứng sau).
+ */
+function applyTickRules_(guests, cols) {
   var n = guests.getMaxRows() - 1;
-  if (n < 1 || !cols.invited) return;
-  var formula = '=$' + colLetter_(cols.invited) + '2';
-  var rules = guests.getConditionalFormatRules();
-  var exists = rules.some(function (rule) {
+  if (n < 1 || (!cols.invited && !cols.offline)) return;
+  var range = guests.getRange(2, 1, n, Math.max(guests.getLastColumn(), cols.width));
+  var ours = /^=(\$[A-Z]+2|\(\$[A-Z]+2\+\$[A-Z]+2\)=2)$/;
+  var others = guests.getConditionalFormatRules().filter(function (rule) {
     var c = rule.getBooleanCondition();
     var v = c && c.getCriteriaValues();
-    return !!(v && v.length === 1 && String(v[0]) === formula);
+    return !(v && v.length === 1 && ours.test(String(v[0])));
   });
-  if (exists) return;
-  rules.push(SpreadsheetApp.newConditionalFormatRule()
-    .whenFormulaSatisfied(formula)
-    .setFontColor('#a3a8ad')
-    .setRanges([guests.getRange(2, 1, n, Math.max(guests.getLastColumn(), cols.width))])
-    .build());
-  guests.setConditionalFormatRules(rules);
+  var make = function (formula, font, fill) {
+    var b = SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied(formula).setRanges([range]);
+    if (font) b = b.setFontColor(font);
+    if (fill) b = b.setBackground(fill);
+    return b.build();
+  };
+  var I = cols.invited ? '$' + colLetter_(cols.invited) + '2' : '';
+  var O = cols.offline ? '$' + colLetter_(cols.offline) + '2' : '';
+  var mine = [];
+  if (I && O) mine.push(make('=(' + I + '+' + O + ')=2', FADED_TEXT, OFFLINE_FILL));
+  if (I) mine.push(make('=' + I, FADED_TEXT, null));
+  if (O) mine.push(make('=' + O, null, OFFLINE_FILL));
+  guests.setConditionalFormatRules(mine.concat(others));
 }
 
 /**
@@ -756,7 +801,7 @@ function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('💌 Thiệp cưới')
     .addItem('Sinh code + link mời cho khách còn trống', 'addMissingInviteLinks')
-    .addItem('Thêm cột "Đã mời" (ô tick đầu dòng)', 'addInvitedColumn')
+    .addItem('Thêm cột ô tick "Đã mời" / "Mời offline"', 'addTickColumns')
     .addSeparator()
     .addItem('Tạo sheet còn thiếu (không sửa sheet đã có)', 'setupDatabase')
     .addToUi();
