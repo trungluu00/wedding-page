@@ -11,6 +11,7 @@
 import { storage } from '../common/storage.js';
 
 const TIMEOUT_MS = 12000;
+const POST_TIMEOUT_MS = 30000;
 
 const DEMO_GUESTS = {
     'bac-hung-7k2': { code: 'bac-hung-7k2', name: 'Hùng', xungHo: 'Bác', side: 'nha-trai', groups: ['nha-trai', 'ho-hang'] },
@@ -37,7 +38,8 @@ export const applySettings = (cfg, data) => {
     const times = data.events && typeof data.events === 'object' ? data.events : {};
     for (const ev of cfg.events ?? []) {
         const t = times[ev.id]?.time;
-        if (typeof t === 'string' && (t === '' || /^\d{2}:\d{2}$/.test(t)) && t !== (ev.time ?? '')) {
+        // Giờ hợp lệ 00:00–23:59 (giờ sai như "25:00" làm mất ngày của sự kiện → giữ giờ trong config)
+        if (typeof t === 'string' && (t === '' || /^([01]\d|2[0-3]):[0-5]\d$/.test(t)) && t !== (ev.time ?? '')) {
             ev.time = t;
             changed = true;
         }
@@ -57,17 +59,19 @@ export const applySettings = (cfg, data) => {
         cfg.couple.bride.bio = str(texts.brideBio);
         changed = true;
     }
-    if (Array.isArray(data.accounts) && data.accounts.length && cfg.gifts) {
+    const accounts = Array.isArray(data.accounts) ? data.accounts.filter((a) => a && typeof a === 'object' && a.family) : [];
+    if (accounts.length && cfg.gifts) {
         const base = cfg.gifts.accounts ?? [];
-        cfg.gifts.accounts = data.accounts.map((a) => {
+        cfg.gifts.accounts = accounts.map((a) => {
             const out = { ...(base.find((b) => b.family === a.family) ?? { family: a.family }) };
             for (const k of ['bankBin', 'bankName', 'accountNo', 'accountName', 'qrImage']) {
                 if (a[k]) {
                     out[k] = String(a[k]);
                 }
             }
-            // Sheet để trống số tài khoản → coi như chưa có (mục mừng cưới tự ẩn)
-            if (!a.accountNo && !a.qrImage) {
+            // Sheet là chuẩn cho số tài khoản: ô trống thì không dùng số giữ chỗ trong config
+            // (chỉ có ảnh QR riêng → thẻ chỉ hiện QR; không QR, không số → mục mừng cưới tự ẩn)
+            if (!a.accountNo) {
                 out.accountNo = '';
             }
             return out;
@@ -85,24 +89,34 @@ export const appsScript = (baseUrl) => {
     const isDemo = url.length === 0;
     const demo = storage('demo');
 
-    const withTimeout = async (input, init = {}) => {
+    /** Lỗi gọi Web App, câu chữ tiếng Việt để hiện thẳng cho khách. */
+    const fail = (msg) => Object.assign(new Error(msg), { friendly: true });
+
+    const withTimeout = async (input, init = {}, ms = TIMEOUT_MS) => {
         const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
-        const timer = ctrl ? setTimeout(() => ctrl.abort(), TIMEOUT_MS) : null;
+        const timer = ctrl ? setTimeout(() => ctrl.abort(), ms) : null;
         try {
-            const res = await fetch(input, { ...init, signal: ctrl?.signal, redirect: 'follow', credentials: 'omit' });
-            if (!res.ok) {
-                throw new Error(`Máy chủ trả lỗi ${res.status}`);
+            // no-store: không dùng bộ nhớ đệm của trình duyệt — Chrome bắt yêu cầu GET giống hệt nhau chờ nhau
+            // (lượt tra thử lại sẽ kẹt sau lượt đầu đang chậm), và dữ liệu Sheet luôn phải mới.
+            let res;
+            try {
+                res = await fetch(input, { ...init, signal: ctrl?.signal, redirect: 'follow', credentials: 'omit', cache: 'no-store' });
+            } catch (e) {
+                throw e?.name === 'AbortError' ? fail('kết nối quá chậm') : fail('không kết nối được, xin kiểm tra mạng');
             }
-            const json = await res.json();
+            if (!res.ok) {
+                throw fail(`máy chủ đang bận (mã ${res.status})`);
+            }
+            let json;
+            try {
+                json = await res.json();
+            } catch (e) {
+                throw e?.name === 'AbortError' ? fail('kết nối quá chậm') : fail('máy chủ trả lời không hợp lệ');
+            }
             if (!json || typeof json !== 'object') {
-                throw new Error('Phản hồi không hợp lệ');
+                throw fail('máy chủ trả lời không hợp lệ');
             }
             return json;
-        } catch (e) {
-            if (e?.name === 'AbortError') {
-                throw new Error('Kết nối quá chậm, bạn thử lại sau ít phút nhé.');
-            }
-            throw e;
         } finally {
             if (timer) clearTimeout(timer);
         }
@@ -117,24 +131,27 @@ export const appsScript = (baseUrl) => {
     };
 
     // text/plain để là "simple request": không có preflight CORS, Apps Script nhận được.
+    // Gửi (xác nhận / lời chúc) chờ tới 30 giây: Web App có lúc trả lời 6–23 giây; bỏ cuộc sớm thì khách thấy
+    // "chưa gửi được" trong khi Sheet vẫn ghi → gửi lại bị trùng (Code.gs bỏ qua bản trùng theo mã rid).
     const post = (body) => withTimeout(url, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(body),
-    });
+    }, POST_TIMEOUT_MS);
 
     const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
     /**
      * @param {string} code
+     * @param {number} [attempt=1] lượt thử lại (≥ 2) có địa chỉ khác lượt đầu để trình duyệt gửi song song
      * @returns {Promise<{success: boolean, found: boolean, data?: object}>}
      */
-    const lookup = async (code) => {
+    const lookup = async (code, attempt = 1) => {
         if (isDemo) {
             const g = DEMO_GUESTS[String(code).toLowerCase()];
             return g ? { success: true, found: true, data: { ...g } } : { success: true, found: false };
         }
-        return get({ action: 'lookup', code });
+        return get(attempt > 1 ? { action: 'lookup', code, try: String(attempt) } : { action: 'lookup', code });
     };
 
     /**
@@ -148,12 +165,15 @@ export const appsScript = (baseUrl) => {
         return get({ action: 'wishes' });
     };
 
-    /** Giờ sự kiện + tài khoản mừng cưới sửa trên Google Sheet. Demo → data null (dùng wedding.config.js). */
-    const settings = async () => {
+    /**
+     * Giờ sự kiện + tài khoản mừng cưới sửa trên Google Sheet. Demo → data null (dùng wedding.config.js).
+     * @param {number} [attempt=1] lượt thử lại (≥ 2) có địa chỉ khác để trình duyệt gửi song song
+     */
+    const settings = async (attempt = 1) => {
         if (isDemo) {
             return { success: true, data: null };
         }
-        return get({ action: 'settings' });
+        return get(attempt > 1 ? { action: 'settings', try: String(attempt) } : { action: 'settings' });
     };
 
     const rsvp = async (payload) => {

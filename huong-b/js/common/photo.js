@@ -7,8 +7,12 @@ import sizes from '../../photos/sizes.json';
 const byId = new Map(Object.entries(sizes));
 const url = (id, size) => `photos/w/${id}-${size}.webp`;
 
-/** Cột thiệp: 100% màn hình điện thoại / máy tính bảng dọc; từ 768px rộng tối đa 480px (.invite-col trong guest.css). */
-export const COLUMN_SIZES = '(min-width: 768px) 480px, 100vw';
+/**
+ * Cột thiệp: gần hết bề ngang điện thoại / máy tính bảng dọc; từ 768px rộng tối đa 480px (.invite-col trong guest.css).
+ * Khai 90vw thay vì 100vw: điện thoại màn hình nét x3 (375px → cần ~1012px) chọn bản 1600 (ảnh dọc rộng 1067px,
+ * vẫn sắc nét) thay vì tải bản 2560 nặng gấp đôi. Ảnh đầu thiệp thực tế còn hẹp hơn (có lề hai bên).
+ */
+export const COLUMN_SIZES = '(min-width: 768px) 480px, 90vw';
 
 export const isPhotoId = (ref) => byId.has(ref);
 
@@ -23,9 +27,12 @@ export const photoAttrs = (ref, sizesAttr = COLUMN_SIZES) => {
         return { src: ref, 'data-full': ref };
     }
     const [size, w, h] = p.w.find((x) => x[0] === 900) ?? p.w[p.w.length - 1];
+    // Bản 2560 không đưa vào srcset: điện thoại màn nét (x3) sẽ chọn nó cho ảnh rộng hết màn hình (mỗi ảnh
+    // 0,5–0,9 MB). Bản 1600 đủ nét cho mọi chỗ trên thiệp; 2560 chỉ tải khi khách chạm xem ảnh lớn (data-full).
+    const choices = p.w.filter((x) => x[0] < 2560);
     return {
         src: url(ref, size),
-        srcset: p.w.map((x) => `${url(ref, x[0])} ${x[1]}w`).join(', '),
+        srcset: (choices.length ? choices : p.w).map((x) => `${url(ref, x[0])} ${x[1]}w`).join(', '),
         sizes: sizesAttr,
         width: w,
         height: h,

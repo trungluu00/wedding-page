@@ -113,7 +113,7 @@ export default {
       lunar: "Tức ngày 04 tháng 11 năm Bính Ngọ",
       venue: "Tư gia nhà trai",
       address: "Thôn Phúc Hoà, Xã Thác Bà, Tỉnh Lào Cai",
-      mapsUrl: "https://www.google.com/maps/dir/?api=1&destination=Th%C3%B4n%20Ph%C3%BAc%20H%C3%B2a%2C%20X%C3%A3%20Th%C3%A1c%20B%C3%A0%2C%20L%C3%A0o%20Cai", // chỉ đường theo địa chỉ trên thiệp in
+      mapsUrl: "https://www.google.com/maps/dir/?api=1&destination=21.7124794,105.0643472", // chỉ đường tới nhà trai theo tọa độ (giống huong-b)
       audience: ["nha-trai", "ban-chung", "public"],
     },
     {
@@ -148,7 +148,7 @@ export default {
       lunar: "Tức ngày 05 tháng 11 năm Bính Ngọ",
       venue: "Tư gia nhà trai",
       address: "Thôn Phúc Hoà, Xã Thác Bà, Tỉnh Lào Cai",
-      mapsUrl: "https://www.google.com/maps/dir/?api=1&destination=Th%C3%B4n%20Ph%C3%BAc%20H%C3%B2a%2C%20X%C3%A3%20Th%C3%A1c%20B%C3%A0%2C%20L%C3%A0o%20Cai",
+      mapsUrl: "https://www.google.com/maps/dir/?api=1&destination=21.7124794,105.0643472",
       audience: ["nha-trai", "public"],
     },
   ],

@@ -156,13 +156,17 @@ export const util = (() => {
      */
     const disableButton = (button, message = 'Đang gửi...') => {
         button.disabled = true;
+        // Đánh dấu "đang gửi": mất mạng rồi có lại (offline.js) không được bật nút này lên giữa chừng —
+        // nếu không khách bấm lần nữa sẽ gửi trùng và nút kẹt mãi ở "Đang gửi...".
+        button.dataset.busy = '1';
         const tmp = Array.from(button.childNodes);
         button.replaceChildren(document.createRange().createContextualFragment(loader), document.createTextNode(message));
 
         return {
             restore: (disabled = false) => {
                 button.replaceChildren(...tmp);
-                button.disabled = disabled;
+                delete button.dataset.busy;
+                button.disabled = disabled || (button.getAttribute('data-offline-disabled') === 'true');
             },
         };
     };

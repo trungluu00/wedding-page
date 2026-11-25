@@ -149,9 +149,12 @@ section.bg-alt {
     color: var(--c-on-primary);
 }
 
+/* Bìa thư cao đúng bằng màn hình (#welcome cố định toàn màn) và cuộn được khi nội dung cao hơn — màn hình thấp
+   (iPhone SE/8 có thanh công cụ Safari, điện thoại xoay ngang) vẫn kéo xuống bấm được "Mở thiệp".
+   Nội dung căn giữa bằng margin auto (my-auto) thay vì align-items: center, để khi tràn không bị cắt mất phần trên. */
 .cover {
-    min-height: 100vh;
-    min-height: 100dvh;
+    height: 100%;
+    -webkit-overflow-scrolling: touch;
 }
 
 .bg-cover-c .ornament {
@@ -406,6 +409,7 @@ section.bg-alt {
     max-height: 88vh;
     object-fit: contain;
     background-color: #000;
+    touch-action: pan-y pinch-zoom; /* vuốt ngang do thiệp xử lý (đổi ảnh), không phải trình duyệt */
 }
 
 .lightbox-nav {

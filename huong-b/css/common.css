@@ -46,6 +46,12 @@ body {
     line-height: 1.6;
 }
 
+/* Vuốt ngang (album) không kích hoạt cử chỉ "quay lại trang trước" của trình duyệt */
+html,
+body {
+    overscroll-behavior-x: none;
+}
+
 /* --- Nền và chữ --- */
 .bg-page {
     background-color: var(--c-bg);
@@ -191,6 +197,18 @@ body {
     z-index: 1080;
     width: min(calc(100vw - 7.5rem), 22rem);
     pointer-events: none;
+}
+/* Nút nổi "Xác nhận tham dự" đang hiện: thông báo nằm trên nút, không che nút */
+body.rsvp-cta-on .toast-zone {
+    bottom: calc(3.6rem + env(safe-area-inset-bottom) + 5rem);
+}
+/* Màn hình máy tính: thông báo nằm giữa cột thiệp (bên phải), không nằm giữa cửa sổ trên ảnh trình chiếu */
+@media (min-width: 768px) {
+    .toast-zone {
+        left: auto !important;
+        right: calc(clamp(400px, 36vw, 480px) / 2);
+        transform: translateX(50%) !important;
+    }
 }
 
 .toast-c {

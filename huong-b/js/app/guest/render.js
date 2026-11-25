@@ -24,14 +24,17 @@ export const guestDisplay = (guest) => {
 };
 
 /**
- * Sự kiện khách được thấy: audience có "all", hoặc trùng side/groups của khách.
+ * Sự kiện khách được thấy, xếp theo thời gian: audience có "all", hoặc trùng side/groups của khách.
  * Người mở link không có mã khách (hoặc mã không có trong Sheet) mang nhãn "public".
- * Khách có trong Sheet nhưng chưa điền side/groups cũng tính là "public" (thấy đủ sự kiện chung),
- * thay vì không thấy sự kiện nào.
+ * Chỉ tính side/groups có xuất hiện trong audience của sự kiện nào đó: khách chưa điền side, hay side gõ sai
+ * (vd "ban-be"), cũng tính là "public" (thấy đủ sự kiện chung) thay vì không thấy sự kiện nào.
  */
 export const visibleEvents = (events, guest) => {
-    const tags = guest ? [guest.side, ...(Array.isArray(guest.groups) ? guest.groups : [])].filter(Boolean) : [];
-    return (events ?? []).filter((ev) => {
+    const list = events ?? [];
+    const known = new Set(list.flatMap((ev) => (Array.isArray(ev.audience) ? ev.audience : [])));
+    const tags = guest ? [guest.side, ...(Array.isArray(guest.groups) ? guest.groups : [])].filter((t) => t && known.has(t)) : [];
+    const byTime = (a, b) => (eventDate(a)?.getTime() ?? 0) - (eventDate(b)?.getTime() ?? 0);
+    return list.filter((ev) => {
         const aud = Array.isArray(ev.audience) && ev.audience.length ? ev.audience : ['all'];
         if (aud.includes('all')) {
             return true;
@@ -40,8 +43,14 @@ export const visibleEvents = (events, guest) => {
             return aud.includes('public');
         }
         return aud.some((a) => tags.includes(a));
-    });
+    }).sort(byTime);
 };
+
+/**
+ * Khách thấy nhiều "sự kiện chính" ở các nơi khác nhau (link chung, bạn chung, chưa biết nhà): không chọn hộ
+ * một nhà cho nút "Lưu vào lịch" / dòng đếm ngược, tránh lưu nhầm địa điểm nhà kia vào lịch của khách.
+ */
+export const mainIsAmbiguous = (visible) => new Set((visible ?? []).filter((e) => e.main).map((e) => e.venue)).size > 1;
 
 /** Sự kiện chính (cho bìa, đếm ngược): sự kiện "all" sớm nhất, nếu không có thì sự kiện thấy được sớm nhất. */
 export const mainEvent = (events, visible) => {
@@ -85,7 +94,8 @@ export const ornament = (cfg, small = false, large = false) => {
  * @param {string} ref
  * @param {string} alt
  * @param {string} cls
- * @param {{eager?: boolean, sizes?: string, zoom?: boolean, group?: string}} [opt]
+ * @param {{eager?: boolean, priority?: boolean, sizes?: string, zoom?: boolean, group?: string}} [opt]
+ *   priority: tải trước mọi thứ (chỉ ảnh bìa thư — thứ khách thấy đầu tiên)
  */
 const img = (ref, alt, cls, opt = {}) => {
     if (!ref) {
@@ -97,7 +107,7 @@ const img = (ref, alt, cls, opt = {}) => {
         alt: alt || 'Ảnh cưới',
         class: `${cls} ${zoom ? 'js-zoom cursor-pointer' : ''}`.trim(),
         loading: opt.eager ? 'eager' : 'lazy',
-        fetchpriority: opt.eager ? 'high' : null,
+        fetchpriority: opt.priority ? 'high' : null,
         decoding: 'async',
         'data-group': opt.group ?? null,
     });
@@ -116,7 +126,10 @@ const sectionShell = (id, { kicker, title }, ...children) => h('section', { id, 
     ...children,
 );
 
-const coupleNames = (cfg) => `${cfg.couple.groom.shortName} & ${cfg.couple.bride.shortName}`;
+/** "Trung & Nhi"; thiệp nhà gái (khách nhà gái / ?ben=nha-gai) ghi tên cô dâu trước: "Nhi & Trung", như thiệp in. */
+const coupleNames = (cfg, ctx) => (ctx?.side === 'nha-gai'
+    ? `${cfg.couple.bride.shortName} & ${cfg.couple.groom.shortName}`
+    : `${cfg.couple.groom.shortName} & ${cfg.couple.bride.shortName}`);
 
 // ---------------------------------------------------------------------------
 // Từng phần
@@ -126,14 +139,14 @@ export const renderCover = (cfg, ctx) => {
     const main = ctx.main;
     const d = main ? eventDate(main) : null;
     // Bìa thư theo trang xem thử (preset Lục bảo): nền màu chính, 囍 vàng đồng, nút "Mở thiệp" nền vàng đồng.
-    return h('div', { class: 'cover d-flex justify-content-center align-items-center overflow-y-auto px-3' },
-        h('div', { class: 'd-flex flex-column text-center align-items-center py-4' },
+    return h('div', { class: 'cover d-flex justify-content-center overflow-y-auto px-3' },
+        h('div', { class: 'd-flex flex-column text-center align-items-center py-4 my-auto' },
             cfg.photos?.cover ? ornament(cfg) : ornament(cfg, false, true),
             h('p', { class: 'cover-small mt-3 mb-3' }, 'Thiệp mời cưới'),
             cfg.photos?.cover
-                ? img(cfg.photos.cover, `Ảnh ${coupleNames(cfg)}`, 'cover-photo mb-3', { eager: true, zoom: false, sizes: fixedSizes(12) })
+                ? img(cfg.photos.cover, `Ảnh ${coupleNames(cfg, ctx)}`, 'cover-photo mb-3', { eager: true, priority: true, zoom: false, sizes: fixedSizes(12) })
                 : null,
-            h('h1', { class: 'font-esthetic cover-names mb-1' }, coupleNames(cfg)),
+            h('h1', { class: 'font-esthetic cover-names mb-1' }, coupleNames(cfg, ctx)),
             d ? h('p', { class: 'cover-date mb-3' }, shortDate(d)) : null,
             h('p', { class: 'cover-small mb-1' }, 'Kính mời'),
             h('p', { class: 'cover-guest mb-1', id: 'cover-guest' }, ctx.khach),
@@ -148,12 +161,13 @@ const renderHero = (cfg, ctx) => {
     const d = ctx.main ? eventDate(ctx.main) : null;
     return h('section', { id: 'home', class: 'bg-page text-center pt-5' },
         h('p', { class: 'section-kicker mb-2' }, 'Chúng tôi kết hôn'),
-        h('h1', { class: 'font-esthetic mb-4', style: { fontSize: '3.25rem', color: 'var(--c-strong)' } }, coupleNames(cfg)),
-        h('div', { class: 'px-4' }, img(cfg.photos?.hero, `Ảnh cưới ${coupleNames(cfg)}`, 'hero-photo', { eager: true })),
+        h('h1', { class: 'font-esthetic mb-4', style: { fontSize: '3.25rem', color: 'var(--c-strong)' } }, coupleNames(cfg, ctx)),
+        h('div', { class: 'px-4' }, img(cfg.photos?.hero, `Ảnh cưới ${coupleNames(cfg, ctx)}`, 'hero-photo', { eager: true, sizes: '(min-width: 768px) 432px, calc(100vw - 3rem)' })),
         d ? h('p', { class: 'mt-4 mb-1 font-display', style: { fontSize: '1.15rem' } }, longDate(d)) : null,
         ctx.main?.lunar ? h('p', { class: 'text-muted-c small mb-3' }, `(${ctx.main.lunar})`) : null,
         h('div', { class: 'd-flex flex-wrap justify-content-center gap-2' },
-            ctx.main ? calendarLink(cfg, ctx, ctx.main, `Đám cưới ${coupleNames(cfg)}`, 'Lưu vào lịch', 'btn btn-outline-auto btn-sm rounded-pill px-3 shadow-sm') : null,
+            // Thấy sự kiện chính ở cả hai nhà thì không lưu hộ một nhà — mỗi thẻ sự kiện có nút "Lưu lịch" riêng
+            ctx.main && !mainIsAmbiguous(ctx.events) ? calendarLink(cfg, ctx, ctx.main, `Đám cưới ${coupleNames(cfg, ctx)}`, 'Lưu vào lịch', 'btn btn-outline-auto btn-sm rounded-pill px-3 shadow-sm') : null,
             h('button', { type: 'button', class: 'btn btn-outline-auto btn-sm rounded-pill px-3 shadow-sm', id: 'button-share' },
                 icon('fa-share-nodes', 'me-2'), 'Chia sẻ thiệp')),
         h('div', { class: 'd-flex justify-content-center align-items-center mt-4 mb-1' },
@@ -234,7 +248,7 @@ const eventCard = (cfg, ev, ctx) => {
         h('div', { class: 'd-flex flex-wrap justify-content-center gap-2' },
             ev.mapsUrl ? h('a', { class: 'btn btn-primary btn-sm rounded-pill px-3', href: ev.mapsUrl, target: '_blank', rel: 'noopener' },
                 icon('fa-map-location-dot', 'me-2'), 'Chỉ đường') : null,
-            d ? calendarLink(cfg, ctx, ev, `${ev.name} - ${coupleNames(cfg)}`, 'Lưu lịch', 'btn btn-outline-auto btn-sm rounded-pill px-3') : null,
+            d ? calendarLink(cfg, ctx, ev, `${ev.name} - ${coupleNames(cfg, ctx)}`, 'Lưu lịch', 'btn btn-outline-auto btn-sm rounded-pill px-3') : null,
         ),
     );
 };
@@ -271,13 +285,18 @@ const renderCountdown = (cfg, ctx) => {
         h('div', { class: 'row justify-content-center mx-0', id: 'countdown-boxes' },
             box('day', 'Ngày'), box('hour', 'Giờ'), box('minute', 'Phút'), box('second', 'Giây')),
         h('p', { class: 'mt-3 mb-0 text-muted-c small', id: 'countdown-note' },
-            [ctx.main.name, `${weekday(eventDate(ctx.main))} ${shortDate(eventDate(ctx.main))}`, ctx.main.time || null].filter(Boolean).join(' · ')),
+            // Thấy sự kiện chính ở cả hai nhà: chỉ ghi ngày, không ghi tên / giờ của riêng một nhà
+            (mainIsAmbiguous(ctx.events)
+                ? [`${weekday(eventDate(ctx.main))} ${shortDate(eventDate(ctx.main))}`]
+                : [ctx.main.name, `${weekday(eventDate(ctx.main))} ${shortDate(eventDate(ctx.main))}`, ctx.main.time ? timeText(eventDate(ctx.main)) : null])
+                .filter(Boolean).join(' · ')),
     );
 };
 
 const ALBUM_FIRST = 12;
-// sizes cho ô lưới 3 cột trong cột thiệp.
-const GRID_SIZES = '(min-width: 768px) 160px, 34vw';
+// sizes cho ô lưới 3 cột trong cột thiệp (ô vuông ~108px trên điện thoại). Khai nhỏ hơn bề ngang thật một chút để
+// điện thoại màn nét dùng bản 400 (vẫn nét ~2,5 lần) thay vì bản 900 (tới 180 KB mỗi ô).
+const GRID_SIZES = '(min-width: 768px) 140px, 23vw';
 
 /** Album: lưới 3 cột, hiện 12 ảnh đầu, nút "Xem thêm"; chạm ảnh mở lightbox có nút trước/sau. */
 const renderAlbum = (cfg) => {
@@ -318,12 +337,19 @@ const renderMusic = (cfg) => {
     );
 };
 
+/** Số tài khoản thật (có chữ số, không phải số giữ chỗ toàn 0 / TODO). */
+const hasAccountNo = (a) => {
+    const no = String(a?.accountNo ?? '').replace(/\s/g, '');
+    return /\d/.test(no) && !/^0+$/.test(no) && !/TODO/i.test(`${no}${a?.bankBin ?? ''}`);
+};
+
 const accountCard = (acc, ctx) => {
     const info = `Mung cuoi ${ctx.guestNamePlain || ''}`.trim();
     const qrSrc = acc.qrImage || vietQrUrl(acc, info);
     // Ảnh QR riêng (vd Google Drive) không tải được — hay gặp khi khách đang đăng nhập Google —
     // thì dùng mã VietQR tự sinh từ ngân hàng + số tài khoản
-    const fallback = acc.qrImage && acc.bankBin && acc.accountNo ? vietQrUrl({ ...acc, qrImage: null }, info) : null;
+    const hasNo = hasAccountNo(acc);
+    const fallback = acc.qrImage && acc.bankBin && hasNo ? vietQrUrl({ ...acc, qrImage: null }, info) : null;
     const onQrError = (e) => {
         const img = e.currentTarget;
         if (fallback && img.getAttribute('src') === img.dataset.qr) {
@@ -335,14 +361,15 @@ const accountCard = (acc, ctx) => {
         h('p', { class: 'fw-semibold mb-1' }, icon('fa-user', 'me-2 text-accent-c'), acc.owner || acc.accountName),
         h('p', { class: 'small mb-1' }, icon('fa-building-columns', 'me-2 text-accent-c'), acc.bankName),
         h('div', { class: 'd-flex justify-content-between align-items-center gap-2 mb-1' },
-            h('span', { class: 'account-no' }, acc.accountNo),
-            h('button', {
+            // Chỉ có ảnh QR riêng, chưa có số tài khoản: không hiện số giữ chỗ và nút Chép
+            hasNo ? h('span', { class: 'account-no' }, acc.accountNo) : null,
+            hasNo ? h('button', {
                 type: 'button', class: 'btn btn-outline-auto btn-sm rounded-pill py-0 px-2 js-copy', 'data-copy': String(acc.accountNo ?? '').replace(/\s/g, ''),
                 'aria-label': 'Chép số tài khoản',
-            }, icon('fa-copy', 'me-1'), 'Chép')),
+            }, icon('fa-copy', 'me-1'), 'Chép') : null),
         acc.accountName ? h('p', { class: 'small text-muted-c mb-2' }, acc.accountName) : null,
         h('div', { class: 'text-center' },
-            h('img', { 'data-qr': qrSrc, src: 'data:,', alt: `Mã QR chuyển khoản ${acc.bankName} ${acc.accountNo}`, class: 'qr-img js-zoom cursor-pointer', loading: 'lazy', onerror: onQrError }),
+            h('img', { 'data-qr': qrSrc, src: 'data:,', alt: `Mã QR chuyển khoản ${acc.bankName || ''} ${hasNo ? acc.accountNo : ''}`.trim(), class: 'qr-img js-zoom cursor-pointer', loading: 'lazy', onerror: onQrError }),
             h('p', { class: 'small text-muted-c mt-1 mb-0' }, 'Quét mã bằng ứng dụng ngân hàng bất kỳ')),
     );
 };
@@ -351,8 +378,7 @@ const accountCard = (acc, ctx) => {
  * Tài khoản đã điền thật: có ảnh QR riêng, hoặc có ngân hàng và số tài khoản không phải số giữ chỗ
  * (toàn số 0 / TODO). Thiếu ngân hàng thì không tạo được QR VietQR đúng nên không hiện.
  */
-const isRealAccount = (a) =>
-    !!a && (!!a.qrImage || (!!String(a.bankBin ?? '').trim() && /\d/.test(a.accountNo ?? '') && !/^0+$/.test(String(a.accountNo).replace(/\s/g, '')) && !/TODO/i.test(`${a.accountNo}${a.bankBin}`)));
+const isRealAccount = (a) => !!a && (!!a.qrImage || (!!String(a.bankBin ?? '').trim() && hasAccountNo(a)));
 
 const renderGifts = (cfg, ctx) => {
     // Chưa có tài khoản thật thì ẩn mục mừng cưới (tránh khách quét nhầm QR giữ chỗ)
@@ -360,7 +386,8 @@ const renderGifts = (cfg, ctx) => {
     if (!accounts.length) {
         return null;
     }
-    const order = (ctx.guest?.side ?? ctx.side) === 'nha-gai' ? ['nha-gai', 'nha-trai'] : ['nha-trai', 'nha-gai'];
+    // ctx.side: nhà của khách theo Sheet, hoặc theo link ?ben= khi Sheet không ghi nhà
+    const order = ctx.side === 'nha-gai' ? ['nha-gai', 'nha-trai'] : ['nha-trai', 'nha-gai'];
     const families = [...new Set([...order, ...accounts.map((a) => a.family)])];
     const collapsed = cfg.gifts?.collapsed !== false;
     const body = h('div', { id: 'gift-body', class: collapsed ? 'collapse' : 'collapse show' },
@@ -373,7 +400,7 @@ const renderGifts = (cfg, ctx) => {
                     list.map((a) => accountCard(a, ctx)));
             })));
     return sectionShell('gifts', { kicker: 'Mừng cưới', title: 'Hộp mừng cưới', alt: true },
-        h('p', { class: 'px-2' }, 'Sự hiện diện của anh chị và các bạn là món quà quý giá nhất với chúng tôi. Trường hợp không thể đến dự, xin mời xem thông tin mừng cưới dưới đây.'),
+        h('p', { class: 'px-2' }, `Sự hiện diện của ${ctx.khach} là món quà quý giá nhất với chúng tôi. Trường hợp không thể đến dự, xin mời xem thông tin mừng cưới dưới đây.`),
         collapsed ? h('button', {
             type: 'button', class: 'btn btn-outline-auto rounded-pill px-3', 'data-bs-toggle': 'collapse', 'data-bs-target': '#gift-body',
             'aria-expanded': 'false', 'aria-controls': 'gift-body', id: 'gift-toggle',
@@ -383,9 +410,9 @@ const renderGifts = (cfg, ctx) => {
 };
 
 const renderEnding = (cfg, ctx) => h('section', { id: 'ending', class: 'bg-page text-center pb-5' },
-    img(cfg.photos?.ending, `Ảnh cưới ${coupleNames(cfg)}`, 'hero-photo mb-4'),
+    img(cfg.photos?.ending, `Ảnh cưới ${coupleNames(cfg, ctx)}`, 'hero-photo mb-4'),
     h('p', { class: 'px-2', style: { fontSize: '1.05rem' }, id: 'thank-you-text' }, fill(text(cfg, ctx, 'thankYou'), ctx.khach)),
-    h('h2', { class: 'font-esthetic my-3', style: { fontSize: '3rem', color: 'var(--c-strong)' } }, coupleNames(cfg)),
+    h('h2', { class: 'font-esthetic my-3', style: { fontSize: '3rem', color: 'var(--c-strong)' } }, coupleNames(cfg, ctx)),
     h('div', { class: 'd-flex justify-content-center' }, ornament(cfg, true)),
     h('hr', { class: 'my-4', style: { borderColor: 'var(--c-line)' } }),
     h('p', { class: 'footer-credit mb-0' },
@@ -429,12 +456,24 @@ export const renderDesktopSide = (cfg, ctx) => {
     }
     const d = ctx.main ? eventDate(ctx.main) : null;
     const refs = (cfg.photos?.desktop?.length ? cfg.photos.desktop : [cfg.photos?.hero]).filter(Boolean);
+    // Cột ảnh này chỉ hiện từ 768px: trên điện thoại không tải trước (và màn tải không phải chờ) ảnh nào của nó
+    const shownNow = !!window.matchMedia?.('(min-width: 768px)').matches;
+    // Các ảnh sau chưa gắn địa chỉ (data-src): các slide chồng lên nhau nên "lazy" không có tác dụng, trình duyệt sẽ
+    // tải cả 7 ảnh lớn ngay. Chỉ tải ảnh đang chiếu và ảnh kế tiếp.
     const slides = refs.map((ref, i) => {
         const attrs = photoAttrs(ref, '66vw');
-        const lazy = i === 0 ? 'eager' : 'lazy';
+        const a = i === 0
+            ? { ...attrs, loading: shownNow ? 'eager' : 'lazy' }
+            : { 'data-src': attrs.src, 'data-srcset': attrs.srcset ?? null, sizes: attrs.sizes ?? null, width: attrs.width ?? null, height: attrs.height ?? null };
         return h('div', { class: `side-slide ${i === 0 ? 'is-active' : ''}`, 'aria-hidden': 'true' },
-            h('img', { ...attrs, alt: '', class: 'side-bg', loading: lazy, decoding: 'async' }),
-            h('img', { ...attrs, alt: '', class: 'side-fg', loading: lazy, decoding: 'async' }));
+            h('img', { ...a, alt: '', class: 'side-bg', decoding: 'async' }),
+            h('img', { ...a, alt: '', class: 'side-fg', decoding: 'async' }));
+    });
+    const load = (k) => slides[k]?.querySelectorAll('img[data-src]').forEach((im) => {
+        if (im.dataset.srcset) im.srcset = im.dataset.srcset;
+        im.src = im.dataset.src;
+        im.removeAttribute('data-src');
+        im.removeAttribute('data-srcset');
     });
     const dots = slides.length > 1 ? slides.map((_, i) => h('span', { class: i === 0 ? 'is-active' : '' })) : [];
     side.replaceChildren(
@@ -443,7 +482,7 @@ export const renderDesktopSide = (cfg, ctx) => {
         h('div', { class: 'side-caption text-center' },
             h('div', { class: 'd-flex justify-content-center mb-2' }, ornament(cfg, true)),
             h('p', { class: 'side-kicker mb-2' }, `Trân trọng kính mời ${ctx.khach}`),
-            h('h2', { class: 'font-esthetic side-names mb-2' }, coupleNames(cfg)),
+            h('h2', { class: 'font-esthetic side-names mb-2' }, coupleNames(cfg, ctx)),
             d ? h('p', { class: 'side-date mb-1' }, longDate(d)) : null,
             ctx.main?.lunar ? h('p', { class: 'side-lunar mb-0' }, `(${ctx.main.lunar})`) : null,
             dots.length ? h('div', { class: 'side-dots' }, ...dots) : null),
@@ -453,6 +492,8 @@ export const renderDesktopSide = (cfg, ctx) => {
         return;
     }
     let i = 0;
+    // Màn hình lớn: tải trước ảnh kế tiếp sau vài giây (khi bìa / ảnh đầu đã tải xong)
+    setTimeout(() => side.offsetWidth && load(1), 4000);
     setInterval(() => {
         if (document.hidden || !side.offsetWidth) {
             return; // màn hình nhỏ (cột ảnh ẩn) hoặc tab ẩn: không đổi ảnh
@@ -460,7 +501,8 @@ export const renderDesktopSide = (cfg, ctx) => {
         slides[i].classList.remove('is-active');
         dots[i].classList.remove('is-active');
         i = (i + 1) % slides.length;
-        slides[i].querySelectorAll('img').forEach((im) => { im.loading = 'eager'; });
+        load(i);
+        load((i + 1) % slides.length);
         slides[i].classList.add('is-active');
         dots[i].classList.add('is-active');
     }, 6000);

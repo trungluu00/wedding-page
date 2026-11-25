@@ -3,7 +3,7 @@
 import { util } from './util.js';
 
 const VN_OFFSET_MS = 7 * 60 * 60 * 1000;
-const WEEKDAYS = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
+const WEEKDAYS = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy']; // viết như thiệp in
 
 const pad = (n) => String(n).padStart(2, '0');
 
@@ -25,7 +25,7 @@ const vnParts = (d) => {
     return { y: v.getUTCFullYear(), m: v.getUTCMonth() + 1, day: v.getUTCDate(), wd: v.getUTCDay(), hh: v.getUTCHours(), mm: v.getUTCMinutes() };
 };
 
-/** "Chủ nhật, ngày 10 tháng 01 năm 2027" */
+/** "Chủ Nhật, ngày 10 tháng 01 năm 2027" */
 export const longDate = (d) => {
     const p = vnParts(d);
     return `${WEEKDAYS[p.wd]}, ngày ${pad(p.day)} tháng ${pad(p.m)} năm ${p.y}`;
@@ -102,7 +102,7 @@ export const calendarUrl = (ev, title, details) => {
 
 /**
  * File lịch .ics (app Lịch trên iPhone / Mac / Outlook). Chưa có giờ → sự kiện cả ngày.
- * Nhắc trước 3 tiếng.
+ * Nhắc trước 1 ngày.
  * @returns {string|null}
  */
 export const icsFile = (ev, title, details) => {
@@ -118,6 +118,27 @@ export const icsFile = (ev, title, details) => {
     };
     const utc = (d) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
     const esc = (s) => String(s ?? '').replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/([,;])/g, '\\$1');
+    // Chuẩn iCalendar: mỗi dòng tối đa 75 byte, dòng dài gấp xuống dòng mới bắt đầu bằng dấu cách
+    // (tiếng Việt có dấu 2–3 byte/chữ nên đếm theo byte UTF-8, không cắt giữa một chữ).
+    const enc = typeof TextEncoder !== 'undefined' ? new TextEncoder() : null;
+    const fold = (line) => {
+        if (!enc || enc.encode(line).length <= 75) return line;
+        const out = [];
+        let cur = '';
+        let bytes = 0;
+        for (const ch of line) {
+            const b = enc.encode(ch).length;
+            if (bytes + b > (out.length ? 74 : 75)) {
+                out.push(cur);
+                cur = '';
+                bytes = 0;
+            }
+            cur += ch;
+            bytes += b;
+        }
+        out.push(cur);
+        return out.join('\r\n ');
+    };
     return [
         'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//thiep-cuoi//VI', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
         'BEGIN:VEVENT',
@@ -128,9 +149,10 @@ export const icsFile = (ev, title, details) => {
         `SUMMARY:${esc(title)}`,
         `DESCRIPTION:${esc(details)}`,
         `LOCATION:${esc([ev.venue, ev.address].filter(Boolean).join(' - '))}`,
-        'BEGIN:VALARM', 'TRIGGER:-PT3H', 'ACTION:DISPLAY', `DESCRIPTION:${esc(title)}`, 'END:VALARM',
+        // Nhắc trước 1 ngày (nhắc trước 3 tiếng thì Lễ Vu Quy 06:00 sẽ báo lúc 03:00 sáng)
+        'BEGIN:VALARM', 'TRIGGER:-P1D', 'ACTION:DISPLAY', `DESCRIPTION:${esc(title)}`, 'END:VALARM',
         'END:VEVENT', 'END:VCALENDAR', '',
-    ].join('\r\n');
+    ].map(fold).join('\r\n');
 };
 
 /**
@@ -140,8 +162,15 @@ export const icsFile = (ev, title, details) => {
  * @returns {string}
  */
 export const vietQrUrl = (acc, addInfo) => {
-    const info = util.removeDiacritics(addInfo).replace(/[^A-Za-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 50);
+    let info = util.removeDiacritics(addInfo).replace(/[^A-Za-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+    if (info.length > 50) {
+        // tối đa 50 ký tự, cắt ở khoảng trắng để không đứt giữa chữ
+        const cut = info.slice(0, 51).lastIndexOf(' ');
+        info = info.slice(0, cut > 20 ? cut : 50).trim();
+    }
     const name = util.removeDiacritics(acc.accountName ?? '').toUpperCase();
     const q = new URLSearchParams({ addInfo: info, accountName: name });
-    return `https://img.vietqr.io/image/${encodeURIComponent(acc.bankBin)}-${encodeURIComponent(acc.accountNo)}-compact2.png?${q.toString()}`;
+    // Số tài khoản bỏ dấu cách / dấu chấm (vd "4444 5555 66") — VietQR chỉ nhận chữ số liền
+    const no = String(acc.accountNo ?? '').replace(/[^0-9A-Za-z]/g, '');
+    return `https://img.vietqr.io/image/${encodeURIComponent(acc.bankBin)}-${encodeURIComponent(no)}-compact2.png?${q.toString()}`;
 };

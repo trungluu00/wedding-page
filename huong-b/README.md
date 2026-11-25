@@ -120,7 +120,13 @@ PHOTO_SOURCE="D:/anh-cuoi" npm run photos         # hoặc chỉ định bằng 
 - `photos.crops`: ảnh cắt từ một vùng của ảnh gốc (tỉ lệ 0..1), vd `"p35-chu-re"` / `"p35-co-dau"` là chân dung chú rể / cô dâu cắt từ p35 (vùng cắt nhỏ hơn 2560 px nên chỉ có cỡ 1600/900/400).
 - Xoay theo EXIF, chuyển về sRGB, **bỏ toàn bộ EXIF/GPS**.
 - Ảnh chia sẻ `photos/share-1200x630.jpg`: JPEG q90, 4:4:4.
-- Hiện tại: 24 ảnh cưới (thư mục "Ảnh phóng" + "Ảnh con") + 2 ảnh cắt chân dung, `photos/w` 102 file ≈ 17 MB. Khách trên điện thoại chỉ tải cỡ 900/1600 và thumbnail 400 cho album; bản 2560 chỉ tải khi chạm xem ảnh.
+- Hiện tại: 24 ảnh cưới (thư mục "Ảnh phóng" + "Ảnh con") + 2 ảnh cắt chân dung, `photos/w` 102 file ≈ 17 MB.
+  Bản 2560 **không** nằm trong `srcset` (điện thoại màn nét x3 sẽ chọn nó cho ảnh rộng hết màn) — chỉ tải khi khách chạm
+  xem ảnh lớn. Ô album dùng bản 400. Màn tải chỉ chờ ảnh trên bìa thư (được tải sẵn ngay từ `<head>`); trình chiếu
+  ảnh bên trái (màn hình máy tính) không tải gì trên điện thoại, trên máy tính chỉ tải ảnh đang chiếu và ảnh kế tiếp.
+  Nhạc chỉ tải khi bấm "Mở thiệp". Bìa thư không chờ cấu hình Sheet (chỉ cần biết khách); phần nội dung bên trong
+  chờ cấu hình rồi dựng sau lưng bìa — bấm "Mở thiệp" quá sớm thì nút hiện "Đang mở thiệp..." vài giây.
+  Đo 25/11/2026 (4G giả lập, CPU chậm x4, link `?ben=`): bìa bấm được sau ~2,1 giây (bản trước ~6,3 giây).
 - `photos.source` đang trỏ tới thư mục trên máy đã xử lý ảnh; máy khác thì đặt `PHOTO_SOURCE` trỏ tới bản sao thư mục ảnh gốc.
 - `.gitignore` chặn các kiểu file ảnh gốc (`IMG_*.jpg`, tên có dấu `+`, RAW, HEIC).
 
@@ -169,6 +175,18 @@ Thiệp gọi theo hợp đồng chung:
 - Link gửi khách (cột `link` trong sheet `KhachMoi` tự ghép): `https://<domain>/?to=<code>&n=<tên có dấu>`;
   `n=` để thiệp hiện đúng tên ngay cả khi chưa tra được Sheet. Link chung theo nhà: `?ben=nha-trai` / `?ben=nha-gai`
   (ô B3/B4 của `CauHinh`).
+- **Tra mã khách (`?to=`) khi Web App chậm:** đo ngày 25/11/2026 trên 122 mã — giữa 2,3 giây, 90% dưới 3,3 giây,
+  nhưng có lượt 6–23 giây hoặc treo. Không tra được thì thiệp không biết khách nhà nào và phải hiện thông tin chung
+  của cả hai nhà. Nên thiệp chờ lượt 1 tới 4,5 giây, chưa có thì gửi thêm lượt 2 song song (địa chỉ khác, không dùng
+  bộ nhớ đệm — Chrome bắt hai yêu cầu giống hệt nhau chờ nhau) và nhận lượt nào về trước, tổng tối đa 15 giây
+  (màn tải chờ tối đa 17 giây với link có mã, 10 giây với link chung). Tra được thì lưu thông tin khách trên máy đó;
+  lần mở sau mà Sheet chưa trả lời sau 4,5 giây thì dùng ngay thông tin đã lưu.
+- **Cấu hình từ Sheet** (giờ, tài khoản, lời): chờ 3 giây, chưa có thì gửi thêm lượt 2, tổng tối đa 6 giây; không được
+  thì dùng bản đã lưu trên máy từ lần mở trước, cuối cùng mới dùng `wedding.config.js`. Dữ liệu lạ không làm hỏng thiệp.
+- **Gửi xác nhận / lời chúc** chờ tới 30 giây. Mỗi lần bấm gửi kèm mã `rid`; gửi lại cùng nội dung sau lỗi mạng thì
+  `Code.gs` không ghi dòng trùng. Mất mạng rồi có mạng lại giữa lúc gửi không làm nút bật lại / gửi trùng.
+- Xác nhận đã gửi được nhớ **theo từng link mời** trên máy: mở link của người khác trên cùng điện thoại không thấy
+  tên / xác nhận của người trước.
 - Ô **Họ và tên** ở phần Xác nhận tham dự và Lời chúc được điền sẵn tên khách trong link mời (tra Sheet được thì là
   xưng hô + tên như trên bìa, vd "Bác Hùng"; chưa tra được thì lấy `n=`); khách sửa được. Tên khách đã tự gõ ở form
   này được điền sang form kia (chỉ với cùng link mời trên cùng máy). Sheet chậm/lỗi lúc tra mã thì xác nhận vẫn gửi

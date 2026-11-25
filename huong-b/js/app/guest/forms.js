@@ -17,16 +17,63 @@ export const forms = (client) => {
     const wishState = storage('wish');
 
     /**
+     * Lần xác nhận đã gửi trên máy này CHO ĐÚNG LINK MỜI NÀY (theo mã khách; link chung = mã rỗng).
+     * Lưu theo mã để mở link của người khác trên cùng điện thoại không hiện xác nhận / tên của người trước.
+     * (Bản cũ lưu một mục "last" chung — chỉ dùng lại nếu đúng mã.)
+     */
+    const lastRsvp = (code) => {
+        const c = String(code ?? '');
+        const mine = saved.get(`last:${c}`);
+        if (mine) {
+            return mine;
+        }
+        const old = saved.get('last');
+        return old && (old.code ?? '') === c ? old : null;
+    };
+
+    /**
      * Tên khách đã tự gõ ở form xác nhận / lời chúc trên máy này — chỉ dùng lại cho cùng link mời
      * (cùng mã khách), để mở link của người khác trên cùng điện thoại không bị điền nhầm tên.
      */
     const typedName = (code) => {
-        const r = saved.get('last');
-        if (r?.name && (r.code ?? '') === code) {
+        const r = lastRsvp(code);
+        if (r?.name) {
             return r.name;
         }
         const w = wishState.get('author');
         return w?.name && (w.code ?? '') === code ? w.name : '';
+    };
+
+    /**
+     * Mã cho một lần gửi: giữ nguyên khi khách bấm gửi lại CÙNG nội dung (sau lỗi mạng / quá chậm) → Code.gs bỏ qua
+     * bản trùng, Sheet không bị hai dòng. Nội dung khác, hoặc đã gửi thành công (reset) → mã mới.
+     */
+    const requestId = () => {
+        let key = '';
+        let id = '';
+        return {
+            next: (payload) => {
+                const k = JSON.stringify({ ...payload, hp: undefined, rid: undefined });
+                if (k !== key || !id) {
+                    key = k;
+                    id = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
+                }
+                return id;
+            },
+            reset: () => {
+                key = '';
+                id = '';
+            },
+        };
+    };
+    const rsvpRid = requestId();
+    const wishRid = requestId();
+
+    /** Thông báo lỗi gửi bằng tiếng Việt (lỗi kết nối của trình duyệt có thể là tiếng Anh: không hiện nguyên văn). */
+    const failText = (err) => {
+        const msg = String(err?.message ?? '').replace(/[.!\s]+$/, '');
+        const vietnamese = err?.friendly || /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(msg);
+        return `Chưa gửi được${vietnamese && msg ? ` (${msg})` : ''}. Xin vui lòng thử lại sau ít phút.`;
     };
 
     /** Điền tên vào ô còn trống (khách vừa gửi ở form kia). */
@@ -62,7 +109,7 @@ export const forms = (client) => {
     const rsvp = (cfg, ctx) => {
         const max = Math.max(1, Number(cfg.backend?.maxGuestsPerInvite) || 1);
         const deadline = cfg.backend?.rsvpDeadline;
-        const prev = saved.get('last');
+        const prev = lastRsvp(ctx.code ?? '');
 
         const name = h('input', { type: 'text', id: 'rsvp-name', class: 'form-control rounded-4', maxlength: '60', autocomplete: 'name', required: true, placeholder: 'Họ và tên' });
         // Điền sẵn: lần gửi trước → tên đã gõ ở form lời chúc → tên khách trong link mời (vd "Bác Hùng")
@@ -136,18 +183,23 @@ export const forms = (client) => {
                 util.notify('Xin vui lòng chọn khách mời nhà trai hay nhà gái.').error();
                 return;
             }
+            if (button.dataset.busy === '1') {
+                return; // đang gửi lần trước
+            }
+            data.rid = rsvpRid.next(data);
             const btn = util.disableButton(button);
             try {
                 const res = await client.rsvp(data);
                 if (!res?.success) {
-                    throw new Error(res?.message || 'Gửi không thành công');
+                    throw new Error(res?.message || 'gửi không thành công');
                 }
-                saved.set('last', data);
+                rsvpRid.reset();
+                saved.set(`last:${data.code}`, data);
                 showDone(data);
                 document.dispatchEvent(new CustomEvent('rsvp:done', { detail: data }));
                 util.notify(res.message || 'Đã gửi xác nhận. Xin chân thành cảm ơn!').success();
             } catch (err) {
-                util.notify(`Chưa gửi được (${err.message}). Xin vui lòng thử lại sau ít phút.`).error();
+                util.notify(failText(err)).error();
             } finally {
                 btn.restore();
             }
@@ -157,7 +209,9 @@ export const forms = (client) => {
             h('p', { class: 'section-kicker mb-1' }, 'Xác nhận tham dự'),
             h('h2', { class: 'section-title mb-0' }, 'Rất mong được đón tiếp'),
             h('div', { class: 'divider-ornament', 'aria-hidden': 'true' }, icon('fa-heart', 'fa-xs')),
-            deadline ? h('p', { class: 'small text-muted-c' }, `Xin vui lòng phản hồi trước ngày ${plainDate(deadline)} để gia đình chúng tôi chuẩn bị chu đáo.`) : null,
+            // Quá hạn thì thôi nhắc "phản hồi trước ngày…" (vẫn nhận xác nhận như thường)
+            deadline && Date.now() <= new Date(`${deadline}T23:59:59+07:00`).getTime()
+                ? h('p', { class: 'small text-muted-c' }, `Xin vui lòng phản hồi trước ngày ${plainDate(deadline)} để gia đình chúng tôi chuẩn bị chu đáo.`) : null,
             form,
         );
     };
@@ -217,7 +271,8 @@ export const forms = (client) => {
         }
         try {
             const res = await client.wishes();
-            cache = Array.isArray(res?.data) ? res.data : [];
+            // bỏ qua mục hỏng (null, thiếu tên / lời chúc) thay vì báo lỗi cả danh sách
+            cache = (Array.isArray(res?.data) ? res.data : []).filter((w) => w && typeof w === 'object' && w.author && w.text);
             setList(cache);
         } catch {
             listEl.replaceChildren(h('p', { class: 'text-muted-c small m-0' }, 'Chưa tải được lời chúc, xin vui lòng tải lại trang sau.'));
@@ -269,12 +324,17 @@ export const forms = (client) => {
                 util.notify('Lời chúc vừa được gửi, xin chờ giây lát trước khi gửi tiếp.').info();
                 return;
             }
+            if (button.dataset.busy === '1') {
+                return; // đang gửi lần trước
+            }
+            data.rid = wishRid.next(data);
             const btn = util.disableButton(button);
             try {
                 const res = await client.wish(data);
                 if (!res?.success) {
-                    throw new Error(res?.message || 'Gửi không thành công');
+                    throw new Error(res?.message || 'gửi không thành công');
                 }
+                wishRid.reset();
                 wishState.set('lastAt', Date.now());
                 wishState.set('author', { name: data.author, code: data.code });
                 document.dispatchEvent(new CustomEvent('wish:done', { detail: data }));
@@ -282,7 +342,7 @@ export const forms = (client) => {
                 prependWish({ author: data.author, relation: data.relation, text: data.text, createdAt: new Date().toISOString() });
                 util.notify('Xin chân thành cảm ơn lời chúc!').success();
             } catch (err) {
-                util.notify(`Chưa gửi được (${err.message}). Xin vui lòng thử lại sau ít phút.`).error();
+                util.notify(failText(err)).error();
             } finally {
                 btn.restore();
             }
@@ -300,6 +360,7 @@ export const forms = (client) => {
 
     return {
         rsvp,
+        lastRsvp,
         wishes,
         loadWishes,
     };

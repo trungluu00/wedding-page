@@ -60,9 +60,11 @@ export const audio = (() => {
             button = null;
             el = null;
         });
-        el.src = src;
+        // Không tải trước file nhạc (~4 MB): chỉ tải khi khách bấm "Mở thiệp" — tải sẵn thì giành băng thông
+        // với ảnh bìa, khách mạng yếu phải chờ lâu hơn mới thấy bìa.
+        el.preload = 'none';
         el.loop = true;
-        el.preload = 'auto';
+        el.src = src;
 
         button.addEventListener('click', toggle);
         document.addEventListener('undangan.open', () => {
@@ -72,9 +74,9 @@ export const audio = (() => {
         // Tạm dừng khi khách chuyển sang app khác.
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && isPlay) {
-                el.pause();
+                el?.pause();
             } else if (!document.hidden && isPlay) {
-                el.play().catch(() => undefined);
+                el?.play().catch(() => undefined);
             }
         });
     };

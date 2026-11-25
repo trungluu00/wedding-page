@@ -20,8 +20,34 @@ import { bs } from '../../libs/bootstrap.js';
 import { loader } from '../../libs/loader.js';
 import * as confetti from '../../libs/confetti.js';
 
-const LOOKUP_TIMEOUT_MS = 6000;
-const SETTINGS_TIMEOUT_MS = 4000;
+// Tra khách theo ?to=: đo trên Web App thật (25/11/2026, 122 mã) — giữa 2,3 giây, 90% dưới 3,3 giây, nhưng có
+// lượt 6–23 giây hoặc treo hẳn (chậm riêng từng lượt). Không tra được thì thiệp không biết khách nhà trai hay nhà
+// gái và phải hiện thông tin chung của cả hai nhà. Nên: chờ lượt 1 tới 4,5 giây; chưa có trả lời thì gửi thêm
+// lượt 2 song song và nhận trả lời nào về trước, chờ thêm tối đa 10,5 giây. Vẫn không được thì dùng thông tin
+// khách đã lưu trên máy này từ lần mở trước.
+const LOOKUP_WAIT_MS = [4500, 10500];
+const SETTINGS_WAIT_MS = [3000, 3000];
+const LOADING_MAX_MS = 10000; // màn tải tối đa với link chung
+const LOADING_MAX_GUEST_MS = 17000; // link có mã khách: đủ thời gian cho 2 lần tra
+
+/** Trả lời đầu tiên có success trong các lần gọi; quá `ms` hoặc mọi lần gọi đều lỗi → null. */
+const firstAnswer = (promises, ms) => new Promise((resolve) => {
+    let left = promises.length;
+    let done = false;
+    const finish = (v) => {
+        if (!done) {
+            done = true;
+            clearTimeout(timer);
+            resolve(v);
+        }
+    };
+    const timer = setTimeout(() => finish(null), ms);
+    const miss = () => {
+        left -= 1;
+        if (left === 0) finish(null);
+    };
+    promises.forEach((p) => p.then((res) => (res?.success ? finish(res) : miss()), miss));
+});
 
 export const guest = (() => {
 
@@ -31,22 +57,35 @@ export const guest = (() => {
     const ticker = wishTicker();
     let wishesLoaded = Promise.resolve([]);
 
-    /** Giờ sự kiện / tài khoản mừng cưới trên Google Sheet; chậm hoặc lỗi → dùng wedding.config.js. */
+    /**
+     * Giờ sự kiện / tài khoản mừng cưới / lời trên thiệp từ Google Sheet. Đo trên trang thật: 2/12 lượt quá 4 giây
+     * (khi đó mục mừng cưới bị ẩn). Nên: chờ 3 giây, chưa có thì gửi thêm lượt 2 song song, tổng tối đa 6 giây;
+     * vẫn không được thì dùng bản đã lưu trên máy từ lần mở trước, cuối cùng mới dùng wedding.config.js.
+     */
     const loadSettings = async () => {
-        try {
-            const res = await Promise.race([
-                client.settings(),
-                new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), SETTINGS_TIMEOUT_MS)),
-            ]);
-            return res?.success ? res.data : null;
-        } catch (e) {
-            console.warn('[thiệp] không tải được cấu hình từ Sheet:', e.message);
-            return null;
+        const remembered = storage('settings');
+        const calls = [client.settings()];
+        let res = await firstAnswer(calls, SETTINGS_WAIT_MS[0]);
+        if (!res) {
+            calls.push(client.settings(2));
+            res = await firstAnswer(calls, SETTINGS_WAIT_MS[1]);
         }
+        if (res) {
+            if (res.data) {
+                remembered.set('last', { data: res.data, at: Date.now() });
+            }
+            return res.data ?? null;
+        }
+        const cached = remembered.get('last')?.data ?? null;
+        console.warn(`[thiệp] không tải được cấu hình từ Sheet, dùng ${cached ? 'bản đã lưu từ lần mở trước' : 'wedding.config.js'}.`);
+        return cached;
     };
 
     /** @type {object} */
     let ctx = null;
+
+    /** Xong khi phần nội dung (sau bìa thư) đã dựng — sau khi có cấu hình Sheet. */
+    let mainReady = Promise.resolve();
 
     /** Đọc ?to= và tra khách. Không tìm thấy mà trông giống tên người → dùng làm tên hiển thị. */
     const resolveGuest = async () => {
@@ -58,21 +97,36 @@ export const guest = (() => {
             return nameFromLink ? { guest: null, code: '', khach: nameFromLink, plain: nameFromLink } : { guest: null, code: '', khach: 'Quý vị', plain: '' };
         }
 
-        let found = null;
-        let unanswered = false; // Sheet lỗi / quá chậm (khác với "không có mã này")
-        try {
-            const res = await Promise.race([
-                client.lookup(raw),
-                new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), LOOKUP_TIMEOUT_MS)),
-            ]);
-            if (res?.success && res.found && res.data) {
-                found = res.data;
-            } else if (!res?.success) {
-                unanswered = true;
+        // Thông tin khách đã tra được ở lần mở trước trên máy này (theo mã) — dùng khi Sheet không trả lời.
+        const remembered = storage('guests');
+        const key = raw.toLowerCase();
+
+        const calls = [client.lookup(raw)];
+        let res = await firstAnswer(calls, LOOKUP_WAIT_MS[0]);
+        if (!res) {
+            console.warn('[thiệp] tra khách chậm / lỗi, thử lại…');
+            calls.push(client.lookup(raw, 2));
+            if (remembered.get(key)?.data) {
+                // Khách đã mở thiệp trên máy này: không bắt chờ thêm, dùng thông tin đã lưu ngay;
+                // lượt tra vẫn chạy nền để cập nhật thông tin cho lần mở sau.
+                firstAnswer(calls, LOOKUP_WAIT_MS[1]).then((late) => {
+                    if (late?.found && late.data) remembered.set(key, { data: late.data, at: Date.now() });
+                });
+            } else {
+                res = await firstAnswer(calls, LOOKUP_WAIT_MS[1]);
             }
-        } catch (e) {
-            unanswered = true;
-            console.warn('[thiệp] không tra được khách:', e.message);
+        }
+
+        let found = null;
+        const unanswered = !res; // Sheet lỗi / quá chậm (khác với "không có mã này")
+        if (res?.found && res.data) {
+            found = res.data;
+            remembered.set(key, { data: found, at: Date.now() });
+        } else if (unanswered && remembered.get(key)?.data) {
+            found = remembered.get(key).data;
+            console.warn('[thiệp] không tra được khách, dùng thông tin đã lưu từ lần mở trước.');
+        } else if (unanswered) {
+            console.warn('[thiệp] không tra được khách (Sheet không trả lời).');
         }
 
         if (found) {
@@ -101,7 +155,7 @@ export const guest = (() => {
             const distance = target.getTime() - Date.now();
             if (distance <= 0) {
                 const sameDay = Math.abs(distance) < 24 * 60 * 60 * 1000;
-                boxes.replaceChildren(util.h('p', { class: 'quote m-0' }, sameDay ? 'Hôm nay là ngày vui của chúng tôi!' : 'Xin chân thành cảm ơn anh chị và các bạn đã chung vui cùng chúng tôi!'));
+                boxes.replaceChildren(util.h('p', { class: 'quote m-0' }, sameDay ? 'Hôm nay là ngày vui của chúng tôi!' : `Xin chân thành cảm ơn ${ctx.khach} đã chung vui cùng chúng tôi!`));
                 return;
             }
             els[0].textContent = pad(Math.floor(distance / 86400000));
@@ -124,12 +178,13 @@ export const guest = (() => {
             return;
         }
         const { h, icon } = util;
-        let done = !!storage('rsvp').get('last');
+        let done = !!f.lastRsvp(ctx.code ?? ''); // chỉ tính xác nhận của đúng link mời này
         let inView = false;
         let armed = false;
         // "2026-12-02" → "02/12" (đọc thẳng từ chuỗi, không qua Date nên không lệch múi giờ)
         const dl = /^\d{4}-(\d{2})-(\d{2})$/.exec(String(cfg.backend?.rsvpDeadline ?? '').trim());
-        const sub = dl ? `Xin vui lòng phản hồi trước ${dl[2]}/${dl[1]}` : 'Để chúng tôi chuẩn bị chu đáo';
+        const late = dl && Date.now() > new Date(`${dl[0]}T23:59:59+07:00`).getTime();
+        const sub = dl && !late ? `Xin vui lòng phản hồi trước ${dl[2]}/${dl[1]}` : 'Để chúng tôi chuẩn bị chu đáo';
         const btn = h('button', {
             type: 'button', class: 'rsvp-cta', id: 'rsvp-cta', hidden: true,
             onclick: () => {
@@ -243,6 +298,11 @@ export const guest = (() => {
         group = g ? Array.from(document.querySelectorAll(`img.js-zoom[data-group="${g}"]`)) : [img];
         groupIndex = Math.max(0, group.indexOf(img));
         showInModal(img);
+        if (!window.bootstrap?.Modal) {
+            // Thư viện Bootstrap (jsDelivr) không tải được: mở ảnh lớn ở tab mới thay vì báo lỗi
+            window.open(img.getAttribute('data-full') || img.currentSrc || img.src, '_blank', 'noopener');
+            return;
+        }
         bs.modal('modal-image').show();
     };
 
@@ -277,9 +337,18 @@ export const guest = (() => {
         document.getElementById('lightbox-prev').addEventListener('click', () => step(-1));
         document.getElementById('lightbox-next').addEventListener('click', () => step(1));
         let touchX = null;
+        let touchY = null;
         shown.addEventListener('touchstart', (e) => {
             touchX = e.touches[0].clientX;
+            touchY = e.touches[0].clientY;
         }, { passive: true });
+        // Vuốt ngang để đổi ảnh: chặn trình duyệt hiểu thành cử chỉ "quay lại trang trước" (thoát khỏi thiệp)
+        shown.addEventListener('touchmove', (e) => {
+            if (touchX === null || e.touches.length > 1) return;
+            const dx = e.touches[0].clientX - touchX;
+            const dy = e.touches[0].clientY - touchY;
+            if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) e.preventDefault();
+        }, { passive: false });
         shown.addEventListener('touchend', (e) => {
             if (touchX === null) return;
             const dx = e.changedTouches[0].clientX - touchX;
@@ -295,6 +364,17 @@ export const guest = (() => {
 
         document.getElementById('button-share')?.addEventListener('click', share);
 
+        // Thanh điều hướng: cuộn tới mục mà không thêm "#muc" vào địa chỉ — nút Quay lại của điện thoại không
+        // phải bấm qua từng mục, và địa chỉ thiệp (có mã khách) giữ nguyên khi khách sao chép.
+        document.getElementById('navbar-list')?.addEventListener('click', (e) => {
+            const a = /** @type {HTMLElement} */ (e.target).closest?.('a[href^="#"]');
+            const el = a && document.querySelector(a.getAttribute('href'));
+            if (!el) return;
+            e.preventDefault();
+            const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+            el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+        });
+
         document.getElementById('album-more')?.addEventListener('click', (e) => {
             document.querySelectorAll('#album-grid .js-more').forEach((el) => el.classList.remove('d-none', 'js-more'));
             e.currentTarget.remove();
@@ -303,6 +383,14 @@ export const guest = (() => {
         const giftBody = document.getElementById('gift-body');
         if (giftBody) {
             giftBody.addEventListener('show.bs.collapse', loadQr);
+            // Bootstrap không tải được: nút "Xem thông tin mừng cưới" tự mở / đóng phần tài khoản
+            document.getElementById('gift-toggle')?.addEventListener('click', (e) => {
+                if (window.bootstrap?.Collapse) return;
+                const opening = !giftBody.classList.contains('show');
+                giftBody.classList.toggle('show', opening);
+                e.currentTarget.setAttribute('aria-expanded', String(opening));
+                if (opening) loadQr();
+            });
             if (giftBody.classList.contains('show')) {
                 document.addEventListener('undangan.open', loadQr);
             }
@@ -347,7 +435,9 @@ export const guest = (() => {
         }
 
         if (window.bootstrap?.ScrollSpy && document.getElementById('navbar-menu')) {
-            window.bootstrap.ScrollSpy.getOrCreateInstance(document.body, { target: '#navbar-menu', rootMargin: '0px 0px -40%' });
+            // Gắn vào <html> (không phải <body>): body có overflow-x: hidden nên Bootstrap tưởng body là khung
+            // cuộn riêng (mà body không cuộn) → mục sáng trên thanh điều hướng không bao giờ đổi.
+            window.bootstrap.ScrollSpy.getOrCreateInstance(document.documentElement, { target: '#navbar-menu', rootMargin: '0px 0px -40%' });
         }
         util.timeOut(() => window.AOS?.refreshHard?.(), 300);
         wishesLoaded.then((list) => ticker.start(list));
@@ -362,13 +452,15 @@ export const guest = (() => {
             welcome.style.opacity = '1';
         } else {
             welcome?.remove();
-            open(null);
+            mainReady.then(() => open(null));
         }
         await util.changeOpacity(document.getElementById('loading'), false).then((el) => el.remove());
     };
 
+    // Màn tải chỉ chờ ảnh trên bìa thư (thứ khách thấy đầu tiên). Ảnh đầu thiệp nằm sau bìa vẫn tải ngay
+    // nhưng không bắt khách chờ — đo trên mạng 4G: bỏ chờ ảnh này giúp bìa hiện sớm hơn ~3 giây.
     const trackEagerImages = () => {
-        document.querySelectorAll('img[loading="eager"]').forEach((img) => {
+        document.querySelectorAll('#welcome img[loading="eager"]').forEach((img) => {
             progress.add();
             if (img.complete && img.naturalWidth > 0) {
                 progress.complete('image');
@@ -382,7 +474,8 @@ export const guest = (() => {
     const domLoaded = async () => {
         theme.setStatusBar('--c-primary');
         offline.init();
-        progress.init(10000);
+        const hasGuestCode = !!(new URLSearchParams(window.location.search).get('to') ?? '').trim();
+        progress.init(hasGuestCode ? LOADING_MAX_GUEST_MS : LOADING_MAX_MS);
         document.addEventListener('undangan.progress.done', booting, { once: true });
 
         const mark = ornament(cfg);
@@ -395,37 +488,69 @@ export const guest = (() => {
 
         loader({ aos: true, confetti: true }).then(() => progress.complete('libs'));
 
-        const [g, settings] = await Promise.all([resolveGuest(), loadSettings()]);
-        applySettings(cfg, settings);
+        // Tra khách và cấu hình Sheet chạy song song. Bìa thư chỉ cần biết khách (tên, nhà) — không cần giờ sự kiện
+        // hay tài khoản — nên dựng ngay khi tra khách xong, không chờ cấu hình (đo trên 4G: cấu hình mất 1,4–2,8 giây).
+        // Phần nội dung bên trong (giờ, mừng cưới, lời) vẫn chờ cấu hình như trước, dựng sau lưng bìa thư.
+        const guestP = resolveGuest();
+        const settingsP = loadSettings();
+        const g = await guestP;
         // Bên của khách: theo Google Sheet, hoặc link theo nhà ?ben=nha-trai / ?ben=nha-gai
         const side = sideFromParam(g.guest?.side) || sideFromParam(new URLSearchParams(window.location.search).get('ben'));
-        const events = visibleEvents(cfg.events, g.guest ?? (side ? { side, groups: [] } : null));
-        ctx = {
-            side,
-            guest: g.guest,
-            code: g.code, // mã khách gửi kèm RSVP / lời chúc / lượt mở ('' = link chung)
-            khach: g.khach,
-            guestNamePlain: g.plain,
-            events,
-            main: mainEvent(cfg.events, events),
-            forms: { rsvp: f.rsvp, wishes: f.wishes },
+        const buildCtx = () => {
+            const events = visibleEvents(cfg.events, g.guest ?? (side ? { side, groups: [] } : null));
+            return {
+                side,
+                guest: g.guest,
+                code: g.code, // mã khách gửi kèm RSVP / lời chúc / lượt mở ('' = link chung)
+                khach: g.khach,
+                guestNamePlain: g.plain,
+                events,
+                main: mainEvent(cfg.events, events),
+                forms: { rsvp: f.rsvp, wishes: f.wishes },
+            };
         };
-
-        const welcome = document.getElementById('welcome');
-        welcome.replaceChildren(renderCover(cfg, ctx));
-        welcome.querySelector('#button-open')?.addEventListener('click', (e) => open(e.currentTarget));
-
-        const present = renderMain(cfg, ctx);
-        renderNavbar(present);
-        renderDesktopSide(cfg, ctx);
-        if (client.isDemo) {
-            console.info('[thiệp] Chế độ demo: chưa điền backend.appsScriptUrl, RSVP/lời chúc lưu trong localStorage.');
-        }
+        ctx = buildCtx();
 
         audio.init(cfg.music?.src);
-        wireEvents();
-        countDown();
-        wishesLoaded = f.loadWishes();
+        const welcome = document.getElementById('welcome');
+        welcome.replaceChildren(renderCover(cfg, ctx));
+
+        mainReady = (async () => {
+            const settings = await settingsP;
+            try {
+                applySettings(cfg, settings);
+            } catch (e) {
+                // Dữ liệu cấu hình lạ từ Sheet không được làm hỏng thiệp: bỏ qua, dùng wedding.config.js
+                console.warn('[thiệp] cấu hình từ Sheet không hợp lệ, dùng wedding.config.js:', e.message);
+            }
+            ctx = buildCtx(); // giờ từ Sheet có thể đổi thứ tự / sự kiện chính
+            try {
+                const present = renderMain(cfg, ctx);
+                renderNavbar(present);
+                renderDesktopSide(cfg, ctx);
+                offline.refresh();
+            } catch (e) {
+                // Bìa thư đã dựng xong: lỗi ở phần nội dung không được làm thiệp trắng màn hình
+                console.error('[thiệp] lỗi dựng nội dung:', e);
+            }
+            if (client.isDemo) {
+                console.info('[thiệp] Chế độ demo: chưa điền backend.appsScriptUrl, RSVP/lời chúc lưu trong localStorage.');
+            }
+            wireEvents();
+            countDown();
+            wishesLoaded = f.loadWishes();
+        })();
+
+        welcome.querySelector('#button-open')?.addEventListener('click', async (e) => {
+            const btn = /** @type {HTMLButtonElement} */ (e.currentTarget);
+            if (btn.disabled) return;
+            btn.disabled = true;
+            audio.play(); // bật nhạc ngay trong cú chạm (trình duyệt chỉ cho phát nhạc theo thao tác của khách)
+            const slow = setTimeout(() => btn.replaceChildren(util.icon('fa-spinner', 'fa-spin me-2'), 'Đang mở thiệp...'), 400);
+            await mainReady; // nội dung thường đã sẵn; Sheet chậm thì chờ thêm vài giây
+            clearTimeout(slow);
+            open(btn);
+        });
 
         trackEagerImages();
         progress.complete('guest');

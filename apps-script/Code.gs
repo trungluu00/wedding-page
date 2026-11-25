@@ -109,9 +109,10 @@ function doPost(e) {
     } catch (parseErr) {
       return json_({ success: false, message: 'Dữ liệu không hợp lệ' });
     }
+    if (!body || typeof body !== 'object') return json_({ success: false, message: 'Dữ liệu không hợp lệ' });
     var action = String(body.action || '');
-    if (action === 'rsvp') return json_(withLock_(function () { return saveRsvp_(body); }));
-    if (action === 'wish') return json_(withLock_(function () { return saveWish_(body); }));
+    if (action === 'rsvp') return json_(withLock_(function () { return oncePerRequest_(body, saveRsvp_); }));
+    if (action === 'wish') return json_(withLock_(function () { return oncePerRequest_(body, saveWish_); }));
     if (action === 'open') return json_(withLock_(function () { return saveOpen_(body); }));
     return json_({ success: false, message: 'Hành động không hợp lệ' });
   } catch (err) {
@@ -121,6 +122,25 @@ function doPost(e) {
 
 function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * Mỗi lần khách bấm gửi mang một mã `rid`; gửi lại cùng mã (thiệp báo lỗi mạng / quá chậm trong khi Sheet đã ghi,
+ * hoặc trình duyệt tự gửi lại) thì không ghi thêm dòng trùng. Nhớ mã 6 giờ.
+ */
+function oncePerRequest_(body, save) {
+  var rid = String(body.rid || '').replace(/[^0-9A-Za-z]/g, '').slice(0, 40);
+  var cache = CacheService.getScriptCache();
+  if (rid && cache.get('rid:' + rid)) return { success: true };
+  var result = save(body);
+  if (rid && result && result.success) {
+    try {
+      cache.put('rid:' + rid, '1', 21600);
+    } catch (cacheErr) {
+      /* bỏ qua */
+    }
+  }
+  return result;
 }
 
 function withLock_(fn) {
@@ -151,7 +171,7 @@ function lookupGuest_(rawCode) {
       xungHo: String(v('xungHo') || ''),
       side: generateSlug(v('side') || ''),
       groups: String(v('groups') || '')
-        .split(',')
+        .split(/[,;]/)
         .map(function (g) { return generateSlug(g); })
         .filter(function (g) { return g; }),
     },
@@ -203,11 +223,16 @@ function getSettings_() {
   var banks = {};
   var texts = {};
   if (last >= 1) {
-    sheet.getRange(1, 1, last, 3).getValues().forEach(function (r) {
+    var range = sheet.getRange(1, 1, last, 3);
+    var shown = range.getDisplayValues();
+    range.getValues().forEach(function (r, i) {
       var key = String(r[2] || '').trim();
       var m = key.match(/^time:([a-z0-9-]+)$/);
       if (m) {
-        var t = normalizeTime_(r[1], tz);
+        // Giờ đọc theo chữ đang hiện trong ô: ô kiểu "thời gian" trả về Date ngày 30/12/1899, đổi múi giờ
+        // ngày đó bị lệch vài phút (giờ địa phương cũ) — chữ hiện trên ô thì luôn đúng như bạn gõ.
+        var t = normalizeTime_(shown[i][1], tz);
+        if (t === null) t = normalizeTime_(r[1], tz); // chữ hiện không đọc được (định dạng lạ) → đọc giá trị gốc
         if (t !== null) events[m[1]] = { time: t };
         return;
       }
@@ -232,7 +257,9 @@ function getSettings_() {
       bankBin: bank.bin,
       bankName: bank.name,
       accountNo: String(b.accountNo || '').replace(/[^0-9A-Za-z]/g, '').slice(0, 30),
-      accountName: String(b.accountName || '').replace(/[^A-Za-z0-9 ]/g, '').toUpperCase().slice(0, 60),
+      // "Lưu Viết Trung" → "LUU VIET TRUNG" (bỏ dấu trước, không bỏ cả chữ có dấu)
+      accountName: String(b.accountName || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D')
+        .replace(/[^A-Za-z0-9 ]/g, '').replace(/\s+/g, ' ').trim().toUpperCase().slice(0, 60),
       qrImage: publicImageUrl_(b.qrImage || ''),
     };
   });
@@ -249,7 +276,8 @@ function getSettings_() {
 function normalizeTime_(v, tz) {
   if (v === '' || v == null) return '';
   if (Object.prototype.toString.call(v) === '[object Date]') return Utilities.formatDate(v, tz, 'HH:mm');
-  var m = String(v).trim().toLowerCase().match(/^(\d{1,2})\s*(?::|h|g|\.|giờ)\s*(\d{2})?\s*(?:phút|p)?$/);
+  // "17:30" | "17:30:00" (ô kiểu thời gian) | "17h30" | "17h" | "17 giờ 30"
+  var m = String(v).trim().toLowerCase().match(/^(\d{1,2})\s*(?::|h|g|\.|giờ)\s*(\d{2})?(?::\d{2})?\s*(?:phút|p)?$/);
   if (!m) return null;
   var h = parseInt(m[1], 10);
   var min = m[2] ? parseInt(m[2], 10) : 0;
@@ -296,7 +324,7 @@ function saveRsvp_(b) {
   var side = generateSlug(b.side || '').slice(0, 30);
   var notes = cleanText_(b.notes, LIMITS.notes);
 
-  appendRowSafe_(getSheet_(SHEETS.rsvp), [new Date(), code, safeCell_(name), side, willAttend, count, safeCell_(notes)]);
+  appendRowSafe_(getSheet_(SHEETS.rsvp), [new Date(), code, safeCell_(name), side, willAttend, count, safeCell_(notes)], 7);
 
   // Cập nhật trạng thái trên danh sách khách mời
   if (code) {
@@ -319,7 +347,7 @@ function saveWish_(b) {
   var relation = cleanText_(b.relation, LIMITS.relation);
 
   var wishes = getSheet_(SHEETS.wishes);
-  var row = appendRowSafe_(wishes, [new Date(), normalizeCode_(b.code), safeCell_(author), safeCell_(relation), safeCell_(text), true]);
+  var row = appendRowSafe_(wishes, [new Date(), normalizeCode_(b.code), safeCell_(author), safeCell_(relation), safeCell_(text), true], WISH_HEADERS.length);
   var showCell = wishes.getRange(row, WISH_HEADERS.length);
   showCell.insertCheckboxes();
   showCell.check();
@@ -332,7 +360,7 @@ function saveOpen_(b) {
   if (!code) return { success: false, message: 'Thiếu mã khách' };
   var found = findGuestRow_(code);
   if (!found) return { success: false, message: 'Không tìm thấy khách' };
-  appendRowSafe_(getSheet_(SHEETS.opens), [new Date(), code, safeCell_(String(found.values[found.cols.name - 1] || ''))]);
+  appendRowSafe_(getSheet_(SHEETS.opens), [new Date(), code, safeCell_(String(found.values[found.cols.name - 1] || ''))], OPEN_HEADERS.length);
   return { success: true };
 }
 
@@ -352,10 +380,15 @@ function cleanText_(v, max) {
     .slice(0, max);
 }
 
-/** Chặn "công thức" do khách nhập (=, +, -, @) bị Sheets thực thi. */
+/**
+ * Chữ khách nhập luôn được lưu đúng như chữ: dấu ' ở đầu (Sheets ẩn dấu này) chặn
+ *  - "công thức" (=, +, -, @) bị Sheets thực thi;
+ *  - Sheets tự đổi kiểu: "0912345678" thành số (mất số 0 đầu), "12/12" thành ngày, "TRUE" thành ô đúng/sai.
+ */
 function safeCell_(s) {
   s = String(s || '');
-  return /^[=+\-@]/.test(s) ? "'" + s : s;
+  var looksLikeValue = /^[\s\d.,:\/%()$€₫-]+$/.test(s) || /^(true|false)$/i.test(s.trim());
+  return /^[=+\-@]/.test(s) || (s && looksLikeValue) ? "'" + s : s;
 }
 
 function normalizeCode_(v) {
@@ -388,10 +421,12 @@ function generateSlug(text) {
 function guestCols_(sheet) {
   var width = Math.max(sheet.getLastColumn(), GUEST_HEADERS.length);
   var head = sheet.getRange(1, 1, 1, width);
-  var names = head.getDisplayValues()[0].map(function (s) { return String(s || '').trim().toLowerCase(); });
+  // normalize('NFC'): bàn phím tiếng Việt kiểu tổ hợp gõ "Đã mời" thành chữ + dấu rời — vẫn phải nhận ra
+  var norm = function (s) { return String(s || '').normalize('NFC').trim().toLowerCase(); };
+  var names = head.getDisplayValues()[0].map(norm);
   var formulas = head.getFormulas()[0];
-  var invited = names.indexOf(INVITED_HEADER.toLowerCase());
-  var offline = names.indexOf(OFFLINE_HEADER.toLowerCase());
+  var invited = names.indexOf(norm(INVITED_HEADER));
+  var offline = names.indexOf(norm(OFFLINE_HEADER));
   var base = names.indexOf('code');
   if (base === -1) {
     // Không thấy tiêu đề "code": cột code nằm ngay sau các cột ô tick ở đầu (nếu có)
@@ -425,21 +460,25 @@ function colLetter_(n) {
 }
 
 /**
- * Dòng ngay sau dòng cuối có dữ liệu ở cột A. Không dùng appendRow vì ô checkbox / định dạng trống
+ * Dòng ngay sau dòng cuối có dữ liệu, xét MỌI cột của bảng (ô tick chưa tick coi như trống) — nên không bao
+ * giờ ghi đè dòng bạn tự gõ tay, kể cả khi để trống cột A. Không dùng appendRow vì ô tick / định dạng trống
  * làm getLastRow() trỏ tới cuối sheet → dữ liệu mới bị ghi tận dòng 1000+.
  */
-function nextEmptyRow_(sheet) {
+function nextEmptyRow_(sheet, width) {
   var last = sheet.getLastRow();
   if (last < 2) return 2;
-  var colA = sheet.getRange(1, 1, last, 1).getValues();
-  for (var i = colA.length - 1; i >= 1; i--) {
-    if (colA[i][0] !== '' && colA[i][0] !== null) return i + 2;
+  var w = Math.max(width || 1, sheet.getLastColumn());
+  var rows = sheet.getRange(1, 1, last, w).getValues();
+  for (var i = rows.length - 1; i >= 1; i--) {
+    if (rows[i].some(function (v) { return v !== '' && v !== null && v !== false; })) return i + 2;
   }
   return 2;
 }
 
-function appendRowSafe_(sheet, values) {
-  var row = nextEmptyRow_(sheet);
+/** CHỈ THÊM: ghi một dòng mới sau dòng cuối có dữ liệu; sheet hết dòng thì thêm 200 dòng trống trước. */
+function appendRowSafe_(sheet, values, width) {
+  var row = nextEmptyRow_(sheet, width || values.length);
+  if (row > sheet.getMaxRows()) sheet.insertRowsAfter(sheet.getMaxRows(), 200);
   sheet.getRange(row, 1, 1, values.length).setValues([values]);
   return row;
 }
@@ -466,7 +505,8 @@ function findGuestRow_(code) {
   for (var i = 0; i < codes.length; i++) {
     if (String(codes[i][0]).trim().toLowerCase() === code) {
       var row = i + 2;
-      return { sheet: sheet, row: row, cols: cols, values: sheet.getRange(row, 1, 1, cols.width).getValues()[0] };
+      // Không đọc quá số cột thật của sheet (cột rsvpStatus/guestCount có thể đã bị xóa)
+      return { sheet: sheet, row: row, cols: cols, values: sheet.getRange(row, 1, 1, Math.min(cols.width, sheet.getMaxColumns())).getValues()[0] };
     }
   }
   return null;
@@ -576,7 +616,7 @@ function fillMissingLinks_(guests) {
   var cols = guestCols_(guests);
   if (linkFormulaWorks_(guests, cols)) return 0;
   var domain = String(getSheet_(SHEETS.config).getRange(1, 2).getDisplayValue()).trim().replace(/\/+$/, '');
-  if (!/^https?:\/\//i.test(domain) || /TODO/i.test(domain)) return 0; // chưa có tên miền thật → không ghi link sai
+  if (!/^https?:\/\//i.test(domain) || /\bTODO\b/i.test(domain)) return 0; // chưa có tên miền thật → không ghi link sai
   var last = guests.getLastRow();
   if (last < 2) return 0;
   var n = last - 1;
@@ -586,11 +626,14 @@ function fillMissingLinks_(guests) {
   var links = guests.getRange(2, cols.link, n, 1).getValues();
   var added = 0;
   for (var i = 0; i < n; i++) {
-    var code = String(codes[i][0] == null ? '' : codes[i][0]).trim();
+    var code = normalizeCode_(codes[i][0]); // chỉ mã thiệp tra được (bỏ qua dòng tiêu đề nhóm, mã có dấu/cách…)
     var current = String(links[i][0] == null ? '' : links[i][0]).trim();
-    if (!code || current) continue; // chưa có code, hoặc ô link đã có chữ → không đụng
-    var who = (String(xungHo[i][0] || '') + ' ' + String(names[i][0] || '')).replace(/\s+/g, ' ').trim();
-    guests.getRange(i + 2, cols.link).setValue(domain + '/?to=' + code + '&n=' + encodeURIComponent(who));
+    if (!code || current) continue; // chưa có code hợp lệ, hoặc ô link đã có chữ → không đụng
+    // Giống TRIM của Sheets: chỉ bỏ / gộp dấu cách thường (giữ nguyên xuống dòng, dấu cách không ngắt)
+    var who = (String(xungHo[i][0] || '') + ' ' + String(names[i][0] || '')).replace(/^ +| +$/g, '').replace(/ {2,}/g, ' ');
+    // Mã hóa như ENCODEURL của Sheets (RFC 3986: mã hóa cả ! ' ( ) *) để link giống hệt link công thức ghép
+    var nameParam = encodeURIComponent(who).replace(/[!'()*]/g, function (c) { return '%' + c.charCodeAt(0).toString(16).toUpperCase(); });
+    guests.getRange(i + 2, cols.link).setValue(domain + '/?to=' + code + '&n=' + nameParam);
     added++;
   }
   return added;
@@ -674,16 +717,19 @@ function fillMissingCodes() {
   var codes = sheet.getRange(2, cols.code, last - 1, 1).getValues();
   var names = sheet.getRange(2, cols.name, last - 1, 1).getValues();
   var xungHo = sheet.getRange(2, cols.xungHo, last - 1, 1).getValues();
+  var isEmpty = function (v) { return v === '' || v === null; }; // 0 / FALSE vẫn là ô có chữ → không ghi đè
   var used = {};
-  codes.forEach(function (r) { if (r[0]) used[String(r[0]).toLowerCase()] = true; });
+  codes.forEach(function (r) { if (!isEmpty(r[0])) used[String(r[0]).trim().toLowerCase()] = true; });
   codes.forEach(function (r, i) {
-    var name = names[i][0], xh = xungHo[i][0];
-    if (r[0] || !name) return;
+    var name = String(names[i][0] == null ? '' : names[i][0]).trim(), xh = xungHo[i][0];
+    if (!isEmpty(r[0]) || !name) return;
+    var cell = sheet.getRange(i + 2, cols.code);
+    if (!isEmpty(cell.getValue())) return; // vừa có người / lần chạy khác điền mã → giữ nguyên
     var base = (generateSlug((xh ? xh + ' ' : '') + name) || 'khach').slice(0, 50);
     var code = base + '-' + randomSuffix_(3);
     while (used[code]) code = base + '-' + randomSuffix_(3);
     used[code] = true;
-    sheet.getRange(i + 2, cols.code).setValue(code);
+    cell.setValue(code);
   });
 }
 
@@ -751,11 +797,16 @@ function applyTickRules_(guests, cols) {
   var n = guests.getMaxRows() - 1;
   if (n < 1 || (!cols.invited && !cols.offline)) return;
   var range = guests.getRange(2, 1, n, Math.max(guests.getLastColumn(), cols.width));
-  var ours = /^=(\$[A-Z]+2|\(\$[A-Z]+2\+\$[A-Z]+2\)=2)$/;
+  // Chỉ thay đúng các quy tắc của hai cột ô tick (Sheets tự đổi chữ cột trong quy tắc khi chèn cột)
+  var Ic = cols.invited ? '$' + colLetter_(cols.invited) + '2' : '';
+  var Oc = cols.offline ? '$' + colLetter_(cols.offline) + '2' : '';
+  var ours = {};
+  [Ic && '=' + Ic, Oc && '=' + Oc, Ic && Oc && '=(' + Ic + '+' + Oc + ')=2', Ic && Oc && '=(' + Oc + '+' + Ic + ')=2']
+    .forEach(function (f) { if (f) ours[f.replace(/\s+/g, '')] = true; });
   var others = guests.getConditionalFormatRules().filter(function (rule) {
     var c = rule.getBooleanCondition();
     var v = c && c.getCriteriaValues();
-    return !(v && v.length === 1 && ours.test(String(v[0])));
+    return !(v && v.length === 1 && ours[String(v[0]).replace(/\s+/g, '')]);
   });
   var make = function (formula, font, fill) {
     var b = SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied(formula).setRanges([range]);
@@ -785,12 +836,25 @@ function onEdit(e) {
     if (sheet.getName() === SHEETS.config) CacheService.getScriptCache().remove(SETTINGS_CACHE_KEY);
     if (sheet.getName() === SHEETS.wishes) CacheService.getScriptCache().remove(WISHES_CACHE_KEY);
     if (sheet.getName() !== SHEETS.guests || e.range.getLastRow() < 2) return;
-    var cols = guestCols_(sheet);
-    var a = e.range.getColumn(), b = e.range.getLastColumn();
-    var touches = function (c) { return a <= c && c <= b; };
-    if (touches(cols.name) || touches(cols.xungHo)) fillMissingCodes();
-    var added = fillMissingLinks_(sheet);
-    if (added) e.source.toast('Đã thêm link mời cho ' + added + ' khách.', '💌 Link mời', 5);
+    // Gõ tên rồi Tab gõ xưng hô ngay: hai lần chạy chồng nhau có thể sinh mã hai lần → chạy lần lượt
+    var lock = (typeof LockService.getDocumentLock === 'function' && LockService.getDocumentLock()) || LockService.getScriptLock();
+    if (!lock.tryLock(8000)) return;
+    try {
+      var cols = guestCols_(sheet);
+      var a = e.range.getColumn(), b = e.range.getLastColumn();
+      var touches = function (c) { return a <= c && c <= b; };
+      if (touches(cols.name) || touches(cols.xungHo)) fillMissingCodes();
+      if (touches(cols.link) && !linkFormulaWorks_(sheet, cols)) {
+        // Vừa gõ nhầm vào cột link làm công thức báo #REF!: nhắc xóa đi thay vì ghi link vào các ô trống
+        // (ghi vào thì công thức không tự hồi phục được nữa khi bạn xóa chữ gõ nhầm)
+        e.source.toast('Cột link chỉ để công thức tự ghép link. Xóa chữ vừa gõ ở cột này để link hiện lại.', '💌 Link mời', 10);
+        return;
+      }
+      var added = fillMissingLinks_(sheet);
+      if (added) e.source.toast('Đã thêm link mời cho ' + added + ' khách.', '💌 Link mời', 5);
+    } finally {
+      lock.releaseLock();
+    }
   } catch (err) {
     Logger.log('onEdit lỗi: ' + err); // xem ở Apps Script → Lần thực thi
   }

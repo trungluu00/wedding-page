@@ -2,6 +2,7 @@
 //   node scripts/build.mjs        → build bản chạy thật (đã nén)
 // Hàm ở đây cũng được scripts/dev.mjs dùng lại.
 import fs from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import * as esbuild from 'esbuild';
@@ -42,6 +43,29 @@ const absUrl = (domain, p) => {
 
 const fontStack = (name, fallback) => (name ? `'${String(name).replace(/'/g, '')}', ${fallback}` : fallback);
 
+/**
+ * Tải sẵn ảnh bìa thư ngay từ <head>, song song với CSS / JS / cấu hình Sheet — không đợi JS dựng bìa xong mới
+ * bắt đầu tải (đo trên 4G: ảnh bìa đến muộn 1,5–2 giây). srcset / sizes phải giống hệt thẻ <img> của bìa
+ * (js/common/photo.js, bìa rộng 12rem = 192px) để trình duyệt dùng lại đúng file đã tải.
+ */
+const coverPreload = (cfg) => {
+  const id = cfg.photos?.cover;
+  if (!id) return '';
+  let sizes = {};
+  try {
+    sizes = JSON.parse(readFileSync(path.join(ROOT, 'photos', 'sizes.json'), 'utf8'));
+  } catch {
+    return '';
+  }
+  const p = sizes[id];
+  if (!p) return `<link rel="preload" as="image" href="${esc(id)}" fetchpriority="high">`;
+  const url = (s) => `photos/w/${id}-${s}.webp`;
+  const choices = p.w.filter((x) => x[0] < 2560);
+  const list = choices.length ? choices : p.w;
+  const src = (p.w.find((x) => x[0] === 900) ?? p.w[p.w.length - 1])[0];
+  return `<link rel="preload" as="image" href="${url(src)}" imagesrcset="${list.map((x) => `${url(x[0])} ${x[1]}w`).join(', ')}" imagesizes="192px" fetchpriority="high">`;
+};
+
 export const renderHead = (cfg) => {
   const site = cfg.site ?? {};
   const theme = themeCss(cfg.theme ?? {});
@@ -79,6 +103,12 @@ export const renderHead = (cfg) => {
     `<meta name="color-scheme" content="light dark">`,
     `<meta name="format-detection" content="telephone=no">`,
     `<link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">`,
+    // Mở sẵn kết nối trước khi gặp file font / CSS (đặt sau thì vô tác dụng). CSS của Google Fonts tải không kèm
+    // crossorigin, file font thì có — nên mỗi host một kiểu; jsDelivr tải CSS/JS có SRI (crossorigin).
+    `<link rel="preconnect" href="https://fonts.googleapis.com">`,
+    `<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">`,
+    `<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin="anonymous">`,
+    coverPreload(cfg),
     `<link rel="stylesheet" href="${esc(fontsUrl)}">`,
     `<style id="theme-vars">${theme.css}${fontVars}</style>`,
   ].filter(Boolean).join('\n    ');

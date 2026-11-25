@@ -263,7 +263,7 @@ câu chữ đã viết sẵn, sửa tùy ý. Ngày âm lịch tính bằng `npm 
       "Phương Nhi" (`displayName`); nhãn dưới tên ở khối báo hỷ là "Chú rể" / "Cô dâu" (`role`)
 - [ ] `couple.bride.familyPhone` — đang trùng số cô dâu nên mục Liên hệ tự ẩn dòng này; điền số bố/mẹ nếu muốn hiện
 - [x] Lịch theo thiệp in: bữa cơm thân mật hai nhà Thứ Bảy 12/12 (04/11 âm), Lễ Vu Quy 06:00 và Lễ Thành Hôn
-      10:00 Chủ nhật 13/12 (05/11 âm). Nút Chỉ đường: nhà trai theo địa chỉ trên thiệp, nhà gái tới Chùa Phăn
+      10:00 Chủ nhật 13/12 (05/11 âm). Nút Chỉ đường: nhà trai theo tọa độ ghim trên Google Maps, nhà gái tới Chùa Phăn
 - [x] **Giờ bữa cơm hai nhà** — đã điền trong Google Sheet (`CauHinh`, nhóm *GIỜ SỰ KIỆN*): nhà trai 15:00,
       nhà gái 16:00. Thiệp đọc giờ từ Sheet mỗi lần mở (sửa xong vài giây là thấy, gõ `17:30` hoặc `17h30`),
       không cần build lại. Giờ trong hai file `wedding.config.js` đã chép theo, chỉ dùng khi không nối được Sheet
