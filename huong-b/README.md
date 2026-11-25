@@ -172,9 +172,13 @@ Thiệp gọi theo hợp đồng chung:
 - `hp` là ô ẩn bẫy bot, người thật luôn gửi rỗng — Apps Script nên bỏ qua bản ghi có `hp` khác rỗng.
 - Gửi bằng `text/plain` để không phát sinh preflight CORS.
 - Tên hiển thị = `xungHo + " " + name`; nếu `name` đã bắt đầu bằng xưng hô (vd "Bác Hùng") thì không lặp.
-- Link gửi khách (cột `link` trong sheet `KhachMoi` tự ghép): `https://<domain>/?to=<code>&n=<tên có dấu>`;
-  `n=` để thiệp hiện đúng tên ngay cả khi chưa tra được Sheet. Link chung theo nhà: `?ben=nha-trai` / `?ben=nha-gai`
-  (ô B3/B4 của `CauHinh`).
+- Link gửi khách (cột `link` trong sheet `KhachMoi` tự ghép), dạng ngắn: `https://<domain>/?{t|g|c|to}=<code>&n=<tên>`.
+  Tên tham số là nhà của khách: `t` nhà trai, `g` nhà gái, `c` bạn chung, `to` chưa ghi nhà (link cũ). `n=` là tên có
+  dấu (dấu cách viết `+`) để thiệp hiện đúng tên khi chưa tra được Sheet. Link chung theo nhà: `?t` / `?g` (dạng cũ
+  `?ben=nha-trai` / `?ben=nha-gai` vẫn dùng được). Công thức ở ô tiêu đề cột link: xem mục 5 của `../README.md`.
+- **Link đã ghi nhà (`?t=` / `?g=` / `?c=`):** Sheet trả lời trong 2,5 giây thì dùng dữ liệu Sheet (chuẩn), không thì mở
+  luôn theo nhà trong link (lượt tra vẫn chạy nền, lưu lại cho lần mở sau) — không chờ 15 giây, không bao giờ hiện
+  thông tin của cả hai nhà. Đo bằng Web App giả treo hẳn: thiệp sẵn sàng sau ~2,9 giây, đúng nhà.
 - **Tra mã khách (`?to=`) khi Web App chậm:** đo ngày 25/11/2026 trên 122 mã — giữa 2,3 giây, 90% dưới 3,3 giây,
   nhưng có lượt 6–23 giây hoặc treo. Không tra được thì thiệp không biết khách nhà nào và phải hiện thông tin chung
   của cả hai nhà. Nên thiệp chờ lượt 1 tới 4,5 giây, chưa có thì gửi thêm lượt 2 song song (địa chỉ khác, không dùng

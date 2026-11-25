@@ -26,6 +26,11 @@ import * as confetti from '../../libs/confetti.js';
 // lượt 2 song song và nhận trả lời nào về trước, chờ thêm tối đa 10,5 giây. Vẫn không được thì dùng thông tin
 // khách đã lưu trên máy này từ lần mở trước.
 const LOOKUP_WAIT_MS = [4500, 10500];
+// Link đã cho biết nhà (?t= / ?g= / ?c=): Sheet trả lời trong 2,5 giây (phần lớn lượt tra) thì dùng thông tin Sheet,
+// không thì mở luôn theo link — khách không phải chờ, và không bao giờ thấy thông tin của cả hai nhà.
+const QUICK_WAIT_MS = 2500;
+/** Tên tham số mã khách → nhà của khách (link ngắn: ?t=mã / ?g=mã / ?c=mã). */
+const LINK_SIDE = { t: 'nha-trai', g: 'nha-gai', c: 'ban-chung' };
 const SETTINGS_WAIT_MS = [3000, 3000];
 const LOADING_MAX_MS = 10000; // màn tải tối đa với link chung
 const LOADING_MAX_GUEST_MS = 17000; // link có mã khách: đủ thời gian cho 2 lần tra
@@ -87,12 +92,33 @@ export const guest = (() => {
     /** Xong khi phần nội dung (sau bìa thư) đã dựng — sau khi có cấu hình Sheet. */
     let mainReady = Promise.resolve();
 
-    /** Đọc ?to= và tra khách. Không tìm thấy mà trông giống tên người → dùng làm tên hiển thị. */
-    const resolveGuest = async () => {
+    /**
+     * Đọc link mời. Mã khách nằm ở tham số mà TÊN tham số cho biết luôn nhà của khách (link ngắn, không lộ chữ):
+     *   ?t=mã → nhà trai · ?g=mã → nhà gái · ?c=mã → bạn chung · ?to=mã → chưa rõ nhà (link cũ, tra Sheet)
+     * Link chung theo nhà: ?t / ?g (không mã), hoặc dạng cũ ?ben=nha-trai / ?ben=nha-gai.
+     * &n= là tên có dấu (dấu cách viết "+"), dùng khi chưa tra được Sheet.
+     */
+    const readLink = () => {
         const params = new URLSearchParams(window.location.search);
-        const raw = (params.get('to') ?? '').trim().slice(0, 80);
-        // Tên có dấu kèm trong link (&n=Bác%20Hùng, do Google Sheet tự sinh) — dùng khi không tra được khách
-        const nameFromLink = (params.get('n') ?? '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim().slice(0, 60);
+        let raw = (params.get('to') ?? '').trim();
+        let linkSide = '';
+        for (const [k, s] of Object.entries(LINK_SIDE)) {
+            if (params.has(k)) {
+                linkSide = linkSide || s;
+                raw = raw || (params.get(k) ?? '').trim();
+            }
+        }
+        const ben = String(params.get('ben') ?? '').trim().toLowerCase();
+        if (!linkSide && Object.values(LINK_SIDE).includes(ben)) {
+            linkSide = ben;
+        }
+        const name = (params.get('n') ?? '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim().slice(0, 60);
+        return { raw: raw.slice(0, 80), linkSide, name };
+    };
+
+    /** Đọc link và tra khách. Không tìm thấy mà trông giống tên người → dùng làm tên hiển thị. */
+    const resolveGuest = async () => {
+        const { raw, linkSide, name: nameFromLink } = readLink();
         if (!raw) {
             return nameFromLink ? { guest: null, code: '', khach: nameFromLink, plain: nameFromLink } : { guest: null, code: '', khach: 'Quý vị', plain: '' };
         }
@@ -100,18 +126,20 @@ export const guest = (() => {
         // Thông tin khách đã tra được ở lần mở trước trên máy này (theo mã) — dùng khi Sheet không trả lời.
         const remembered = storage('guests');
         const key = raw.toLowerCase();
+        const keepLate = (calls) => firstAnswer(calls, LOOKUP_WAIT_MS[1]).then((late) => {
+            if (late?.found && late.data) remembered.set(key, { data: late.data, at: Date.now() });
+        });
 
         const calls = [client.lookup(raw)];
-        let res = await firstAnswer(calls, LOOKUP_WAIT_MS[0]);
+        // Link đã cho biết nhà (?t= / ?g= / ?c=): chỉ chờ Sheet một lúc ngắn — không kịp thì mở luôn theo link
+        let res = await firstAnswer(calls, linkSide ? QUICK_WAIT_MS : LOOKUP_WAIT_MS[0]);
         if (!res) {
             console.warn('[thiệp] tra khách chậm / lỗi, thử lại…');
             calls.push(client.lookup(raw, 2));
-            if (remembered.get(key)?.data) {
-                // Khách đã mở thiệp trên máy này: không bắt chờ thêm, dùng thông tin đã lưu ngay;
-                // lượt tra vẫn chạy nền để cập nhật thông tin cho lần mở sau.
-                firstAnswer(calls, LOOKUP_WAIT_MS[1]).then((late) => {
-                    if (late?.found && late.data) remembered.set(key, { data: late.data, at: Date.now() });
-                });
+            if (linkSide || remembered.get(key)?.data) {
+                // Đã biết nhà (từ link, hoặc thông tin lưu từ lần mở trước): không bắt khách chờ thêm;
+                // lượt tra vẫn chạy nền để lưu thông tin Sheet cho lần mở sau.
+                keepLate(calls);
             } else {
                 res = await firstAnswer(calls, LOOKUP_WAIT_MS[1]);
             }
@@ -240,7 +268,9 @@ export const guest = (() => {
 
     /** Chia sẻ thiệp: link chung theo nhà (không kèm mã khách riêng). */
     const share = async () => {
-        const url = `${window.location.origin}${window.location.pathname}${ctx.side ? `?ben=${ctx.side}` : ''}`;
+        // Link chung theo nhà, dạng ngắn: ?t (nhà trai) / ?g (nhà gái)
+        const short = Object.keys(LINK_SIDE).find((k) => LINK_SIDE[k] === ctx.side);
+        const url = `${window.location.origin}${window.location.pathname}${short ? `?${short}` : ''}`;
         const title = `Thiệp cưới ${cfg.couple.groom.shortName} & ${cfg.couple.bride.shortName}`;
         try {
             if (navigator.share) {
@@ -474,7 +504,7 @@ export const guest = (() => {
     const domLoaded = async () => {
         theme.setStatusBar('--c-primary');
         offline.init();
-        const hasGuestCode = !!(new URLSearchParams(window.location.search).get('to') ?? '').trim();
+        const hasGuestCode = !!readLink().raw;
         progress.init(hasGuestCode ? LOADING_MAX_GUEST_MS : LOADING_MAX_MS);
         document.addEventListener('undangan.progress.done', booting, { once: true });
 
@@ -494,10 +524,15 @@ export const guest = (() => {
         const guestP = resolveGuest();
         const settingsP = loadSettings();
         const g = await guestP;
-        // Bên của khách: theo Google Sheet, hoặc link theo nhà ?ben=nha-trai / ?ben=nha-gai
-        const side = sideFromParam(g.guest?.side) || sideFromParam(new URLSearchParams(window.location.search).get('ben'));
+        // Nhà của khách: theo Google Sheet (chuẩn); Sheet không ghi / chưa tra được thì theo link
+        // (?t= / ?g= / ?c=, hoặc ?ben=). side = nhà trai / nhà gái (lời mời, thứ tự tên); "ban-chung" chỉ dùng lọc sự kiện.
+        const { linkSide } = readLink();
+        const sheetSide = String(g.guest?.side ?? '');
+        const whoSide = sheetSide || linkSide;
+        const side = sideFromParam(whoSide);
         const buildCtx = () => {
-            const events = visibleEvents(cfg.events, g.guest ?? (side ? { side, groups: [] } : null));
+            const who = g.guest ? { ...g.guest, side: whoSide } : (whoSide ? { side: whoSide, groups: [] } : null);
+            const events = visibleEvents(cfg.events, who);
             return {
                 side,
                 guest: g.guest,

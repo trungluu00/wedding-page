@@ -438,7 +438,7 @@ function guestCols_(sheet) {
     var at = -1;
     if (h === 'link') {
       for (var j = 0; j < width; j++) {
-        if (String(formulas[j]).indexOf('/?to=') !== -1) { at = j; break; }
+        if (/&n=|\/\?to=/.test(String(formulas[j]))) { at = j; break; } // công thức link (cũ ?to= và mới ?t/g/c/to=)
       }
     }
     if (at === -1) at = names.indexOf(h.toLowerCase());
@@ -553,8 +553,8 @@ function setupCore_() {
     cfg.setColumnWidth(2, 420);
     // Link theo nhà: gửi chung cho bạn bè / đồng nghiệp của mỗi bên (không cần mã khách)
     cfg.getRange(3, 1, 2, 1).setValues([['Link thiệp nhà trai'], ['Link thiệp nhà gái']]);
-    cfg.getRange(3, 2).setFormula('=B1 & "/?ben=nha-trai"');
-    cfg.getRange(4, 2).setFormula('=B1 & "/?ben=nha-gai"');
+    cfg.getRange(3, 2).setFormula('=B1 & "/?t"'); // link chung nhà trai (ngắn); thiệp vẫn hiểu ?ben=nha-trai
+    cfg.getRange(4, 2).setFormula('=B1 & "/?g"'); // link chung nhà gái
   }
   setupSettingRows_(cfg); // chỉ thêm dòng còn thiếu, không đụng dòng đã có
 
@@ -584,14 +584,21 @@ function setupCore_() {
 }
 
 /**
- * Công thức ở ô tiêu đề cột link: link mời = tên miền + ?to=mã + &n=tên có dấu (thiệp hiện đúng tên ngay cả khi
- * chưa tra được Sheet). Chữ cột (A/B/C…) lấy theo vị trí thật của cột code, name, xungHo.
+ * Link mời ngắn: tên miền + /?{t|g|c|to}=mã + &n=tên có dấu (dấu cách viết "+").
+ * Tên tham số cho biết nhà của khách — t: nhà trai, g: nhà gái, c: bạn chung, to: chưa ghi nhà — nên thiệp biết nhà
+ * ngay từ link mà không cần chờ Sheet, link không dài thêm và không lộ chữ. &n= để thiệp hiện đúng tên khi chưa
+ * tra được Sheet. Thiệp vẫn hiểu link cũ ?to=mã&n=…
  */
+var SIDE_PARAM = { 'nha-trai': 't', 'nha-gai': 'g', 'ban-chung': 'c' };
+
+/** Công thức ở ô tiêu đề cột link. Chữ cột (A/B/C…) lấy theo vị trí thật của cột code, name, xungHo, side. */
 function linkFormula_(cols) {
-  var c = colLetter_(cols.code), n = colLetter_(cols.name), x = colLetter_(cols.xungHo);
+  var c = colLetter_(cols.code), n = colLetter_(cols.name), x = colLetter_(cols.xungHo), s = colLetter_(cols.side);
   var r = function (L) { return L + '2:' + L; };
-  return '={"link"; ARRAYFORMULA(IF(' + r(c) + '="", "", ' + SHEETS.config + '!$B$1 & "/?to=" & ' + r(c) +
-    ' & "&n=" & ENCODEURL(TRIM(' + r(x) + ' & " " & ' + r(n) + '))))}';
+  var side = 'LOWER(TRIM(' + r(s) + '))';
+  var param = 'IF(' + side + '="nha-trai", "t", IF(' + side + '="nha-gai", "g", IF(' + side + '="ban-chung", "c", "to")))';
+  return '={"link"; ARRAYFORMULA(IF(' + r(c) + '="", "", ' + SHEETS.config + '!$B$1 & "/?" & ' + param + ' & "=" & ' + r(c) +
+    ' & "&n=" & SUBSTITUTE(ENCODEURL(TRIM(' + r(x) + ' & " " & ' + r(n) + ')), "%20", "+")))}';
 }
 
 function setLinkFormula_(guests, cols) {
@@ -609,7 +616,7 @@ function linkFormulaWorks_(guests, cols) {
  * CHỈ THÊM: ghi link mời vào những ô link CÒN TRỐNG của các dòng đã có code — dùng khi công thức ở ô tiêu đề
  * cột link không chạy được (vd báo #REF! vì trong cột đã có link dán dạng chữ / ghi chú). Không sửa, không xóa
  * ô nào đã có chữ. Công thức đang chạy bình thường thì không làm gì (công thức tự ghép link).
- * Link giống hệt công thức: tên miền (CauHinh!B1) + /?to=code + &n=xưng hô + tên (có dấu, mã hóa URL).
+ * Link giống hệt công thức (linkFormula_): tên miền (CauHinh!B1) + /?{t|g|c|to}=code + &n=xưng hô + tên.
  * @returns {number} số link đã thêm
  */
 function fillMissingLinks_(guests) {
@@ -623,6 +630,7 @@ function fillMissingLinks_(guests) {
   var codes = guests.getRange(2, cols.code, n, 1).getValues();
   var names = guests.getRange(2, cols.name, n, 1).getValues();
   var xungHo = guests.getRange(2, cols.xungHo, n, 1).getValues();
+  var sides = guests.getRange(2, cols.side, n, 1).getValues();
   var links = guests.getRange(2, cols.link, n, 1).getValues();
   var added = 0;
   for (var i = 0; i < n; i++) {
@@ -632,8 +640,10 @@ function fillMissingLinks_(guests) {
     // Giống TRIM của Sheets: chỉ bỏ / gộp dấu cách thường (giữ nguyên xuống dòng, dấu cách không ngắt)
     var who = (String(xungHo[i][0] || '') + ' ' + String(names[i][0] || '')).replace(/^ +| +$/g, '').replace(/ {2,}/g, ' ');
     // Mã hóa như ENCODEURL của Sheets (RFC 3986: mã hóa cả ! ' ( ) *) để link giống hệt link công thức ghép
-    var nameParam = encodeURIComponent(who).replace(/[!'()*]/g, function (c) { return '%' + c.charCodeAt(0).toString(16).toUpperCase(); });
-    guests.getRange(i + 2, cols.link).setValue(domain + '/?to=' + code + '&n=' + nameParam);
+    var nameParam = encodeURIComponent(who).replace(/[!'()*]/g, function (c) { return '%' + c.charCodeAt(0).toString(16).toUpperCase(); })
+      .replace(/%20/g, '+');
+    var param = SIDE_PARAM[String(sides[i][0] == null ? '' : sides[i][0]).trim().toLowerCase()] || 'to';
+    guests.getRange(i + 2, cols.link).setValue(domain + '/?' + param + '=' + code + '&n=' + nameParam);
     added++;
   }
   return added;

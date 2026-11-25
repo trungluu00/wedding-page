@@ -195,11 +195,19 @@ cho thiệp cưới. Muốn ẩn lời chúc không phù hợp: bỏ tick cột 
    - `groups`: nhóm, cách nhau dấu phẩy (vd `gia-dinh`), dùng để hiện các sự kiện riêng.
    - `code`: để trống, script tự sinh từ xưng hô + tên (vd `bac-hung-7k2`) khi bạn nhập tên / xưng hô.
      Hoặc dùng menu **💌 Thiệp cưới → Sinh code + link mời cho khách còn trống**.
-2. Cột `link` tự ghép thành `https://tên-miền/?to=bac-hung&n=B%C3%A1c%20H%C3%B9ng` — sao chép gửi qua
-   Zalo/Messenger. Phần `n=` là **tên có dấu** (xưng hô + tên, lấy nguyên văn từ Sheet): thiệp hiện
-   "Kính mời Bác Hùng" đúng dấu ngay khi mở, kể cả khi chưa nối được Sheet. Khi tra được mã `to` trong
-   Sheet thì thiệp dùng dữ liệu Sheet (nhà trai/nhà gái, nhóm) để chọn sự kiện hiển thị.
-   Tên hiển thị không bao giờ bị "đoán" từ mã không dấu.
+2. Cột `link` tự ghép link mời ngắn, vd `https://tên-miền/?t=bac-hung-7k2&n=B%C3%A1c+H%C3%B9ng` — sao chép gửi
+   qua Zalo/Messenger.
+   - **Tên tham số cho biết nhà của khách** (lấy từ cột `side`): `?t=` nhà trai, `?g=` nhà gái, `?c=` bạn chung,
+     `?to=` chưa ghi nhà. Thiệp biết nhà ngay từ link: Sheet trả lời trong 2,5 giây thì dùng dữ liệu Sheet (chuẩn —
+     sửa `side` sau khi gửi link thì thiệp vẫn theo Sheet), không kịp thì mở luôn theo link, không bao giờ hiện
+     thông tin của cả hai nhà. Link không dài thêm, không lộ chữ "nhà trai/nhà gái".
+   - `n=` là **tên có dấu** (xưng hô + tên, dấu cách viết `+`): thiệp hiện "Kính mời Bác Hùng" đúng dấu ngay khi
+     mở, kể cả khi chưa nối được Sheet. Tên hiển thị không bao giờ bị "đoán" từ mã không dấu.
+   - Link cũ dạng `?to=mã&n=…` đã gửi vẫn dùng được (thiệp tra Sheet để biết nhà, chờ tối đa 15 giây).
+   - Link chung theo nhà (ô B3/B4 của `CauHinh`): `https://tên-miền/?t` (nhà trai) / `?g` (nhà gái);
+     dạng cũ `?ben=nha-trai` / `?ben=nha-gai` vẫn dùng được.
+   - Công thức ở ô tiêu đề cột link (Sheet tiếng Việt dùng `;`, cột C = code, D = name, E = xungHo, F = side):
+     `={"link"; ARRAYFORMULA(IF(C2:C=""; ""; CauHinh!$B$1 & "/?" & IF(LOWER(TRIM(F2:F))="nha-trai"; "t"; IF(LOWER(TRIM(F2:F))="nha-gai"; "g"; IF(LOWER(TRIM(F2:F))="ban-chung"; "c"; "to"))) & "=" & C2:C & "&n=" & SUBSTITUTE(ENCODEURL(TRIM(E2:E & " " & D2:D)); "%20"; "+")))}`
    Link chỉ có khi dòng đó đã có `code`. Ban đầu cột `link` do công thức ở ô tiêu đề cột tự ghép; công thức này
    báo `#REF!` nếu trong cột link đã có chữ (vd dán cả khối khách kèm link đã sao chép, hay gõ ghi chú).
    **Sheet hiện tại đang như vậy** (link dạng chữ ở dòng 100–203 và ghi chú ở H29), nên script chuyển sang
