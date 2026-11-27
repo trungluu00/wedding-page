@@ -2,7 +2,8 @@
 //   node scripts/build.mjs        → build bản chạy thật (đã nén)
 // Hàm ở đây cũng được scripts/dev.mjs dùng lại.
 import fs from 'node:fs/promises';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import * as esbuild from 'esbuild';
@@ -73,7 +74,11 @@ export const renderHead = (cfg) => {
   const title = site.title || `Thiệp cưới ${cfg.couple.groom.shortName} & ${cfg.couple.bride.shortName}`;
   const desc = site.description || title;
   const domain = site.domain && !/TODO/i.test(site.domain) ? site.domain : '';
-  const ogImage = absUrl(domain, site.ogImage);
+  // Gắn mã theo nội dung ảnh (?v=...) để Zalo/Facebook lấy ảnh mới mỗi khi ảnh chia sẻ thay đổi
+  // (chúng nhớ ảnh xem trước theo đường dẫn).
+  const ogFile = site.ogImage && !/^https?:/i.test(site.ogImage) ? path.join(ROOT, site.ogImage) : '';
+  const ogVersion = ogFile && existsSync(ogFile) ? createHash('md5').update(readFileSync(ogFile)).digest('hex').slice(0, 8) : '';
+  const ogImage = absUrl(domain, site.ogImage) + (ogVersion ? `?v=${ogVersion}` : '');
   const fontsUrl = fontsHref(fonts);
 
   if (!domain) {

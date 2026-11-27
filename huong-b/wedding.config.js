@@ -175,8 +175,10 @@ export default {
     //   p01–p30 = Ảnh con DUN00001 … DUN09995, p31–p37 = Ảnh phóng DUN00013 … DUN09723
     // (xem photos/manifest.json hoặc mở photos-contact-sheet.html để biết mã nào là ảnh nào).
     source: "C:/Users/Trung lv/Pictures/me/anh-cuoi",
-    shareFrom: "p04", // ảnh chia sẻ Zalo/Facebook 1200x630: hai bạn tạo hình trái tim trong vườn (ảnh ngang)
+    shareFrom: "p36", // ảnh chia sẻ Zalo/Facebook 1200x630: ảnh phóng DUN09485 (vest trắng dưới vòm hoa)
     sharePosition: "center",
+    // Ảnh dọc → chọn vùng cắt ngang: cả chiều rộng, từ đầu tới gối (mặt hai bạn ở 1/3 phía trên khung)
+    shareCrop: { left: 0, top: 0.26, width: 1 },
     cover: "p36", // bìa thư (khung vòm): vest trắng dưới vòm hoa, nhìn nhau
     hero: "p31", // ảnh lớn đầu thiệp: trong vườn, vest đen + váy cưới (DUN00013)
     statement: "p01", // nền mờ sau lời mời: tà voan bay trong vườn (ảnh ngang)

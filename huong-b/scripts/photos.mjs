@@ -121,8 +121,22 @@ const processCrop = async (file, id, crop) => {
   return { width: box.width, height: box.height, orientation: box.width >= box.height ? 'ngang' : 'doc', widths };
 };
 
-const makeShare = async (file, position) => {
-  await orient(sharp(file, { failOn: 'none' }))
+/**
+ * Ảnh xem trước 1200x630. crop = { left, top, width } (tỉ lệ 0..1 của ảnh gốc đã xoay đúng chiều): chọn vùng
+ * cắt — chiều cao tự tính theo khung 1200:630; dùng khi ảnh dọc mà muốn giữ mặt hai bạn trong khung ngang.
+ */
+const makeShare = async (file, position, crop) => {
+  let img = orient(sharp(file, { failOn: 'none' }));
+  if (crop && typeof crop.top === 'number') {
+    const rotated = await img.png({ compressionLevel: 0 }).toBuffer();
+    const { width: W, height: H } = await sharp(rotated).metadata();
+    const w = Math.round((crop.width ?? 1) * W);
+    const h = Math.min(H, Math.round((w * 630) / 1200));
+    const left = Math.min(W - w, Math.round((crop.left ?? 0) * W));
+    const top = Math.min(H - h, Math.round(crop.top * H));
+    img = sharp(rotated).extract({ left, top, width: w, height: h });
+  }
+  await img
     .resize({ width: 1200, height: 630, fit: 'cover', position: position === 'attention' ? 'attention' : 'centre' })
     .toColourspace('srgb')
     .jpeg({ quality: 90, chromaSubsampling: '4:4:4', mozjpeg: true })
@@ -277,7 +291,7 @@ const run = async () => {
   // 5. Ảnh chia sẻ.
   const share = byId.get(cfg.photos?.shareFrom);
   if (share && files.includes(share.original)) {
-    await makeShare(path.join(source, share.original), cfg.photos?.sharePosition);
+    await makeShare(path.join(source, share.original), cfg.photos?.sharePosition, cfg.photos?.shareCrop);
     manifest.share = share.id;
   }
 
